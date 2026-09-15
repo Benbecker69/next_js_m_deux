@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/logo";
-import { buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserAvatar } from "@/components/user-avatar";
+import { LogoutButton } from "@/components/logout-button";
 import { requireOnboarded } from "@/lib/auth/session";
 import { AppNav } from "./_components/app-nav";
 
@@ -20,17 +21,20 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         </div>
         <div className="mt-6 flex flex-col gap-4 md:mt-0">
           <ThemeToggle />
-          <div className="border-t border-line pt-4">
-            <p className="text-sm text-ink">{user.name}</p>
-            <p className="text-xs text-ink-muted">{user.credits} crédits</p>
-            <form action="/deconnexion" method="post" className="mt-3">
-              <button
-                type="submit"
-                className={buttonVariants({ variant: "secondary", size: "sm" })}
-              >
-                Déconnexion
-              </button>
-            </form>
+          <div className="flex items-center justify-between gap-2 border-t border-line pt-4">
+            <Link
+              href="/parametres/profil"
+              className="flex min-w-0 items-center gap-3 rounded-sm transition-opacity hover:opacity-80"
+            >
+              <UserAvatar name={user.name} />
+              <span className="min-w-0">
+                <span className="block truncate text-sm text-ink">{user.name}</span>
+                <span className="block text-xs text-ink-muted">
+                  {user.credits} crédits
+                </span>
+              </span>
+            </Link>
+            <LogoutButton label="Déconnexion" />
           </div>
         </div>
       </aside>

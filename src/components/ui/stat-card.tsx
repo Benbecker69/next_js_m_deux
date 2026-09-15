@@ -9,7 +9,13 @@ type StatCardProps = HTMLAttributes<HTMLDivElement> & {
 
 export function StatCard({ label, value, hint, className, ...props }: StatCardProps) {
   return (
-    <div className={cn("rounded-sm border border-line p-4", className)} {...props}>
+    <div
+      className={cn(
+        "rounded-sm border border-line bg-surface p-4 shadow-sm shadow-ink/5",
+        className,
+      )}
+      {...props}
+    >
       <p className="text-xs text-ink-muted">{label}</p>
       <p className="mt-1 font-display text-2xl font-medium text-ink">{value}</p>
       {hint && <p className="mt-1 text-xs text-ink-muted">{hint}</p>}

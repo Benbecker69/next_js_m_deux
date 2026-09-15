@@ -1,19 +1,24 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LocaleSwitcher } from "@/components/locale-switcher";
+import { UserAvatar } from "@/components/user-avatar";
+import { LogoutButton } from "@/components/logout-button";
 import { buttonVariants } from "@/components/ui/button";
 import { getSession } from "@/lib/auth/session";
-
-const NAV_LINKS = [
-  { href: "/fonctionnalites", label: "Fonctionnalités" },
-  { href: "/tarifs", label: "Tarifs" },
-  { href: "/lieux", label: "Lieux" },
-  { href: "/vision-mobile", label: "Vision mobile" },
-  { href: "/faq", label: "FAQ" },
-];
+import { getLocale, getDictionary } from "@/lib/i18n/locale";
 
 export async function SiteHeader() {
-  const user = await getSession();
+  const [user, locale] = await Promise.all([getSession(), getLocale()]);
+  const t = getDictionary(locale);
+
+  const NAV_LINKS = [
+    { href: "/fonctionnalites", label: t.nav.features },
+    { href: "/tarifs", label: t.nav.pricing },
+    { href: "/lieux", label: t.nav.locations },
+    { href: "/vision-mobile", label: t.nav.mobileVision },
+    { href: "/faq", label: t.nav.faq },
+  ];
 
   return (
     <header className="border-b border-line">
@@ -38,23 +43,14 @@ export async function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <LocaleSwitcher locale={locale} />
           <ThemeToggle />
           {user ? (
             <>
-              <Link
-                href="/tableau-de-bord"
-                className="hidden text-sm text-ink-muted transition-colors hover:text-ink sm:inline"
-              >
-                {user.name.split(" ")[0]}
+              <Link href="/tableau-de-bord" aria-label={user.name}>
+                <UserAvatar name={user.name} />
               </Link>
-              <form action="/deconnexion" method="post">
-                <button
-                  type="submit"
-                  className={buttonVariants({ variant: "secondary", size: "sm" })}
-                >
-                  Déconnexion
-                </button>
-              </form>
+              <LogoutButton label={t.common.logout} />
             </>
           ) : (
             <>
@@ -62,10 +58,10 @@ export async function SiteHeader() {
                 href="/connexion"
                 className="hidden text-sm text-ink-muted transition-colors hover:text-ink sm:inline"
               >
-                Se connecter
+                {t.common.login}
               </Link>
               <Link href="/inscription" className={buttonVariants({ size: "sm" })}>
-                Réserver un espace
+                {t.common.bookSpace}
               </Link>
             </>
           )}

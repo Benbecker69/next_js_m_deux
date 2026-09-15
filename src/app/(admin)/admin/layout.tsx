@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/logo";
-import { buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserAvatar } from "@/components/user-avatar";
+import { LogoutButton } from "@/components/logout-button";
 import { requireAdmin } from "@/lib/auth/session";
 import { AdminNav } from "./_components/admin-nav";
 
@@ -22,24 +23,25 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <div className="mt-6 flex flex-col gap-4 md:mt-0">
           <ThemeToggle />
           <div className="border-t border-line pt-4">
-            <p className="text-sm text-ink">{user.name}</p>
-            <p className="text-xs text-ink-muted">Administrateur</p>
-            <div className="mt-3 flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
               <Link
-                href="/tableau-de-bord"
-                className="text-xs text-ink-muted transition-colors hover:text-ink"
+                href="/parametres/profil"
+                className="flex min-w-0 items-center gap-3 rounded-sm transition-opacity hover:opacity-80"
               >
-                ← Retour à l&apos;espace membre
+                <UserAvatar name={user.name} />
+                <span className="min-w-0">
+                  <span className="block truncate text-sm text-ink">{user.name}</span>
+                  <span className="block text-xs text-ink-muted">Administrateur</span>
+                </span>
               </Link>
-              <form action="/deconnexion" method="post">
-                <button
-                  type="submit"
-                  className={buttonVariants({ variant: "secondary", size: "sm" })}
-                >
-                  Déconnexion
-                </button>
-              </form>
+              <LogoutButton label="Déconnexion" />
             </div>
+            <Link
+              href="/tableau-de-bord"
+              className="mt-3 block text-xs text-ink-muted transition-colors hover:text-ink"
+            >
+              ← Retour à l&apos;espace membre
+            </Link>
           </div>
         </div>
       </aside>

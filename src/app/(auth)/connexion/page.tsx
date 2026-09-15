@@ -1,18 +1,21 @@
 import type { Metadata } from "next";
+import { getT } from "@/lib/i18n/locale";
 import { LoginForm } from "./_components/login-form";
 
-export const metadata: Metadata = {
-  title: "Connexion",
-  description: "Accédez à votre espace Repère.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return { title: t.auth.loginTitle, description: t.auth.loginSubtitle };
+}
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const t = await getT();
+
   return (
     <div>
-      <h1 className="font-display text-2xl font-medium text-ink">Connexion</h1>
-      <p className="mt-2 text-sm text-ink-muted">Accédez à votre espace Repère.</p>
+      <h1 className="font-display text-2xl font-medium text-ink">{t.auth.loginTitle}</h1>
+      <p className="mt-2 text-sm text-ink-muted">{t.auth.loginSubtitle}</p>
       <div className="mt-8">
-        <LoginForm />
+        <LoginForm t={t.auth} />
       </div>
     </div>
   );

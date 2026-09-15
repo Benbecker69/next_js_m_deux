@@ -1,23 +1,24 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { getT } from "@/lib/i18n/locale";
 
-const FOOTER_LINKS = [
-  { href: "/fonctionnalites", label: "Fonctionnalités" },
-  { href: "/tarifs", label: "Tarifs" },
-  { href: "/lieux", label: "Lieux" },
-  { href: "/vision-mobile", label: "Vision mobile" },
-  { href: "/faq", label: "FAQ" },
-];
+export async function SiteFooter() {
+  const t = await getT();
 
-export function SiteFooter() {
+  const FOOTER_LINKS = [
+    { href: "/fonctionnalites", label: t.nav.features },
+    { href: "/tarifs", label: t.nav.pricing },
+    { href: "/lieux", label: t.nav.locations },
+    { href: "/vision-mobile", label: t.nav.mobileVision },
+    { href: "/faq", label: t.nav.faq },
+  ];
+
   return (
     <footer className="border-t border-line">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-xs">
           <Logo />
-          <p className="mt-2 text-sm text-ink-muted">
-            Trouvez et réservez un espace de coworking près de chez vous.
-          </p>
+          <p className="mt-2 text-sm text-ink-muted">{t.footer.tagline}</p>
         </div>
 
         <nav
@@ -36,9 +37,7 @@ export function SiteFooter() {
         </nav>
       </div>
       <div className="border-t border-line px-6 py-4">
-        <p className="mx-auto max-w-6xl text-xs text-ink-muted">
-          © 2026 Repère. Tous droits réservés.
-        </p>
+        <p className="mx-auto max-w-6xl text-xs text-ink-muted">{t.footer.copyright}</p>
       </div>
     </footer>
   );

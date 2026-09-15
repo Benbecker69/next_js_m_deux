@@ -1,27 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Logo } from "@/components/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { getT } from "@/lib/i18n/locale";
 
-// Root-level boundary: catches any URL that matches no route in the app.
-// Rendered inside the root layout only (route-group headers/footers don't
-// apply here, since the URL never matched a segment inside those groups) —
-// so this page is deliberately self-contained rather than assuming nav exists.
+// Scoped to (marketing): notFound() called from a page inside this group
+// (e.g. /lieux/[slug] for an unknown slug) still renders within the
+// SiteHeader/SiteFooter layout — without this file, it fell through to the
+// root not-found.tsx, which duplicates its own logo under the site header.
+// The root one stays as the fallback for a URL that matches no route at all.
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
   return { title: t.errors.notFoundMetaTitle, robots: { index: false } };
 }
 
-export default async function NotFound() {
+export default async function MarketingNotFound() {
   const t = await getT();
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-6 py-20">
-      <Link href="/">
-        <Logo />
-      </Link>
-      <p className="mt-10 text-sm text-ink-muted">{t.errors.notFoundCode}</p>
+    <div className="mx-auto max-w-lg px-6 py-20">
+      <p className="text-sm text-ink-muted">{t.errors.notFoundCode}</p>
       <h1 className="mt-2 font-display text-3xl font-medium text-ink">
         {t.errors.notFoundTitle}
       </h1>

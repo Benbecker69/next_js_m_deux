@@ -6,6 +6,7 @@ import { themeInitScript } from "@/lib/theme/theme-script";
 import { ToastProvider } from "@/lib/feedback/toast-provider";
 import { FlashToast } from "@/lib/feedback/flash-toast";
 import { SITE_URL } from "@/lib/site-config";
+import { getLocale, getT } from "@/lib/i18n/locale";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -18,15 +19,17 @@ const publicSans = Public_Sans({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: "Repère — réservez votre espace de coworking",
-    template: "%s · Repère",
-  },
-  description:
-    "Repère, la plateforme pour trouver et réserver un espace de coworking près de chez vous.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getT();
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: t.common.siteTitle,
+      template: "%s · Repère",
+    },
+    description: t.common.siteDescription,
+  };
+}
 
 // Matches --paper in globals.css so the mobile browser chrome (address bar)
 // follows the system color scheme instead of defaulting to white. Tracks
@@ -40,10 +43,12 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const [locale, t] = await Promise.all([getLocale(), getT()]);
+
   return (
     <html
-      lang="fr"
+      lang={locale}
       className={`${fraunces.variable} ${publicSans.variable} h-full`}
       suppressHydrationWarning
     >
@@ -60,7 +65,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           href="#contenu"
           className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-sm focus:border focus:border-line focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:text-ink"
         >
-          Aller au contenu
+          {t.common.skipToContent}
         </a>
         <ThemeProvider>
           <ToastProvider>
