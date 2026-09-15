@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 import { distanceKm } from "@/lib/geo/distance";
 import { SPACE_TYPE_LABELS, type Location, type Space } from "@/types/domain";
 
@@ -82,7 +83,11 @@ export function SpaceBrowser({ spaces }: { spaces: SpaceWithLocation[] }) {
               : "Trier par distance"}
         </Button>
       </div>
-      {geoError && <p className="mt-2 text-sm text-danger">{geoError}</p>}
+      {geoError && (
+        <Alert variant="error" className="mt-2">
+          {geoError}
+        </Alert>
+      )}
 
       {filtered.length === 0 ? (
         <p className="mt-8 text-sm text-ink-muted">

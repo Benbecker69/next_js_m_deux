@@ -69,7 +69,7 @@ export default async function AdminReservationsPage({
                 : `/admin/reservations?status=${filter.value}`
             }
             className={cn(
-              "rounded-sm border border-line px-3 py-1.5 text-sm",
+              "rounded-sm border border-line px-3 py-1.5 text-sm transition-colors",
               activeStatus === filter.value
                 ? "border-pine bg-pine/10 text-pine"
                 : "text-ink-muted hover:text-ink",

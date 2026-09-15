@@ -86,7 +86,7 @@ export function CreneauPicker({
                 setSelectedHour(null);
               }}
               className={cn(
-                "rounded-sm border border-line px-3 py-2 text-sm",
+                "rounded-sm border border-line px-3 py-2 text-sm transition-colors",
                 index === selectedDay
                   ? "border-pine bg-pine/10 text-pine"
                   : "text-ink-muted hover:text-ink",
@@ -114,7 +114,7 @@ export function CreneauPicker({
                 disabled={taken}
                 onClick={() => setSelectedHour(hour)}
                 className={cn(
-                  "rounded-sm border border-line px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40",
+                  "rounded-sm border border-line px-3 py-2 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40",
                   selectedHour === hour
                     ? "border-pine bg-pine/10 text-pine"
                     : "text-ink-muted hover:text-ink",

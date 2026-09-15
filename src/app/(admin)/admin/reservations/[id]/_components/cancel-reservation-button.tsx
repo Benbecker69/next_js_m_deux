@@ -21,7 +21,7 @@ export function CancelReservationButton({ reservationId }: { reservationId: stri
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-sm border border-danger/30 bg-danger/5 p-4">
+    <div className="animate-toast-in flex flex-col gap-3 rounded-sm border border-danger/30 bg-danger/5 p-4">
       <p className="text-sm text-ink">
         Confirmer l&apos;annulation ? Les crédits seront recrédités au membre.
       </p>

@@ -110,9 +110,10 @@ body {
   }
 }
 
-/* Toast entrance — the one deliberate motion moment for feedback, not
-   applied indiscriminately elsewhere. Neutralized above under
-   prefers-reduced-motion like every other animation on the page. */
+/* Small, quick fade-and-rise — feedback appearing (toasts, inline Alerts,
+   inline confirm panels): things that need to draw the eye for a moment,
+   not decorate the page. Neutralized above under prefers-reduced-motion
+   like every animation on the page. */
 @keyframes toast-in {
   from {
     opacity: 0;
@@ -126,4 +127,24 @@ body {
 
 .animate-toast-in {
   animation: toast-in 0.2s ease-out;
+}
+
+/* The one deliberate page-load reveal (see the design skill's own
+   guidance): the marketing homepage hero only, staggered across its few
+   children via [animation-delay:...] at the call site — not reused as a
+   generic "fade everything in on scroll" pattern elsewhere. `both` keeps
+   content invisible through its delay and holds the end state after. */
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-hero-reveal {
+  animation: hero-reveal 0.6s ease-out both;
 }

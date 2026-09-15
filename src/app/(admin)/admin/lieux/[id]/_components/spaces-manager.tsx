@@ -93,13 +93,13 @@ export function SpacesManager({
                 </Badge>
                 <button
                   type="button"
-                  className="text-xs text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+                  className="text-xs text-ink-muted underline-offset-2 transition-colors hover:text-ink hover:underline"
                   onClick={() => toggleStatus(space.id)}
                 >
                   Basculer
                 </button>
                 {confirmingDeleteId === space.id ? (
-                  <span className="flex items-center gap-2 text-xs">
+                  <span className="animate-toast-in flex items-center gap-2 text-xs">
                     <span className="text-ink-muted">Sûr ?</span>
                     <button
                       type="button"

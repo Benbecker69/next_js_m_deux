@@ -32,8 +32,8 @@ export default async function LocationsPage() {
             ...locationSpaces.map((space) => space.pricePerHour),
           );
           return (
-            <Link key={location.slug} href={`/lieux/${location.slug}`}>
-              <Card className="h-full transition-colors hover:border-pine">
+            <Link key={location.slug} href={`/lieux/${location.slug}`} className="block">
+              <Card className="h-full transition-[border-color,transform] duration-150 hover:-translate-y-0.5 hover:border-pine">
                 <CardHeader>
                   <CardTitle>{location.name}</CardTitle>
                   <CardDescription>{location.city}</CardDescription>

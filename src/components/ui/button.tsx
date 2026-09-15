@@ -22,7 +22,8 @@ export function buttonVariants(
 ) {
   const { variant = "primary", size = "md", className } = options;
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-sm font-medium transition-colors",
+    "inline-flex items-center justify-center gap-2 rounded-sm font-medium",
+    "transition-[background-color,color,opacity,transform] duration-150 active:scale-[0.97]",
     "disabled:pointer-events-none disabled:opacity-50",
     variantClasses[variant],
     sizeClasses[size],

@@ -42,15 +42,15 @@ export default async function MarketingHomePage() {
       <section className="border-b border-line">
         <div className="mx-auto grid max-w-6xl gap-12 px-6 py-20 md:grid-cols-2 md:items-center md:py-28">
           <div>
-            <h1 className="font-display text-4xl font-medium leading-tight text-ink sm:text-5xl">
+            <h1 className="animate-hero-reveal font-display text-4xl font-medium leading-tight text-ink sm:text-5xl">
               Un bureau, pas une adresse à deviner.
             </h1>
-            <p className="mt-6 max-w-md text-lg text-ink-muted">
+            <p className="animate-hero-reveal mt-6 max-w-md text-lg text-ink-muted [animation-delay:100ms]">
               Repère référence des espaces de coworking dans toute la France et vous
               laisse réserver un bureau, une salle ou un poste flex pour la journée, en
               quelques clics.
             </p>
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="animate-hero-reveal mt-8 flex flex-wrap gap-4 [animation-delay:200ms]">
               <Link href="/inscription" className={buttonVariants({ size: "lg" })}>
                 Réserver un espace
               </Link>
@@ -62,7 +62,9 @@ export default async function MarketingHomePage() {
               </Link>
             </div>
           </div>
-          <SpacePlan />
+          <div className="animate-hero-reveal [animation-delay:150ms]">
+            <SpacePlan />
+          </div>
         </div>
       </section>
 
@@ -97,7 +99,11 @@ export default async function MarketingHomePage() {
           </div>
           <div className="mt-10 grid divide-y divide-line rounded-sm border border-line sm:grid-cols-2 sm:divide-x sm:divide-y-0">
             {featuredLocations.map((location) => (
-              <Link key={location.slug} href={`/lieux/${location.slug}`} className="p-6">
+              <Link
+                key={location.slug}
+                href={`/lieux/${location.slug}`}
+                className="block p-6 transition-colors hover:bg-surface"
+              >
                 <h3 className="font-display text-lg font-medium text-ink">
                   {location.name}
                 </h3>

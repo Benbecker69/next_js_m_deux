@@ -41,6 +41,7 @@ export function Alert({
       role={role}
       className={cn(
         "flex items-start gap-2 rounded-sm border px-3 py-2.5 text-sm",
+        "animate-toast-in",
         classes,
         className,
       )}
