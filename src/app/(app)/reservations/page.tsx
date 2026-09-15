@@ -6,7 +6,7 @@ import { requireOnboarded } from "@/lib/auth/session";
 import { listLocations } from "@/lib/data/locations";
 import { listReservationsByUser } from "@/lib/data/reservations";
 import { listSpaces } from "@/lib/data/spaces";
-import type { ReservationStatus } from "@/types/domain";
+import { RESERVATION_STATUS_LABELS, type ReservationStatus } from "@/types/domain";
 import { cn } from "@/lib/utils/cn";
 
 export const metadata: Metadata = {
@@ -19,15 +19,6 @@ const STATUS_FILTERS: { value: ReservationStatus | "all"; label: string }[] = [
   { value: "completed", label: "Passées" },
   { value: "cancelled", label: "Annulées" },
 ];
-
-const STATUS_BADGE: Record<
-  ReservationStatus,
-  { label: string; variant: "success" | "neutral" | "danger" }
-> = {
-  confirmed: { label: "Confirmée", variant: "success" },
-  completed: { label: "Terminée", variant: "neutral" },
-  cancelled: { label: "Annulée", variant: "danger" },
-};
 
 // Filtering by status lives in the URL (searchParams), not client state — a
 // bookmarkable/shareable link and a server-rendered result, no client JS
@@ -106,7 +97,7 @@ export default async function ReservationsPage({
               const location = space
                 ? locations.find((item) => item.id === space.locationId)
                 : null;
-              const badge = STATUS_BADGE[reservation.displayStatus];
+              const badge = RESERVATION_STATUS_LABELS[reservation.displayStatus];
               return (
                 <li key={reservation.id} className="py-4">
                   <Link

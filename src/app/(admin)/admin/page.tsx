@@ -6,19 +6,10 @@ import { listLocations } from "@/lib/data/locations";
 import { listReservations } from "@/lib/data/reservations";
 import { listSpaces } from "@/lib/data/spaces";
 import { listUsers } from "@/lib/data/users";
-import type { ReservationStatus } from "@/types/domain";
+import { RESERVATION_STATUS_LABELS } from "@/types/domain";
 
 export const metadata: Metadata = {
   title: "Administration",
-};
-
-const STATUS_BADGE: Record<
-  ReservationStatus,
-  { label: string; variant: "success" | "neutral" | "danger" }
-> = {
-  confirmed: { label: "Confirmée", variant: "success" },
-  completed: { label: "Terminée", variant: "neutral" },
-  cancelled: { label: "Annulée", variant: "danger" },
 };
 
 export default async function AdminOverviewPage() {
@@ -74,7 +65,7 @@ export default async function AdminOverviewPage() {
                 ? locations.find((item) => item.id === space.locationId)
                 : null;
               const member = users.find((item) => item.id === reservation.userId);
-              const badge = STATUS_BADGE[reservation.status];
+              const badge = RESERVATION_STATUS_LABELS[reservation.status];
               return (
                 <li
                   key={reservation.id}

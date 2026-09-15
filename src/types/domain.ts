@@ -56,6 +56,15 @@ export type Space = {
 
 export type ReservationStatus = "confirmed" | "cancelled" | "completed";
 
+export const RESERVATION_STATUS_LABELS: Record<
+  ReservationStatus,
+  { label: string; variant: "success" | "neutral" | "danger" }
+> = {
+  confirmed: { label: "Confirmée", variant: "success" },
+  completed: { label: "Terminée", variant: "neutral" },
+  cancelled: { label: "Annulée", variant: "danger" },
+};
+
 export type Reservation = {
   id: string;
   userId: string;

@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { requireOnboarded } from "@/lib/auth/session";
+import { requireAdmin } from "@/lib/auth/session";
 import { getLocationById } from "@/lib/data/locations";
 import { getReservationById } from "@/lib/data/reservations";
 import { getSpaceById } from "@/lib/data/spaces";
+import { getUserById } from "@/lib/data/users";
 import { RESERVATION_STATUS_LABELS } from "@/types/domain";
 import { CancelReservationButton } from "./_components/cancel-reservation-button";
 
@@ -13,28 +14,28 @@ export const metadata: Metadata = {
   title: "Détail de la réservation",
 };
 
-export default async function ReservationDetailPage({
+export default async function AdminReservationDetailPage({
   params,
-}: PageProps<"/reservations/[id]">) {
+}: PageProps<"/admin/reservations/[id]">) {
   const { id } = await params;
-  const user = await requireOnboarded();
+  await requireAdmin();
   const reservation = await getReservationById(id);
-  if (!reservation || reservation.userId !== user.id) notFound();
+  if (!reservation) notFound();
 
-  const space = await getSpaceById(reservation.spaceId);
+  const [space, member] = await Promise.all([
+    getSpaceById(reservation.spaceId),
+    getUserById(reservation.userId),
+  ]);
   const location = space ? await getLocationById(space.locationId) : null;
-
-  const canCancel =
-    reservation.status === "confirmed" && new Date(reservation.startAt) > new Date();
   const badge = RESERVATION_STATUS_LABELS[reservation.status];
 
   return (
     <div className="mx-auto max-w-2xl px-8 py-12">
       <Link
-        href="/reservations"
+        href="/admin/reservations"
         className="text-sm text-ink-muted transition-colors hover:text-ink"
       >
-        ← Mes réservations
+        ← Réservations
       </Link>
       <div className="mt-4 flex items-center justify-between">
         <h1 className="font-display text-2xl font-medium text-ink">
@@ -47,6 +48,12 @@ export default async function ReservationDetailPage({
       </p>
 
       <dl className="mt-8 divide-y divide-line border-t border-line text-sm">
+        <div className="flex justify-between py-3">
+          <dt className="text-ink-muted">Membre</dt>
+          <dd className="text-ink">
+            {member?.name ?? "—"} ({member?.email ?? "—"})
+          </dd>
+        </div>
         <div className="flex justify-between py-3">
           <dt className="text-ink-muted">Créneau</dt>
           <dd className="text-ink">
@@ -62,7 +69,7 @@ export default async function ReservationDetailPage({
         </div>
       </dl>
 
-      {canCancel && (
+      {reservation.status === "confirmed" && (
         <div className="mt-8">
           <CancelReservationButton reservationId={reservation.id} />
         </div>
