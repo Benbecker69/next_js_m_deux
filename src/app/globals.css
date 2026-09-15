@@ -15,7 +15,11 @@
   --line: #d8d4c9;
   --pine: #24534a;
   --pine-contrast: #f4f6f5;
-  --ochre: #a66b2e;
+  /* #8f5a26, not the more obvious #a66b2e: the lighter value reads fine on
+     borders/backgrounds but is 3.76:1 as small text on --paper — under the
+     4.5:1 WCAG AA floor. This darker shade clears it (~4.9:1) without
+     touching dark mode, whose ochre already passes comfortably. */
+  --ochre: #8f5a26;
   --ochre-contrast: #fdf8f1;
   --danger: #a3372a;
   --danger-contrast: #fdf3f1;

@@ -7,7 +7,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       <Link href="/" className="font-display text-lg font-medium text-ink">
         Repère
       </Link>
-      <div className="mt-10 w-full max-w-sm border-t border-line pt-10">{children}</div>
+      <main id="contenu" className="mt-10 w-full max-w-sm border-t border-line pt-10">
+        {children}
+      </main>
     </div>
   );
 }
