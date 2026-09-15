@@ -1,26 +1,99 @@
 @import "tailwindcss";
 
+/*
+ * Repère — design tokens.
+ * Palette named after the metaphor (encre/papier/pin/ochre) grounding the
+ * "architect's plan / lieu guide" direction — see .claude/PLAN.md §4.
+ * Two layers: raw palette below, then Tailwind color utilities generated
+ * from it via @theme inline (bg-pine, text-ink, border-line, …).
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink: #171b1f;
+  --ink-muted: #5b6168;
+  --paper: #ededea;
+  --surface: #ffffff;
+  --line: #d8d4c9;
+  --pine: #24534a;
+  --pine-contrast: #f4f6f5;
+  --ochre: #a66b2e;
+  --ochre-contrast: #fdf8f1;
+  --danger: #a3372a;
+  --danger-contrast: #fdf3f1;
+  --focus: #24534a;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* System dark, when the user has made no explicit choice. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --ink: #edeeea;
+    --ink-muted: #9aa0a6;
+    --paper: #14171a;
+    --surface: #1d211f;
+    --line: #2c322f;
+    --pine: #4c9c8b;
+    --pine-contrast: #0e1a17;
+    --ochre: #d69a57;
+    --ochre-contrast: #241505;
+    --danger: #e07a68;
+    --danger-contrast: #2a0f0a;
+    --focus: #4c9c8b;
   }
 }
 
+/* Explicit choice via the theme toggle always wins over system preference. */
+:root[data-theme="dark"] {
+  --ink: #edeeea;
+  --ink-muted: #9aa0a6;
+  --paper: #14171a;
+  --surface: #1d211f;
+  --line: #2c322f;
+  --pine: #4c9c8b;
+  --pine-contrast: #0e1a17;
+  --ochre: #d69a57;
+  --ochre-contrast: #241505;
+  --danger: #e07a68;
+  --danger-contrast: #2a0f0a;
+  --focus: #4c9c8b;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-pine: var(--pine);
+  --color-pine-contrast: var(--pine-contrast);
+  --color-ochre: var(--ochre);
+  --color-ochre-contrast: var(--ochre-contrast);
+  --color-danger: var(--danger);
+  --color-danger-contrast: var(--danger-contrast);
+  --color-focus: var(--focus);
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-public-sans);
+}
+
+* {
+  border-color: var(--line);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
