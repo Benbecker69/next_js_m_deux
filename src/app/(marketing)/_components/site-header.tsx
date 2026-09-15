@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { href: "/fonctionnalites", label: "Fonctionnalités" },
   { href: "/tarifs", label: "Tarifs" },
   { href: "/lieux", label: "Lieux" },
+  { href: "/vision-mobile", label: "Vision mobile" },
   { href: "/faq", label: "FAQ" },
 ];
 
