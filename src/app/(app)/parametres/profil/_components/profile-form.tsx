@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
 import type { MemberType } from "@/types/domain";
 import { updateProfileAction, type ProfileFormState } from "../_actions";
 
@@ -51,16 +52,8 @@ export function ProfileForm({
         </div>
       </fieldset>
 
-      {state.error && (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      )}
-      {state.success && (
-        <p role="status" className="text-sm text-pine">
-          Profil mis à jour.
-        </p>
-      )}
+      {state.error && <Alert variant="error">{state.error}</Alert>}
+      {state.success && <Alert variant="success">Profil mis à jour.</Alert>}
 
       <div>
         <Button type="submit" disabled={pending}>

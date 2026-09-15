@@ -77,8 +77,16 @@
   --font-sans: var(--font-public-sans);
 }
 
-* {
-  border-color: var(--line);
+/* @layer base, not a bare rule: Tailwind's utilities (border-pine/30 and
+   friends) live inside Tailwind's own cascade layers, and an unlayered rule
+   always beats a layered one regardless of selector specificity — so a bare
+   `* { border-color }` here would silently win over every colored-border
+   utility in the app. Layering this puts it back under normal cascade
+   rules, where the later, more specific utility class wins as expected. */
+@layer base {
+  * {
+    border-color: var(--line);
+  }
 }
 
 body {
@@ -100,4 +108,22 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Toast entrance — the one deliberate motion moment for feedback, not
+   applied indiscriminately elsewhere. Neutralized above under
+   prefers-reduced-motion like every other animation on the page. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-toast-in {
+  animation: toast-in 0.2s ease-out;
 }

@@ -7,6 +7,7 @@ import { createReservation, listReservationsBySpace } from "@/lib/data/reservati
 import { getSpaceById } from "@/lib/data/spaces";
 import { updateUser } from "@/lib/data/users";
 import { createReservationSchema } from "@/lib/validation/reservation";
+import { withFlash } from "@/lib/feedback/flash-messages";
 
 export type ReservationFormState = {
   error: string | null;
@@ -70,5 +71,5 @@ export async function createReservationAction(
   // The (app) layout (sidebar credits) is shared across routes and would
   // otherwise keep showing the pre-booking balance from the router cache.
   revalidatePath("/tableau-de-bord", "layout");
-  redirect("/tableau-de-bord");
+  redirect(withFlash("/tableau-de-bord", "reservation-confirmee"));
 }

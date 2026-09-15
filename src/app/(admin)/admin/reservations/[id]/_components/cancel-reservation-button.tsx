@@ -2,12 +2,15 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
+import { useToast } from "@/lib/feedback/toast-provider";
 import { adminCancelReservationAction } from "../_actions";
 
 export function CancelReservationButton({ reservationId }: { reservationId: string }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const { showSuccess } = useToast();
 
   if (!confirming) {
     return (
@@ -22,11 +25,7 @@ export function CancelReservationButton({ reservationId }: { reservationId: stri
       <p className="text-sm text-ink">
         Confirmer l&apos;annulation ? Les crédits seront recrédités au membre.
       </p>
-      {error && (
-        <p role="alert" className="text-sm text-danger">
-          {error}
-        </p>
-      )}
+      {error && <Alert variant="error">{error}</Alert>}
       <div className="flex gap-2">
         <Button
           variant="destructive"
@@ -36,6 +35,7 @@ export function CancelReservationButton({ reservationId }: { reservationId: stri
             startTransition(async () => {
               try {
                 await adminCancelReservationAction(reservationId);
+                showSuccess("Réservation annulée, crédits recrédités au membre.");
               } catch (err) {
                 setError(err instanceof Error ? err.message : "Une erreur est survenue.");
               }

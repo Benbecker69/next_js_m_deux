@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
+import { useToast } from "@/lib/feedback/toast-provider";
 import { SPACE_TYPE_LABELS, type Space, type SpaceType } from "@/types/domain";
 import {
   deleteSpaceAction,
@@ -18,7 +20,7 @@ const SPACE_TYPES: SpaceType[] = [
   "salle-reunion",
   "phone-booth",
 ];
-const initialState: SpaceFormState = { error: null };
+const initialState: SpaceFormState = { error: null, success: false };
 
 // Delete uses a two-step inline confirm (like reservation cancellation)
 // rather than window.confirm() — consistent with the rest of the app, and
@@ -34,12 +36,14 @@ export function SpacesManager({
   const [, startTransition] = useTransition();
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
   const [rowError, setRowError] = useState<string | null>(null);
+  const { showSuccess } = useToast();
 
   const toggleStatus = (spaceId: string) => {
     setRowError(null);
     startTransition(async () => {
       try {
         await toggleSpaceStatusAction(spaceId);
+        showSuccess("Statut de l'espace mis à jour.");
       } catch (error) {
         setRowError(error instanceof Error ? error.message : "Une erreur est survenue.");
       }
@@ -52,6 +56,7 @@ export function SpacesManager({
     startTransition(async () => {
       try {
         await deleteSpaceAction(spaceId);
+        showSuccess("Espace supprimé.");
       } catch (error) {
         setRowError(error instanceof Error ? error.message : "Une erreur est survenue.");
       }
@@ -61,9 +66,9 @@ export function SpacesManager({
   return (
     <div className="mt-4">
       {rowError && (
-        <p role="alert" className="mb-4 text-sm text-danger">
+        <Alert variant="error" className="mb-4">
           {rowError}
-        </p>
+        </Alert>
       )}
 
       {spaces.length === 0 ? (
@@ -173,9 +178,14 @@ export function SpacesManager({
         </div>
 
         {state.error && (
-          <p role="alert" className="text-sm text-danger sm:col-span-2">
+          <Alert variant="error" className="sm:col-span-2">
             {state.error}
-          </p>
+          </Alert>
+        )}
+        {state.success && (
+          <Alert variant="success" className="sm:col-span-2">
+            Espace ajouté.
+          </Alert>
         )}
 
         <div className="sm:col-span-2">

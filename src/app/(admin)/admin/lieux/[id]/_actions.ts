@@ -11,6 +11,7 @@ import type { LocationFormState } from "../_components/location-form";
 
 export type SpaceFormState = {
   error: string | null;
+  success: boolean;
 };
 
 export async function updateLocationAction(
@@ -68,7 +69,10 @@ export async function createSpaceAction(
     status: "active",
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
+    return {
+      error: parsed.error.issues[0]?.message ?? "Formulaire invalide.",
+      success: false,
+    };
   }
 
   const space: Space = { id: crypto.randomUUID(), ...parsed.data };
@@ -76,7 +80,7 @@ export async function createSpaceAction(
   revalidatePath(`/admin/lieux/${locationId}`);
   revalidateTag("spaces", "max");
 
-  return { error: null };
+  return { error: null, success: true };
 }
 
 export async function toggleSpaceStatusAction(spaceId: string): Promise<void> {

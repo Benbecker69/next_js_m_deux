@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
 import type { Location } from "@/types/domain";
 import { updatePreferencesAction, type PreferencesFormState } from "../_actions";
 
@@ -56,16 +57,8 @@ export function PreferencesForm({
         latérale.
       </p>
 
-      {state.error && (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      )}
-      {state.success && (
-        <p role="status" className="text-sm text-pine">
-          Préférences mises à jour.
-        </p>
-      )}
+      {state.error && <Alert variant="error">{state.error}</Alert>}
+      {state.success && <Alert variant="success">Préférences mises à jour.</Alert>}
 
       <div>
         <Button type="submit" disabled={pending}>

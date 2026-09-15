@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth/session";
 import { updatePreference } from "@/lib/data/preferences";
 import { updateUser } from "@/lib/data/users";
 import { onboardingSchema } from "@/lib/validation/profile";
+import { withFlash } from "@/lib/feedback/flash-messages";
 
 export type OnboardingFormState = {
   error: string | null;
@@ -30,5 +31,5 @@ export async function completeOnboardingAction(
   });
   await updatePreference(user.id, { defaultLocationId: parsed.data.defaultLocationId });
 
-  redirect("/tableau-de-bord");
+  redirect(withFlash("/tableau-de-bord", "profil-complete"));
 }

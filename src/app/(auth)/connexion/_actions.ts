@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getUserByEmail } from "@/lib/data/users";
 import { createSession } from "@/lib/auth/session";
 import { loginSchema } from "@/lib/validation/auth";
+import { withFlash } from "@/lib/feedback/flash-messages";
 
 export type LoginFormState = {
   error: string | null;
@@ -30,5 +31,12 @@ export async function loginAction(
   }
 
   await createSession(user.id);
-  redirect(user.onboardingCompletedAt ? "/tableau-de-bord" : "/bienvenue");
+  // /bienvenue is itself a welcome screen for a not-yet-onboarded user, so a
+  // flash toast on top of it would be redundant — reserved for the direct
+  // return to the dashboard.
+  redirect(
+    user.onboardingCompletedAt
+      ? withFlash("/tableau-de-bord", "connexion-reussie")
+      : "/bienvenue",
+  );
 }

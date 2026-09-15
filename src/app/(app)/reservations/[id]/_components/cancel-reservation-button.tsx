@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
+import { useToast } from "@/lib/feedback/toast-provider";
 import { cancelReservationAction } from "../_actions";
 
 // Direct server-action call (not a <form>) wrapped in useTransition — a
@@ -11,6 +13,7 @@ export function CancelReservationButton({ reservationId }: { reservationId: stri
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const { showSuccess } = useToast();
 
   if (!confirming) {
     return (
@@ -25,11 +28,7 @@ export function CancelReservationButton({ reservationId }: { reservationId: stri
       <p className="text-sm text-ink">
         Confirmer l&apos;annulation ? Les crédits débités seront recrédités.
       </p>
-      {error && (
-        <p role="alert" className="text-sm text-danger">
-          {error}
-        </p>
-      )}
+      {error && <Alert variant="error">{error}</Alert>}
       <div className="flex gap-2">
         <Button
           variant="destructive"
@@ -39,7 +38,10 @@ export function CancelReservationButton({ reservationId }: { reservationId: stri
             startTransition(async () => {
               try {
                 await cancelReservationAction(reservationId);
+                showSuccess("Réservation annulée, vos crédits ont été recrédités.");
               } catch (err) {
+                // Inline, not toasted too: the confirm panel stays open on
+                // failure, so it's already showing the error in context.
                 setError(err instanceof Error ? err.message : "Une erreur est survenue.");
               }
             });

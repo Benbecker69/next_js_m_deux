@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Fraunces, Public_Sans } from "next/font/google";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
 import { themeInitScript } from "@/lib/theme/theme-script";
+import { ToastProvider } from "@/lib/feedback/toast-provider";
+import { FlashToast } from "@/lib/feedback/flash-toast";
 import { SITE_URL } from "@/lib/site-config";
 import "./globals.css";
 
@@ -59,7 +62,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Aller au contenu
         </a>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <ToastProvider>
+            {/* useSearchParams needs a Suspense boundary, per Next.js. */}
+            <Suspense fallback={null}>
+              <FlashToast />
+            </Suspense>
+            {children}
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

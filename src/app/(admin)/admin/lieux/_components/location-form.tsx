@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
 import type { Location } from "@/types/domain";
 
 export type LocationFormState = {
@@ -104,16 +105,8 @@ export function LocationForm({
         <p className="text-xs text-ink-muted">Séparés par des virgules.</p>
       </div>
 
-      {state.error && (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      )}
-      {state.success && (
-        <p role="status" className="text-sm text-pine">
-          Enregistré.
-        </p>
-      )}
+      {state.error && <Alert variant="error">{state.error}</Alert>}
+      {state.success && <Alert variant="success">Enregistré.</Alert>}
 
       <div>
         <Button type="submit" disabled={pending}>

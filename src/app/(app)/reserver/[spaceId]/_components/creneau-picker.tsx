@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 import { cn } from "@/lib/utils/cn";
 import type { Reservation, Space } from "@/types/domain";
 import { createReservationAction, type ReservationFormState } from "../_actions";
@@ -135,15 +136,9 @@ export function CreneauPicker({
         </div>
       )}
 
-      {state.error && (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      )}
+      {state.error && <Alert variant="error">{state.error}</Alert>}
       {insufficientCredits && (
-        <p className="text-sm text-danger">
-          Crédits insuffisants pour réserver cet espace.
-        </p>
+        <Alert variant="error">Crédits insuffisants pour réserver cet espace.</Alert>
       )}
 
       <Button

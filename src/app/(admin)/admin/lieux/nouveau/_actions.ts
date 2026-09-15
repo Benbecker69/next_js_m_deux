@@ -8,6 +8,7 @@ import { slugify } from "@/lib/utils/slugify";
 import { locationSchema } from "@/lib/validation/location";
 import type { Location } from "@/types/domain";
 import type { LocationFormState } from "../_components/location-form";
+import { withFlash } from "@/lib/feedback/flash-messages";
 
 function parseLocationForm(formData: FormData) {
   return locationSchema.safeParse({
@@ -46,5 +47,5 @@ export async function createLocationAction(
   await createLocation(location);
   revalidateTag("locations", "max");
 
-  redirect(`/admin/lieux/${location.id}`);
+  redirect(withFlash(`/admin/lieux/${location.id}`, "lieu-cree"));
 }

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
 import type { Location } from "@/types/domain";
 import { completeOnboardingAction, type OnboardingFormState } from "../_actions";
 
@@ -74,11 +75,7 @@ export function OnboardingForm({ locations }: { locations: Location[] }) {
         </select>
       </div>
 
-      {state.error && (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      )}
+      {state.error && <Alert variant="error">{state.error}</Alert>}
 
       <Button type="submit" disabled={pending}>
         {pending ? "Enregistrement…" : "Terminer"}

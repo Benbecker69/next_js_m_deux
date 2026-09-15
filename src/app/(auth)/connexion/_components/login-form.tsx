@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert } from "@/components/ui/alert";
 import { loginAction, type LoginFormState } from "../_actions";
 
 const initialState: LoginFormState = { error: null };
@@ -28,11 +29,7 @@ export function LoginForm() {
           required
         />
       </div>
-      {state.error && (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      )}
+      {state.error && <Alert variant="error">{state.error}</Alert>}
       <Button type="submit" disabled={pending}>
         {pending ? "Connexion…" : "Se connecter"}
       </Button>
