@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidateTag } from "next/cache";
 import { requireAdmin } from "@/lib/auth/session";
 import { createLocation } from "@/lib/data/locations";
 import { slugify } from "@/lib/utils/slugify";
@@ -43,6 +44,7 @@ export async function createLocationAction(
     ...parsed.data,
   };
   await createLocation(location);
+  revalidateTag("locations", "max");
 
   redirect(`/admin/lieux/${location.id}`);
 }

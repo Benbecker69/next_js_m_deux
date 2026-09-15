@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { SPACE_TYPE_LABELS } from "@/types/domain";
-import { listLocations } from "@/lib/data/locations";
-import { listSpaces } from "@/lib/data/spaces";
+import { getCachedLocations } from "@/lib/data/locations";
+import { getCachedSpaces } from "@/lib/data/spaces";
 import { SpacePlan } from "./_components/space-plan";
 
 const STEPS = [
@@ -22,7 +22,10 @@ const STEPS = [
 ];
 
 export default async function MarketingHomePage() {
-  const [locations, spaces] = await Promise.all([listLocations(), listSpaces()]);
+  const [locations, spaces] = await Promise.all([
+    getCachedLocations(),
+    getCachedSpaces(),
+  ]);
   const featuredLocations = locations.slice(0, 2).map((location) => {
     const types = [
       ...new Set(

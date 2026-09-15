@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { listLocations } from "@/lib/data/locations";
-import { listSpaces } from "@/lib/data/spaces";
+import { getCachedLocations } from "@/lib/data/locations";
+import { getCachedSpaces } from "@/lib/data/spaces";
 
 export const metadata: Metadata = {
   title: "Les lieux",
@@ -10,7 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default async function LocationsPage() {
-  const [locations, spaces] = await Promise.all([listLocations(), listSpaces()]);
+  const [locations, spaces] = await Promise.all([
+    getCachedLocations(),
+    getCachedSpaces(),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-20">

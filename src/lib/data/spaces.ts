@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import type { Space } from "@/types/domain";
 import { createCollection } from "./store";
 import { SEED_SPACES } from "./seed";
@@ -8,6 +9,11 @@ const spaces = createCollection<Space>("spaces", SEED_SPACES);
 export async function listSpaces(): Promise<Space[]> {
   return spaces.list();
 }
+
+/** Cached read for public marketing pages — see getCachedLocations for why. */
+export const getCachedSpaces = unstable_cache(listSpaces, ["spaces"], {
+  tags: ["spaces"],
+});
 
 export async function getSpaceById(id: string): Promise<Space | null> {
   return spaces.get(id);

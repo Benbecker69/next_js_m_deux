@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { listLocations } from "@/lib/data/locations";
+import { getCachedLocations } from "@/lib/data/locations";
 import { SITE_URL } from "@/lib/site-config";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -10,7 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  const locations = await listLocations();
+  const locations = await getCachedLocations();
   const locationRoutes = locations.map((location) => ({
     url: `${SITE_URL}/lieux/${location.slug}`,
     lastModified: new Date(),

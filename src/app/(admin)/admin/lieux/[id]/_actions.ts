@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { requireAdmin } from "@/lib/auth/session";
 import { getLocationById, updateLocation } from "@/lib/data/locations";
 import { createSpace, deleteSpace, getSpaceById, updateSpace } from "@/lib/data/spaces";
@@ -47,6 +47,7 @@ export async function updateLocationAction(
   await updateLocation(locationId, parsed.data);
   revalidatePath(`/admin/lieux/${locationId}`);
   revalidatePath("/admin/lieux");
+  revalidateTag("locations", "max"); // public /lieux pages read the cached list
 
   return { error: null, success: true };
 }
@@ -73,6 +74,7 @@ export async function createSpaceAction(
   const space: Space = { id: crypto.randomUUID(), ...parsed.data };
   await createSpace(space);
   revalidatePath(`/admin/lieux/${locationId}`);
+  revalidateTag("spaces", "max");
 
   return { error: null };
 }
@@ -87,6 +89,7 @@ export async function toggleSpaceStatusAction(spaceId: string): Promise<void> {
     status: space.status === "active" ? "maintenance" : "active",
   });
   revalidatePath(`/admin/lieux/${space.locationId}`);
+  revalidateTag("spaces", "max");
 }
 
 export async function deleteSpaceAction(spaceId: string): Promise<void> {
@@ -97,4 +100,5 @@ export async function deleteSpaceAction(spaceId: string): Promise<void> {
   }
   await deleteSpace(spaceId);
   revalidatePath(`/admin/lieux/${space.locationId}`);
+  revalidateTag("spaces", "max");
 }

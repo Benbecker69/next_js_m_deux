@@ -3,11 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { SPACE_TYPE_LABELS } from "@/types/domain";
-import { getLocationBySlug, listLocations } from "@/lib/data/locations";
-import { listSpacesByLocation } from "@/lib/data/spaces";
+import { getCachedLocations } from "@/lib/data/locations";
+import { getCachedSpaces } from "@/lib/data/spaces";
 
 export async function generateStaticParams() {
-  const locations = await listLocations();
+  const locations = await getCachedLocations();
   return locations.map((location) => ({ slug: location.slug }));
 }
 
@@ -17,7 +17,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const location = await getLocationBySlug(slug);
+  const locations = await getCachedLocations();
+  const location = locations.find((item) => item.slug === slug);
   if (!location) return {};
   return {
     title: location.name,
@@ -27,10 +28,14 @@ export async function generateMetadata({
 
 export default async function LocationDetailPage({ params }: PageProps<"/lieux/[slug]">) {
   const { slug } = await params;
-  const location = await getLocationBySlug(slug);
+  const [locations, spaces] = await Promise.all([
+    getCachedLocations(),
+    getCachedSpaces(),
+  ]);
+  const location = locations.find((item) => item.slug === slug);
   if (!location) notFound();
 
-  const spaces = await listSpacesByLocation(location.id);
+  const locationSpaces = spaces.filter((space) => space.locationId === location.id);
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-20">
@@ -47,7 +52,7 @@ export default async function LocationDetailPage({ params }: PageProps<"/lieux/[
       <div className="mt-10 border-t border-line pt-6">
         <h2 className="font-display text-lg font-medium text-ink">Espaces disponibles</h2>
         <ul className="mt-4 divide-y divide-line border-t border-line">
-          {spaces.map((space) => (
+          {locationSpaces.map((space) => (
             <li key={space.id} className="flex items-center justify-between py-3 text-sm">
               <span className="text-ink">
                 {space.name !== SPACE_TYPE_LABELS[space.type]
