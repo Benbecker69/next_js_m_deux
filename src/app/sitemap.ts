@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
-import { MARKETING_LOCATIONS } from "./(marketing)/lieux/_data";
+import { listLocations } from "@/lib/data/locations";
 import { SITE_URL } from "@/lib/site-config";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = ["", "/fonctionnalites", "/tarifs", "/lieux", "/faq"].map(
     (path) => ({
       url: `${SITE_URL}${path}`,
@@ -10,7 +10,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }),
   );
 
-  const locationRoutes = MARKETING_LOCATIONS.map((location) => ({
+  const locations = await listLocations();
+  const locationRoutes = locations.map((location) => ({
     url: `${SITE_URL}/lieux/${location.slug}`,
     lastModified: new Date(),
   }));

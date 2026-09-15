@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { SPACE_TYPE_LABELS } from "@/types/domain";
+import { listLocations } from "@/lib/data/locations";
+import { listSpaces } from "@/lib/data/spaces";
 import { SpacePlan } from "./_components/space-plan";
 
 const STEPS = [
@@ -18,20 +21,19 @@ const STEPS = [
   },
 ];
 
-const FEATURED_LOCATIONS = [
-  {
-    name: "Le Chantier",
-    city: "Lyon · Part-Dieu",
-    type: "Bureaux privés, salles de réunion",
-  },
-  {
-    name: "Station 9",
-    city: "Nantes · Île de Nantes",
-    type: "Postes flex, phone booths",
-  },
-];
+export default async function MarketingHomePage() {
+  const [locations, spaces] = await Promise.all([listLocations(), listSpaces()]);
+  const featuredLocations = locations.slice(0, 2).map((location) => {
+    const types = [
+      ...new Set(
+        spaces
+          .filter((space) => space.locationId === location.id)
+          .map((space) => SPACE_TYPE_LABELS[space.type]),
+      ),
+    ];
+    return { ...location, typesLabel: types.join(", ") };
+  });
 
-export default function MarketingHomePage() {
   return (
     <>
       <section className="border-b border-line">
@@ -91,14 +93,14 @@ export default function MarketingHomePage() {
             </Link>
           </div>
           <div className="mt-10 grid divide-y divide-line rounded-sm border border-line sm:grid-cols-2 sm:divide-x sm:divide-y-0">
-            {FEATURED_LOCATIONS.map((location) => (
-              <div key={location.name} className="p-6">
+            {featuredLocations.map((location) => (
+              <Link key={location.slug} href={`/lieux/${location.slug}`} className="p-6">
                 <h3 className="font-display text-lg font-medium text-ink">
                   {location.name}
                 </h3>
                 <p className="mt-1 text-sm text-ink-muted">{location.city}</p>
-                <p className="mt-4 text-sm text-ink">{location.type}</p>
-              </div>
+                <p className="mt-4 text-sm text-ink">{location.typesLabel}</p>
+              </Link>
             ))}
           </div>
         </div>

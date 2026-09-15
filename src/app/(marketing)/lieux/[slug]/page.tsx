@@ -2,21 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
-import { MARKETING_LOCATIONS } from "../_data";
+import { SPACE_TYPE_LABELS } from "@/types/domain";
+import { getLocationBySlug, listLocations } from "@/lib/data/locations";
+import { listSpacesByLocation } from "@/lib/data/spaces";
 
-type Params = { slug: string };
-
-export function generateStaticParams() {
-  return MARKETING_LOCATIONS.map((location) => ({ slug: location.slug }));
+export async function generateStaticParams() {
+  const locations = await listLocations();
+  return locations.map((location) => ({ slug: location.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<Params>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const location = MARKETING_LOCATIONS.find((item) => item.slug === slug);
+  const location = await getLocationBySlug(slug);
   if (!location) return {};
   return {
     title: location.name,
@@ -26,8 +27,10 @@ export async function generateMetadata({
 
 export default async function LocationDetailPage({ params }: PageProps<"/lieux/[slug]">) {
   const { slug } = await params;
-  const location = MARKETING_LOCATIONS.find((item) => item.slug === slug);
+  const location = await getLocationBySlug(slug);
   if (!location) notFound();
+
+  const spaces = await listSpacesByLocation(location.id);
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-20">
@@ -44,12 +47,13 @@ export default async function LocationDetailPage({ params }: PageProps<"/lieux/[
       <div className="mt-10 border-t border-line pt-6">
         <h2 className="font-display text-lg font-medium text-ink">Espaces disponibles</h2>
         <ul className="mt-4 divide-y divide-line border-t border-line">
-          {location.spaces.map((space) => (
-            <li
-              key={space.type}
-              className="flex items-center justify-between py-3 text-sm"
-            >
-              <span className="text-ink">{space.type}</span>
+          {spaces.map((space) => (
+            <li key={space.id} className="flex items-center justify-between py-3 text-sm">
+              <span className="text-ink">
+                {space.name !== SPACE_TYPE_LABELS[space.type]
+                  ? `${space.name} · ${SPACE_TYPE_LABELS[space.type]}`
+                  : space.name}
+              </span>
               <span className="text-ink-muted">{space.pricePerHour} crédits / heure</span>
             </li>
           ))}

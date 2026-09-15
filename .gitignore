@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# mock data store — JSON-file-backed local persistence, never committed
+# (real data once the actual database lands, see CLAUDE.md)
+/.data/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
