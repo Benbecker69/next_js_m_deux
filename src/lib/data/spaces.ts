@@ -16,3 +16,18 @@ export async function getSpaceById(id: string): Promise<Space | null> {
 export async function listSpacesByLocation(locationId: string): Promise<Space[]> {
   return spaces.filter((space) => space.locationId === locationId);
 }
+
+export async function createSpace(space: Space): Promise<Space> {
+  return spaces.insert(space);
+}
+
+export async function updateSpace(
+  id: string,
+  patch: Partial<Space>,
+): Promise<Space | null> {
+  return spaces.update(id, patch);
+}
+
+export async function deleteSpace(id: string): Promise<boolean> {
+  return spaces.remove(id);
+}

@@ -16,3 +16,14 @@ export async function getLocationById(id: string): Promise<Location | null> {
 export async function getLocationBySlug(slug: string): Promise<Location | null> {
   return locations.find((location) => location.slug === slug);
 }
+
+export async function createLocation(location: Location): Promise<Location> {
+  return locations.insert(location);
+}
+
+export async function updateLocation(
+  id: string,
+  patch: Partial<Location>,
+): Promise<Location | null> {
+  return locations.update(id, patch);
+}
