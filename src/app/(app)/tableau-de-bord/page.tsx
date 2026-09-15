@@ -62,19 +62,21 @@ export default async function DashboardPage() {
                   ? locations.find((item) => item.id === space.locationId)
                   : null;
                 return (
-                  <li
-                    key={reservation.id}
-                    className="flex items-center justify-between py-3 text-sm"
-                  >
-                    <span className="text-ink">
-                      {space?.name ?? "Espace"} · {location?.name ?? ""}
-                    </span>
-                    <span className="text-ink-muted">
-                      {new Date(reservation.startAt).toLocaleString("fr-FR", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      })}
-                    </span>
+                  <li key={reservation.id} className="py-3 text-sm">
+                    <Link
+                      href={`/reservations/${reservation.id}`}
+                      className="flex items-center justify-between transition-colors hover:text-pine"
+                    >
+                      <span className="text-ink">
+                        {space?.name ?? "Espace"} · {location?.name ?? ""}
+                      </span>
+                      <span className="text-ink-muted">
+                        {new Date(reservation.startAt).toLocaleString("fr-FR", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </span>
+                    </Link>
                   </li>
                 );
               })}
