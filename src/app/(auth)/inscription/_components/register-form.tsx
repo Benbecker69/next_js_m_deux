@@ -1,0 +1,51 @@
+"use client";
+
+import Link from "next/link";
+import { useActionState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { registerAction, type RegisterFormState } from "../_actions";
+
+const initialState: RegisterFormState = { error: null };
+
+export function RegisterForm() {
+  const [state, formAction, pending] = useActionState(registerAction, initialState);
+
+  return (
+    <form action={formAction} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="name">Nom</Label>
+        <Input id="name" name="name" type="text" autoComplete="name" required />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="email">E-mail</Label>
+        <Input id="email" name="email" type="email" autoComplete="email" required />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="password">Mot de passe</Label>
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          required
+        />
+      </div>
+      {state.error && (
+        <p role="alert" className="text-sm text-danger">
+          {state.error}
+        </p>
+      )}
+      <Button type="submit" disabled={pending}>
+        {pending ? "Création…" : "Créer un compte"}
+      </Button>
+      <p className="text-sm text-ink-muted">
+        Déjà un compte ?{" "}
+        <Link href="/connexion" className="text-pine hover:underline">
+          Se connecter
+        </Link>
+      </p>
+    </form>
+  );
+}

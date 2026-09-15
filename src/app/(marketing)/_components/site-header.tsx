@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
+import { getSession } from "@/lib/auth/session";
 
 const NAV_LINKS = [
   { href: "/fonctionnalites", label: "Fonctionnalités" },
@@ -9,7 +10,9 @@ const NAV_LINKS = [
   { href: "/faq", label: "FAQ" },
 ];
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const user = await getSession();
+
   return (
     <header className="border-b border-line">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-6">
@@ -34,15 +37,36 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <Link
-            href="/connexion"
-            className="hidden text-sm text-ink-muted transition-colors hover:text-ink sm:inline"
-          >
-            Se connecter
-          </Link>
-          <Link href="/inscription" className={buttonVariants({ size: "sm" })}>
-            Réserver un espace
-          </Link>
+          {user ? (
+            <>
+              <Link
+                href="/tableau-de-bord"
+                className="hidden text-sm text-ink-muted transition-colors hover:text-ink sm:inline"
+              >
+                {user.name.split(" ")[0]}
+              </Link>
+              <form action="/deconnexion" method="post">
+                <button
+                  type="submit"
+                  className={buttonVariants({ variant: "secondary", size: "sm" })}
+                >
+                  Déconnexion
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/connexion"
+                className="hidden text-sm text-ink-muted transition-colors hover:text-ink sm:inline"
+              >
+                Se connecter
+              </Link>
+              <Link href="/inscription" className={buttonVariants({ size: "sm" })}>
+                Réserver un espace
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
