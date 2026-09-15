@@ -4,6 +4,12 @@
 export type UserRole = "member" | "admin";
 export type MemberType = "freelance" | "entreprise" | "etudiant";
 
+export const MEMBER_TYPE_LABELS: Record<MemberType, string> = {
+  freelance: "Freelance",
+  entreprise: "Entreprise",
+  etudiant: "Étudiant",
+};
+
 export type User = {
   id: string;
   name: string;
