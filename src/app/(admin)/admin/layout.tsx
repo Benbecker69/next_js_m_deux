@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Logo } from "@/components/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { requireAdmin } from "@/lib/auth/session";
@@ -12,8 +13,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     <div className="flex min-h-screen flex-col md:flex-row">
       <aside className="flex flex-col justify-between border-b border-line p-6 md:w-60 md:shrink-0 md:border-r md:border-b-0">
         <div>
-          <Link href="/admin" className="flex items-baseline gap-2">
-            <span className="font-display text-lg font-medium text-ink">Repère</span>
+          <Link href="/admin" className="flex items-center gap-2">
+            <Logo />
             <span className="text-xs text-ochre">Admin</span>
           </Link>
           <AdminNav />

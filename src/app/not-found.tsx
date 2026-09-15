@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { buttonVariants } from "@/components/ui/button";
 
 // Root-level boundary: catches any URL that matches no route in the app.
@@ -14,8 +15,8 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-6 py-20">
-      <Link href="/" className="font-display text-lg font-medium text-ink">
-        Repère
+      <Link href="/">
+        <Logo />
       </Link>
       <p className="mt-10 text-sm text-ink-muted">404</p>
       <h1 className="mt-2 font-display text-3xl font-medium text-ink">

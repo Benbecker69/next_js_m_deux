@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 
 const FOOTER_LINKS = [
   { href: "/fonctionnalites", label: "Fonctionnalités" },
@@ -13,7 +14,7 @@ export function SiteFooter() {
     <footer className="border-t border-line">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-10 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-xs">
-          <p className="font-display text-lg font-medium text-ink">Repère</p>
+          <Logo />
           <p className="mt-2 text-sm text-ink-muted">
             Trouvez et réservez un espace de coworking près de chez vous.
           </p>

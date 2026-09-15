@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { getSession } from "@/lib/auth/session";
@@ -16,9 +17,9 @@ export async function SiteHeader() {
 
   return (
     <header className="border-b border-line">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-6">
-        <Link href="/" className="font-display text-lg font-medium text-ink">
-          Repère
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:gap-6 sm:px-6">
+        <Link href="/">
+          <Logo />
         </Link>
 
         <nav
@@ -36,7 +37,7 @@ export async function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
           {user ? (
             <>

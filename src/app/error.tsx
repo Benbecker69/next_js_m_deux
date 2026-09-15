@@ -6,6 +6,7 @@
 // a closure that needs to run in the browser to re-render the segment.
 import { useEffect } from "react";
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { buttonVariants } from "@/components/ui/button";
 
 export default function GlobalError({
@@ -21,8 +22,8 @@ export default function GlobalError({
 
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-6 py-20">
-      <Link href="/" className="font-display text-lg font-medium text-ink">
-        Repère
+      <Link href="/">
+        <Logo />
       </Link>
       <p className="mt-10 text-sm text-ink-muted">Erreur</p>
       <h1 className="mt-2 font-display text-3xl font-medium text-ink">
