@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Public_Sans } from "next/font/google";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
 import { themeInitScript } from "@/lib/theme/theme-script";
+import { SITE_URL } from "@/lib/site-config";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -15,6 +16,7 @@ const publicSans = Public_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Repère — réservez votre espace de coworking",
     template: "%s · Repère",
