@@ -9,8 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminUsersPage() {
-  await requireAdmin();
-  const users = await listUsers();
+  const [, users] = await Promise.all([requireAdmin(), listUsers()]);
   const sorted = [...users].sort((a, b) => a.name.localeCompare(b.name));
 
   return (

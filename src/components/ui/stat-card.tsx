@@ -17,7 +17,9 @@ export function StatCard({ label, value, hint, className, ...props }: StatCardPr
       {...props}
     >
       <p className="text-xs text-ink-muted">{label}</p>
-      <p className="mt-1 font-display text-2xl font-medium text-ink">{value}</p>
+      <p className="mt-1 font-display text-2xl font-medium tabular-nums text-ink">
+        {value}
+      </p>
       {hint && <p className="mt-1 text-xs text-ink-muted">{hint}</p>}
     </div>
   );

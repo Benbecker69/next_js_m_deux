@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getUserById } from "@/lib/data/users";
@@ -22,13 +23,21 @@ export async function destroySession() {
   cookieStore.delete(SESSION_COOKIE);
 }
 
-/** Returns the current user, or null if nobody is logged in. Never redirects. */
-export async function getSession(): Promise<User | null> {
+/**
+ * Returns the current user, or null if nobody is logged in. Never redirects.
+ * Wrapped in React's cache(): every protected layout calls requireX() and
+ * every page under it calls it again (pages don't receive the layout's
+ * already-resolved user as a prop), so a single request re-reads the same
+ * session cookie and re-looks-up the same user several times over. cache()
+ * memoizes per request — same inputs, one real getUserById() call, however
+ * many times getSession()/requireUser()/etc. get called while handling it.
+ */
+export const getSession = cache(async (): Promise<User | null> => {
   const cookieStore = await cookies();
   const userId = cookieStore.get(SESSION_COOKIE)?.value;
   if (!userId) return null;
   return getUserById(userId);
-}
+});
 
 /**
  * Real server-side enforcement, not UI masking: call this at the top of any

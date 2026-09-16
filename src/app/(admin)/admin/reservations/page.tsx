@@ -23,17 +23,17 @@ const STATUS_FILTERS: { value: ReservationStatus | "all"; label: string }[] = [
 export default async function AdminReservationsPage({
   searchParams,
 }: PageProps<"/admin/reservations">) {
-  await requireAdmin();
-  const resolvedSearchParams = await searchParams;
+  const [, resolvedSearchParams, reservations, spaces, locations, users] =
+    await Promise.all([
+      requireAdmin(),
+      searchParams,
+      listReservations(),
+      listSpaces(),
+      listLocations(),
+      listUsers(),
+    ]);
   const statusParam = resolvedSearchParams.status;
   const activeStatus = typeof statusParam === "string" ? statusParam : "all";
-
-  const [reservations, spaces, locations, users] = await Promise.all([
-    listReservations(),
-    listSpaces(),
-    listLocations(),
-    listUsers(),
-  ]);
 
   const now = new Date();
   const withDisplayStatus = reservations.map((reservation) => ({

@@ -8,8 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function OnboardingProfilePage() {
-  await requireUser();
-  const locations = await listLocations();
+  const [, locations] = await Promise.all([requireUser(), listLocations()]);
 
   return (
     <div>

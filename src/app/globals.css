@@ -8,6 +8,9 @@
  * from it via @theme inline (bg-pine, text-ink, border-line, …).
  */
 :root {
+  /* "system": let the browser pick native-UI chrome (scrollbars, <select>,
+     date pickers) per OS preference, same as the page's own colors. */
+  color-scheme: light dark;
   --ink: #171b1f;
   --ink-muted: #5b6168;
   --paper: #ededea;
@@ -29,6 +32,7 @@
 /* System dark, when the user has made no explicit choice. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --ink: #edeeea;
     --ink-muted: #9aa0a6;
     --paper: #14171a;
@@ -45,7 +49,12 @@
 }
 
 /* Explicit choice via the theme toggle always wins over system preference. */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --ink: #edeeea;
   --ink-muted: #9aa0a6;
   --paper: #14171a;
@@ -97,6 +106,26 @@ body {
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+/* Headings can't ever fall back to a naive word-wrap that strands one short
+   word alone on the last line — this is what text-wrap: balance is for.
+   One rule here beats adding a class to every h1/h2 in the app. Unsupported
+   browsers just get normal wrapping, so this is a safe progressive
+   enhancement. */
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+/* Buttons/links already have real active/focus states (see Button's
+   active:scale-[0.97] and the ring above) — the default mobile tap flash
+   only fights them, and manipulation removes the ~300ms double-tap-to-zoom
+   delay on touch devices. */
+button,
+a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {

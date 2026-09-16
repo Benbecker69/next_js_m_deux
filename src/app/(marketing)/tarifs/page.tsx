@@ -27,7 +27,7 @@ export default async function PricingPage() {
               className="grid gap-1 py-4 sm:grid-cols-[200px_160px_1fr] sm:items-baseline sm:gap-6"
             >
               <span className="text-ink">{item.type}</span>
-              <span className="text-sm text-pine">{item.price}</span>
+              <span className="text-sm tabular-nums text-pine">{item.price}</span>
               <span className="text-sm text-ink-muted">{item.detail}</span>
             </div>
           ))}
@@ -46,7 +46,9 @@ export default async function PricingPage() {
             >
               <span className="text-ink">{pack.name}</span>
               <span className="text-sm text-ink-muted">{pack.credits}</span>
-              <span className="text-sm text-pine sm:text-right">{pack.price}</span>
+              <span className="text-sm tabular-nums text-pine sm:text-right">
+                {pack.price}
+              </span>
             </div>
           ))}
         </div>

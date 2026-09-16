@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminOverviewPage() {
-  await requireAdmin();
-  const [locations, spaces, users, reservations] = await Promise.all([
+  const [, locations, spaces, users, reservations] = await Promise.all([
+    requireAdmin(),
     listLocations(),
     listSpaces(),
     listUsers(),

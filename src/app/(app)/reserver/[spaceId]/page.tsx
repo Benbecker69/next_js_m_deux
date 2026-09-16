@@ -22,8 +22,7 @@ export default async function ReserveSpacePage({
   params,
 }: PageProps<"/reserver/[spaceId]">) {
   const { spaceId } = await params;
-  const user = await requireOnboarded();
-  const space = await getSpaceById(spaceId);
+  const [user, space] = await Promise.all([requireOnboarded(), getSpaceById(spaceId)]);
   if (!space || space.status !== "active") notFound();
 
   const [location, existingReservations] = await Promise.all([

@@ -21,7 +21,14 @@ export function LoginForm({ t }: { t: Dictionary["auth"] }) {
     <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">{t.email}</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" required />
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          spellCheck={false}
+          required
+        />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="password">{t.password}</Label>

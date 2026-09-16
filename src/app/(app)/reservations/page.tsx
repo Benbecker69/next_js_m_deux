@@ -26,8 +26,10 @@ const STATUS_FILTERS: { value: ReservationStatus | "all"; label: string }[] = [
 export default async function ReservationsPage({
   searchParams,
 }: PageProps<"/reservations">) {
-  const user = await requireOnboarded();
-  const resolvedSearchParams = await searchParams;
+  const [user, resolvedSearchParams] = await Promise.all([
+    requireOnboarded(),
+    searchParams,
+  ]);
   const statusParam = resolvedSearchParams.status;
   const activeStatus = typeof statusParam === "string" ? statusParam : "all";
 

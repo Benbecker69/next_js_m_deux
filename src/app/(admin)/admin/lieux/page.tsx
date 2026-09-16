@@ -10,8 +10,11 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminLocationsPage() {
-  await requireAdmin();
-  const [locations, spaces] = await Promise.all([listLocations(), listSpaces()]);
+  const [, locations, spaces] = await Promise.all([
+    requireAdmin(),
+    listLocations(),
+    listSpaces(),
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl px-8 py-12">

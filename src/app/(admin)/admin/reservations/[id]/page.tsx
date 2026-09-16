@@ -18,8 +18,7 @@ export default async function AdminReservationDetailPage({
   params,
 }: PageProps<"/admin/reservations/[id]">) {
   const { id } = await params;
-  await requireAdmin();
-  const reservation = await getReservationById(id);
+  const [, reservation] = await Promise.all([requireAdmin(), getReservationById(id)]);
   if (!reservation) notFound();
 
   const [space, member] = await Promise.all([

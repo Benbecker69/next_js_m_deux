@@ -20,8 +20,7 @@ export default async function AdminUserDetailPage({
   params,
 }: PageProps<"/admin/utilisateurs/[id]">) {
   const { id } = await params;
-  const admin = await requireAdmin();
-  const user = await getUserById(id);
+  const [admin, user] = await Promise.all([requireAdmin(), getUserById(id)]);
   if (!user) notFound();
 
   const boundAction = updateUserAdminAction.bind(null, user.id);

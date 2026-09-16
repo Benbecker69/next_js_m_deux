@@ -21,8 +21,10 @@ export default async function AdminLocationDetailPage({
   params,
 }: PageProps<"/admin/lieux/[id]">) {
   const { id } = await params;
-  await requireAdmin();
-  const location = await getLocationById(id);
+  // requireAdmin() doesn't need `location`, getLocationById() doesn't need
+  // the admin check to resolve — independent, so they run in parallel
+  // instead of one blocking the other.
+  const [, location] = await Promise.all([requireAdmin(), getLocationById(id)]);
   if (!location) notFound();
 
   const spaces = await listSpacesByLocation(location.id);

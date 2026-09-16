@@ -10,8 +10,11 @@ export const metadata: Metadata = {
 };
 
 export default async function ReservePage() {
-  await requireOnboarded();
-  const [spaces, locations] = await Promise.all([listSpaces(), listLocations()]);
+  const [, spaces, locations] = await Promise.all([
+    requireOnboarded(),
+    listSpaces(),
+    listLocations(),
+  ]);
   const locationById = new Map<string, Location>(
     locations.map((location) => [location.id, location]),
   );

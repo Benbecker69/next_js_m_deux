@@ -17,8 +17,10 @@ export default async function ReservationDetailPage({
   params,
 }: PageProps<"/reservations/[id]">) {
   const { id } = await params;
-  const user = await requireOnboarded();
-  const reservation = await getReservationById(id);
+  const [user, reservation] = await Promise.all([
+    requireOnboarded(),
+    getReservationById(id),
+  ]);
   if (!reservation || reservation.userId !== user.id) notFound();
 
   const space = await getSpaceById(reservation.spaceId);
