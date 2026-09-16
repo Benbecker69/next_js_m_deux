@@ -11,9 +11,7 @@ import { loginAction, type LoginFormState } from "../_actions";
 
 const initialState: LoginFormState = { error: null };
 
-// Real emails from seed.ts (SEED_USERS) — mock auth accepts any password
-// for a known email, so "demo1234" here is just a non-empty placeholder,
-// never actually checked.
+// Real accounts from prisma/seed.ts, seeded with this exact password.
 const DEMO_ACCOUNTS = {
   admin: "admin@example.com",
   member: "camille@example.com",

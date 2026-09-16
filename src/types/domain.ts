@@ -1,5 +1,7 @@
-// Core domain types — shared by the mock data layer (src/lib/data) and,
-// unchanged, by whatever real database replaces it later (see CLAUDE.md).
+// Core domain types — the shape every src/lib/data repository maps its
+// Prisma rows into (and back out of, on writes). Kept independent of the
+// generated Prisma types so the rest of the app never imports from
+// src/generated/prisma directly.
 
 export type UserRole = "member" | "admin";
 export type MemberType = "freelance" | "entreprise" | "etudiant";

@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { createUser, getUserByEmail } from "@/lib/data/users";
 import { createSession } from "@/lib/auth/session";
 import { registerSchema } from "@/lib/validation/auth";
-import type { User } from "@/types/domain";
 
 export type RegisterFormState = {
   error: string | null;
@@ -30,20 +29,12 @@ export async function registerAction(
     return { error: "Un compte existe déjà avec cette adresse e-mail." };
   }
 
-  // Mock auth: the password is validated but never stored — see connexion/_actions.ts.
-  const now = new Date().toISOString();
-  const user: User = {
-    id: crypto.randomUUID(),
+  const user = await createUser({
     name: parsed.data.name,
     email: parsed.data.email,
-    role: "member",
-    memberType: null,
+    password: parsed.data.password,
     credits: SIGNUP_BONUS_CREDITS,
-    avatarUrl: null,
-    onboardingCompletedAt: null,
-    createdAt: now,
-  };
-  await createUser(user);
+  });
   await createSession(user.id);
   redirect("/bienvenue");
 }

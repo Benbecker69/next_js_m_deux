@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { getUserByEmail } from "@/lib/data/users";
+import { verifyUserCredentials } from "@/lib/data/users";
 import { createSession } from "@/lib/auth/session";
 import { loginSchema } from "@/lib/validation/auth";
 import { withFlash } from "@/lib/feedback/flash-messages";
@@ -22,12 +22,10 @@ export async function loginAction(
     return { error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
   }
 
-  // Mock auth: any password is accepted for a known email — there is no
-  // password store yet. Real verification arrives with the real backend,
-  // see CLAUDE.md "Décisions actées". Never write this to a real backend.
-  const user = await getUserByEmail(parsed.data.email);
+  const user = await verifyUserCredentials(parsed.data.email, parsed.data.password);
   if (!user) {
-    return { error: "Aucun compte ne correspond à cette adresse e-mail." };
+    // Deliberately generic — doesn't reveal whether the email exists.
+    return { error: "E-mail ou mot de passe incorrect." };
   }
 
   await createSession(user.id);

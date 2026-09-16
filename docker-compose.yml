@@ -1,0 +1,25 @@
+# Local PostgreSQL for Repère. Host port 5433 (not the default 5432) to
+# avoid clashing with any other Postgres already running on the machine.
+# Start it with `npm run db:up`, then run migrations/seed — see
+# docs/base-de-donnees.md.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: repere-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: repere
+      POSTGRES_PASSWORD: repere
+      POSTGRES_DB: repere
+    ports:
+      - "5433:5432"
+    volumes:
+      - repere-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U repere -d repere"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  repere-postgres-data:

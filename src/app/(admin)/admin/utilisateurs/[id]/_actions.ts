@@ -1,8 +1,10 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/session";
-import { getUserById, updateUser } from "@/lib/data/users";
+import { deleteUser, getUserById, updateUser } from "@/lib/data/users";
+import { withFlash } from "@/lib/feedback/flash-messages";
 
 export type UserFormState = {
   error: string | null;
@@ -43,4 +45,21 @@ export async function updateUserAdminAction(
   revalidatePath("/admin/utilisateurs");
 
   return { error: null, success: true };
+}
+
+export async function deleteUserAdminAction(userId: string): Promise<void> {
+  const admin = await requireAdmin();
+
+  if (userId === admin.id) {
+    throw new Error("Vous ne pouvez pas supprimer votre propre compte.");
+  }
+
+  const target = await getUserById(userId);
+  if (!target) {
+    throw new Error("Utilisateur introuvable.");
+  }
+
+  await deleteUser(userId);
+  revalidatePath("/admin/utilisateurs");
+  redirect(withFlash("/admin/utilisateurs", "utilisateur-supprime"));
 }

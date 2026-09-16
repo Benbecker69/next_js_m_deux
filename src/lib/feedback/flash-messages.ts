@@ -15,6 +15,7 @@ export const FLASH_MESSAGES = {
     variant: "success",
     message: "Profil complété. Bienvenue sur votre tableau de bord !",
   },
+  "utilisateur-supprime": { variant: "success", message: "Utilisateur supprimé." },
 } as const satisfies Record<string, { variant: "success" | "error"; message: string }>;
 
 export type FlashCode = keyof typeof FLASH_MESSAGES;

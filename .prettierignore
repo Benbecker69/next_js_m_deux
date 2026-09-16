@@ -8,3 +8,5 @@ node_modules/
 public/
 package-lock.json
 *.pdf
+src/generated/
+prisma/migrations/

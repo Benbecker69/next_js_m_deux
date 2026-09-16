@@ -20,7 +20,7 @@ export function ThemeToggle() {
     <div
       role="radiogroup"
       aria-label="Thème"
-      className="inline-flex shrink-0 items-center gap-0.5 rounded-sm border border-line bg-surface p-0.5"
+      className="inline-flex w-fit shrink-0 items-center gap-0.5 rounded-sm border border-line bg-surface p-0.5"
     >
       {OPTIONS.map(({ value, label, Icon }) => {
         const active = theme === value;

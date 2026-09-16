@@ -1,0 +1,123 @@
+// Prisma schema for Repère — real PostgreSQL, replacing the mock JSON store.
+// See docs/base-de-donnees.md for the reasoning and local setup (Docker).
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+// Connection URL lives in prisma.config.ts (Prisma 7 driver-adapter setup),
+// not here — see docs/base-de-donnees.md.
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  member
+  admin
+}
+
+enum MemberType {
+  freelance
+  entreprise
+  etudiant
+}
+
+enum SpaceStatus {
+  active
+  maintenance
+}
+
+enum ReservationStatus {
+  confirmed
+  cancelled
+  completed
+}
+
+enum Theme {
+  light
+  dark
+  system
+}
+
+model User {
+  id                    String      @id @default(uuid())
+  name                  String
+  email                 String      @unique
+  passwordHash          String
+  role                  UserRole    @default(member)
+  memberType            MemberType?
+  credits               Int         @default(0)
+  avatarUrl             String?
+  onboardingCompletedAt DateTime?
+  createdAt             DateTime    @default(now())
+
+  reservations Reservation[]
+  preference   Preference?
+
+  @@map("users")
+}
+
+model Location {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  name        String
+  city        String
+  address     String
+  lat         Float
+  lng         Float
+  description String
+  amenities   String[]
+
+  spaces Space[]
+
+  @@map("locations")
+}
+
+// `type` stays a plain string (not a Prisma enum) — its values ("poste-flex",
+// "bureau-prive", ...) contain hyphens, which aren't valid Prisma enum
+// identifiers, and the finite set is already enforced by zod at the form
+// boundary (src/lib/validation/space.ts).
+model Space {
+  id           String      @id @default(uuid())
+  locationId   String
+  location     Location    @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  name         String
+  type         String
+  capacity     Int
+  pricePerHour Int
+  status       SpaceStatus @default(active)
+
+  reservations Reservation[]
+
+  @@index([locationId])
+  @@map("spaces")
+}
+
+model Reservation {
+  id           String            @id @default(uuid())
+  userId       String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  spaceId      String
+  space        Space             @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  startAt      DateTime
+  endAt        DateTime
+  status       ReservationStatus @default(confirmed)
+  creditsSpent Int
+  createdAt    DateTime          @default(now())
+
+  @@index([userId])
+  @@index([spaceId])
+  @@map("reservations")
+}
+
+model Preference {
+  id                   String  @id @default(uuid())
+  userId               String  @unique
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defaultLocationId    String?
+  theme                Theme   @default(system)
+  notificationsEnabled Boolean @default(true)
+
+  @@map("preferences")
+}

@@ -1,7 +1,29 @@
-import "server-only";
-import type { Location, Preference, Reservation, Space, User } from "@/types/domain";
+// Seeds the database with the same demo data the old mock layer shipped
+// with. Runs standalone (via `npm run db:seed` / `prisma db seed`), outside
+// the Next.js server runtime — no `@/` alias, no "server-only" import.
+import { randomBytes, scryptSync } from "node:crypto";
+import { PrismaPg } from "@prisma/adapter-pg";
+// Explicit /index.js: this script runs through plain `node` (see
+// package.json's `prisma.migrations.seed`), whose stricter ESM resolver
+// doesn't do directory-import resolution the way bundlers/TS do — unlike
+// the `@/generated/prisma` alias used from application code.
+import { PrismaClient } from "../src/generated/prisma/index.js";
 
-export const SEED_LOCATIONS: Location[] = [
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
+
+// Mirrors src/lib/auth/password.ts's hashPassword, kept in sync manually —
+// duplicated because that module is server-only and this script runs
+// through plain `node`, not the Next.js server runtime.
+function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  const derivedKey = scryptSync(password, salt, 64);
+  return `${salt}:${derivedKey.toString("hex")}`;
+}
+
+const DEMO_PASSWORD = "demo1234";
+
+const LOCATIONS = [
   {
     id: "le-chantier-lyon",
     slug: "le-chantier-lyon",
@@ -52,7 +74,7 @@ export const SEED_LOCATIONS: Location[] = [
   },
 ];
 
-export const SEED_SPACES: Space[] = [
+const SPACES = [
   // Le Chantier
   {
     id: "chantier-flex",
@@ -61,7 +83,7 @@ export const SEED_SPACES: Space[] = [
     type: "poste-flex",
     capacity: 1,
     pricePerHour: 4,
-    status: "active",
+    status: "active" as const,
   },
   {
     id: "chantier-bureau",
@@ -70,7 +92,7 @@ export const SEED_SPACES: Space[] = [
     type: "bureau-prive",
     capacity: 1,
     pricePerHour: 9,
-    status: "active",
+    status: "active" as const,
   },
   {
     id: "chantier-salle",
@@ -79,7 +101,7 @@ export const SEED_SPACES: Space[] = [
     type: "salle-reunion",
     capacity: 4,
     pricePerHour: 18,
-    status: "active",
+    status: "active" as const,
   },
   // Station 9
   {
@@ -89,7 +111,7 @@ export const SEED_SPACES: Space[] = [
     type: "poste-flex",
     capacity: 1,
     pricePerHour: 4,
-    status: "active",
+    status: "active" as const,
   },
   {
     id: "station9-booth",
@@ -98,7 +120,7 @@ export const SEED_SPACES: Space[] = [
     type: "phone-booth",
     capacity: 1,
     pricePerHour: 3,
-    status: "active",
+    status: "active" as const,
   },
   {
     id: "station9-bureau",
@@ -107,7 +129,7 @@ export const SEED_SPACES: Space[] = [
     type: "bureau-prive",
     capacity: 1,
     pricePerHour: 8,
-    status: "active",
+    status: "active" as const,
   },
   // La Verrière
   {
@@ -117,7 +139,7 @@ export const SEED_SPACES: Space[] = [
     type: "poste-flex",
     capacity: 1,
     pricePerHour: 4,
-    status: "active",
+    status: "active" as const,
   },
   {
     id: "verriere-salle",
@@ -126,7 +148,7 @@ export const SEED_SPACES: Space[] = [
     type: "salle-reunion",
     capacity: 6,
     pricePerHour: 22,
-    status: "active",
+    status: "active" as const,
   },
   {
     id: "verriere-bureau",
@@ -135,7 +157,7 @@ export const SEED_SPACES: Space[] = [
     type: "bureau-prive",
     capacity: 1,
     pricePerHour: 9,
-    status: "active",
+    status: "active" as const,
   },
   // Le Comptoir
   {
@@ -145,7 +167,7 @@ export const SEED_SPACES: Space[] = [
     type: "poste-flex",
     capacity: 1,
     pricePerHour: 4,
-    status: "active",
+    status: "active" as const,
   },
   {
     id: "comptoir-bureau",
@@ -154,7 +176,7 @@ export const SEED_SPACES: Space[] = [
     type: "bureau-prive",
     capacity: 1,
     pricePerHour: 8,
-    status: "active",
+    status: "active" as const,
   },
   {
     id: "comptoir-salle",
@@ -163,50 +185,69 @@ export const SEED_SPACES: Space[] = [
     type: "salle-reunion",
     capacity: 4,
     pricePerHour: 17,
-    status: "active",
+    status: "active" as const,
   },
 ];
 
-export const SEED_USERS: User[] = [
+const USERS = [
   {
     id: "u-camille",
     name: "Camille Roussel",
     email: "camille@example.com",
-    role: "member",
-    memberType: "freelance",
-    credits: 42,
-    avatarUrl: null,
-    onboardingCompletedAt: "2026-01-15T09:00:00.000Z",
-    createdAt: "2026-01-10T09:00:00.000Z",
+    role: "member" as const,
+    memberType: "freelance" as const,
+    credits: 250,
+    onboardingCompletedAt: new Date("2026-01-15T09:00:00.000Z"),
+    createdAt: new Date("2026-01-10T09:00:00.000Z"),
   },
   {
     id: "u-admin",
     name: "Nadia Ferrand",
     email: "admin@example.com",
-    role: "admin",
-    memberType: "entreprise",
-    credits: 0,
-    avatarUrl: null,
-    onboardingCompletedAt: "2025-11-02T09:00:00.000Z",
-    createdAt: "2025-11-01T09:00:00.000Z",
+    role: "admin" as const,
+    memberType: "entreprise" as const,
+    credits: 500,
+    onboardingCompletedAt: new Date("2025-11-02T09:00:00.000Z"),
+    createdAt: new Date("2025-11-01T09:00:00.000Z"),
   },
 ];
 
-export const SEED_RESERVATIONS: Reservation[] = [];
+async function main() {
+  for (const location of LOCATIONS) {
+    await prisma.location.upsert({
+      where: { id: location.id },
+      update: location,
+      create: location,
+    });
+  }
+  console.log(`Seeded ${LOCATIONS.length} locations.`);
 
-export const SEED_PREFERENCES: Preference[] = [
-  {
-    id: "u-camille",
-    userId: "u-camille",
-    defaultLocationId: "le-chantier-lyon",
-    theme: "system",
-    notificationsEnabled: true,
-  },
-  {
-    id: "u-admin",
-    userId: "u-admin",
-    defaultLocationId: null,
-    theme: "system",
-    notificationsEnabled: true,
-  },
-];
+  for (const space of SPACES) {
+    await prisma.space.upsert({ where: { id: space.id }, update: space, create: space });
+  }
+  console.log(`Seeded ${SPACES.length} spaces.`);
+
+  const passwordHash = hashPassword(DEMO_PASSWORD);
+  for (const user of USERS) {
+    await prisma.user.upsert({
+      where: { id: user.id },
+      update: { ...user, passwordHash },
+      create: { ...user, passwordHash },
+    });
+    await prisma.preference.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: { userId: user.id },
+    });
+  }
+  console.log(`Seeded ${USERS.length} users (demo password: "${DEMO_PASSWORD}").`);
+}
+
+main()
+  .catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
