@@ -41,6 +41,7 @@ export default async function LocationsPage() {
               <LocationArt
                 slug={location.slug}
                 variant="top"
+                zoom
                 className="transition-colors duration-150 group-hover:border-pine"
               />
               <div className="rounded-b-sm border border-t-0 border-line bg-surface p-6 shadow-sm transition-[border-color,box-shadow] duration-150 group-hover:border-pine group-hover:shadow-md">

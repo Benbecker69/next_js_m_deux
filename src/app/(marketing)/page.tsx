@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { buttonVariants } from "@/components/ui/button";
 import { LocationArt } from "@/components/location-art";
+import { DashLink } from "@/components/dash-link";
 import { SPACE_TYPE_LABELS } from "@/types/domain";
 import { getCachedLocations } from "@/lib/data/locations";
 import { getCachedSpaces } from "@/lib/data/spaces";
@@ -30,8 +31,9 @@ export default async function MarketingHomePage() {
       <section className="border-b border-line">
         <div className="mx-auto grid max-w-6xl gap-12 px-6 py-20 md:grid-cols-2 md:items-center md:py-28">
           <div>
-            <h1 className="animate-hero-reveal font-display text-4xl font-medium leading-tight text-ink sm:text-5xl">
-              {t.home.heroTitle}
+            <h1 className="animate-hero-reveal font-display text-5xl font-medium leading-[1.05] text-ink sm:text-6xl">
+              {t.home.heroTitlePrefix}
+              <em className="italic">{t.home.heroTitleEmphasis}</em>
             </h1>
             <p className="animate-hero-reveal mt-6 max-w-md text-lg text-ink-muted [animation-delay:100ms]">
               {t.home.heroSubtitle}
@@ -93,9 +95,7 @@ export default async function MarketingHomePage() {
             <h2 className="font-display text-2xl font-medium text-ink">
               {t.home.featuredTitle}
             </h2>
-            <Link href="/lieux" className="text-sm text-pine hover:underline">
-              {t.home.seeAll}
-            </Link>
+            <DashLink href="/lieux">{t.home.seeAll}</DashLink>
           </div>
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
             {featuredLocations.map((location) => (
@@ -107,6 +107,7 @@ export default async function MarketingHomePage() {
                 <LocationArt
                   slug={location.slug}
                   variant="top"
+                  zoom
                   className="transition-colors duration-150 group-hover:border-pine"
                 />
                 <div className="rounded-b-sm border border-t-0 border-line bg-surface p-6 shadow-sm transition-[border-color,box-shadow] duration-150 group-hover:border-pine group-hover:shadow-md">

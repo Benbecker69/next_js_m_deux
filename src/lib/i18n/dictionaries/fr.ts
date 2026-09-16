@@ -28,7 +28,8 @@ export const fr = {
     copyright: "© 2026 Repère. Tous droits réservés.",
   },
   home: {
-    heroTitle: "Un bureau, pas une adresse à deviner.",
+    heroTitlePrefix: "Un bureau, pas une adresse à ",
+    heroTitleEmphasis: "deviner.",
     heroSubtitle:
       "Repère référence des espaces de coworking dans toute la France et vous laisse réserver un bureau, une salle ou un poste flex pour la journée, en quelques clics.",
     howItWorks: "Comment ça marche",
@@ -177,8 +178,10 @@ export const fr = {
       "Ce que l'application mobile Repère permettra : badge NFC à l'entrée des lieux et géolocalisation en temps réel pour trouver un espace libre.",
     badge: "En préparation",
     title: "L'app mobile, pensée avant d'être codée.",
-    subtitle:
-      "Deux usages sont prévus pour l'application mobile Repère : badger à l'entrée d'un lieu et repérer l'espace libre le plus proche en temps réel. Voici comment ça fonctionnera.",
+    subtitlePrefix: "Deux usages sont prévus pour l'application mobile Repère : ",
+    subtitleEmphasis:
+      "badger à l'entrée d'un lieu et repérer l'espace libre le plus proche en temps réel",
+    subtitleSuffix: ". Voici comment ça fonctionnera.",
     nfcTitle: "Badge NFC à l'entrée",
     nfcDescription:
       "Un simple contact du téléphone sur le lecteur du lieu confirme votre réservation et déverrouille l'accès — plus besoin de présenter quoi que ce soit à l'accueil.",
@@ -197,6 +200,9 @@ export const fr = {
   auth: {
     loginTitle: "Connexion",
     loginSubtitle: "Accédez à votre espace Repère.",
+    demoAccountsLabel: "Comptes de démonstration",
+    demoAdmin: "Admin",
+    demoMember: "Membre",
     email: "E-mail",
     password: "Mot de passe",
     loginCta: "Se connecter",

@@ -29,7 +29,8 @@ export const en = {
     copyright: "© 2026 Repère. All rights reserved.",
   },
   home: {
-    heroTitle: "A desk, not an address to guess at.",
+    heroTitlePrefix: "A desk, not an address to ",
+    heroTitleEmphasis: "guess at.",
     heroSubtitle:
       "Repère lists coworking spaces all across France and lets you book a desk, a room, or a flex seat for the day, in a few clicks.",
     howItWorks: "How it works",
@@ -176,8 +177,10 @@ export const en = {
       "What the Repère mobile app will enable: an NFC badge to enter locations, and real-time geolocation to find a free space.",
     badge: "In the works",
     title: "The mobile app, designed before it's built.",
-    subtitle:
-      "Two uses are planned for the Repère mobile app: badging in at a location's entrance, and finding the nearest free space in real time. Here's how it will work.",
+    subtitlePrefix: "Two uses are planned for the Repère mobile app: ",
+    subtitleEmphasis:
+      "badging in at a location's entrance, and finding the nearest free space in real time",
+    subtitleSuffix: ". Here's how it will work.",
     nfcTitle: "NFC badge at the entrance",
     nfcDescription:
       "A simple tap of your phone on the location's reader confirms your booking and unlocks access — no need to show anything at the front desk.",
@@ -196,6 +199,9 @@ export const en = {
   auth: {
     loginTitle: "Log in",
     loginSubtitle: "Access your Repère account.",
+    demoAccountsLabel: "Demo accounts",
+    demoAdmin: "Admin",
+    demoMember: "Member",
     email: "Email",
     password: "Password",
     loginCta: "Log in",

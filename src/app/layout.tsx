@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { Fraunces, Public_Sans } from "next/font/google";
+import { Fraunces, Schibsted_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/lib/theme/theme-provider";
 import { themeInitScript } from "@/lib/theme/theme-script";
 import { ToastProvider } from "@/lib/feedback/toast-provider";
@@ -14,8 +14,13 @@ const fraunces = Fraunces({
   subsets: ["latin"],
 });
 
-const publicSans = Public_Sans({
-  variable: "--font-public-sans",
+// Schibsted Grotesk, not the more neutral Public Sans it replaces: it was
+// commissioned for a newspaper group (Schibsted) — a body face literally
+// built for long-form editorial reading, which is exactly the "carnet de
+// lieux" (place notebook) metaphor this app is built around. Warmer,
+// humanist curves instead of Public Sans's civic/mechanical ones.
+const schibstedGrotesk = Schibsted_Grotesk({
+  variable: "--font-schibsted-grotesk",
   subsets: ["latin"],
 });
 
@@ -49,7 +54,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang={locale}
-      className={`${fraunces.variable} ${publicSans.variable} h-full`}
+      className={`${fraunces.variable} ${schibstedGrotesk.variable} h-full`}
       suppressHydrationWarning
     >
       <body className="min-h-full font-sans antialiased">

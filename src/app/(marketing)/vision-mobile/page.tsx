@@ -27,7 +27,13 @@ export default async function VisionMobilePage() {
       <h1 className="mt-4 font-display text-3xl font-medium text-ink">
         {t.visionMobile.title}
       </h1>
-      <p className="mt-4 max-w-xl text-ink-muted">{t.visionMobile.subtitle}</p>
+      <p className="mt-4 max-w-xl text-ink-muted">
+        {t.visionMobile.subtitlePrefix}
+        <strong className="font-medium text-ink">
+          {t.visionMobile.subtitleEmphasis}
+        </strong>
+        {t.visionMobile.subtitleSuffix}
+      </p>
 
       <div className="mt-14 grid gap-8 border-t border-line pt-10 sm:grid-cols-2">
         <div>

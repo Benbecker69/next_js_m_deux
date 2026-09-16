@@ -83,7 +83,7 @@
   --color-danger-contrast: var(--danger-contrast);
   --color-focus: var(--focus);
   --font-display: var(--font-fraunces);
-  --font-sans: var(--font-public-sans);
+  --font-sans: var(--font-schibsted-grotesk);
 }
 
 /* @layer base, not a bare rule: Tailwind's utilities (border-pine/30 and
@@ -116,6 +116,16 @@ body {
 h1,
 h2 {
   text-wrap: balance;
+}
+
+/* A small negative tracking on display type is a classic editorial move —
+   Fraunces's letterforms are wide/soft by design, and tightening the gaps
+   between them is what makes a headline read as set on purpose rather than
+   left at its default spacing. Targets the font-display utility itself
+   (every heading and the wordmark already carry it) rather than a fixed
+   list of tag names. */
+.font-display {
+  letter-spacing: -0.01em;
 }
 
 /* Buttons/links already have real active/focus states (see Button's

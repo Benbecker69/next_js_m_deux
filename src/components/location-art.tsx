@@ -233,6 +233,7 @@ const SCENES: Record<RoofStyle, () => React.JSX.Element> = {
 export function LocationArt({
   slug,
   variant = "standalone",
+  zoom = false,
   className,
 }: {
   slug: string;
@@ -240,6 +241,11 @@ export function LocationArt({
    *  directly above a content block that supplies its own bottom border,
    *  so the two read as one card rather than two boxes with a gap. */
   variant?: "standalone" | "top";
+  /** Subtle scale-up on the parent `group`'s hover — for when this sits
+   *  inside a clickable card, so hovering it reads as "alive"/clickable
+   *  the way a photo would. Left off the standalone (detail-page hero) use,
+   *  which isn't itself a link. */
+  zoom?: boolean;
   className?: string;
 }) {
   const style = STYLE_BY_SLUG[slug] ?? "lookout";
@@ -253,7 +259,14 @@ export function LocationArt({
         className,
       )}
     >
-      <svg viewBox="0 0 400 280" className="h-full w-full text-ink" aria-hidden="true">
+      <svg
+        viewBox="0 0 400 280"
+        className={cn(
+          "h-full w-full text-ink",
+          zoom && "transition-transform duration-300 group-hover:scale-105",
+        )}
+        aria-hidden="true"
+      >
         <g fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round">
           <Scene />
         </g>
