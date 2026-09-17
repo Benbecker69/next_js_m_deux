@@ -330,8 +330,6 @@ export const fr = {
     locations: "Lieux",
     users: "Utilisateurs",
     reservations: "Réservations",
-    backToMemberArea: "← Retour à l'espace membre",
-    administrator: "Administrateur",
   },
   adminOverview: {
     title: "Vue d'ensemble",

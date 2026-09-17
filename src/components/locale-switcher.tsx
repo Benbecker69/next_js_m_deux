@@ -12,7 +12,21 @@ const LOCALES: Locale[] = ["fr", "en"];
 // Locale lives server-side only (a cookie read in getLocale()) — this just
 // renders the current value passed down from a Server Component parent and
 // asks setLocaleAction to change it.
-export function LocaleSwitcher({ locale }: { locale: Locale }) {
+//
+// `dropUp`: the dropdown defaults to opening below and left-aligned to the
+// trigger's right edge — fine when the trigger sits near the top-right of
+// the page (marketing header, auth layout), but the sidebar footers place
+// it near the bottom-left, where that same positioning pushes the list
+// past both the left and bottom edges of the viewport. Callers there pass
+// `dropUp` to flip it: open above the trigger, left-aligned so it grows
+// toward the right instead.
+export function LocaleSwitcher({
+  locale,
+  dropUp = false,
+}: {
+  locale: Locale;
+  dropUp?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -63,7 +77,10 @@ export function LocaleSwitcher({ locale }: { locale: Locale }) {
         <ul
           role="listbox"
           aria-label="Choisir une langue"
-          className="animate-toast-in absolute right-0 z-20 mt-1 min-w-36 rounded-sm border border-line bg-surface p-1 shadow-md"
+          className={cn(
+            "animate-toast-in absolute z-20 min-w-36 rounded-sm border border-line bg-surface p-1 shadow-md",
+            dropUp ? "bottom-full left-0 mb-1" : "right-0 mt-1",
+          )}
         >
           {otherLocales.map((value) => (
             <li key={value} role="option" aria-selected={false}>

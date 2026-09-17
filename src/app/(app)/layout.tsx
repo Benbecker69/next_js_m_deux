@@ -32,7 +32,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         </div>
         <div className="mt-6 flex flex-col gap-4 md:mt-0">
           <div className="flex items-center gap-2">
-            <LocaleSwitcher locale={locale} />
+            <LocaleSwitcher locale={locale} dropUp />
             <ThemeToggle />
           </div>
           <div className="flex items-center justify-between gap-2 border-t border-line pt-4">

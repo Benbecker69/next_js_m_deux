@@ -325,8 +325,6 @@ export const en = {
     locations: "Locations",
     users: "Users",
     reservations: "Bookings",
-    backToMemberArea: "← Back to member area",
-    administrator: "Administrator",
   },
   adminOverview: {
     title: "Overview",

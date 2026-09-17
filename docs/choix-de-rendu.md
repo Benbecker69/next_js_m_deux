@@ -10,8 +10,9 @@ Les références `fichier:ligne` pointent vers le code réel au moment de ce com
 
 ## 1. Server Component par défaut, gardes serveur réelles
 
-**Où** : toute l'app (`(app)`, `(admin)`, `(onboarding)`) ; le mécanisme central est
-`src/lib/auth/session.ts:34-48` (`requireUser` / `requireAdmin` / `requireOnboarded`).
+**Où** : toute l'app (`(app)` — qui héberge aussi `/admin`, `(onboarding)`) ; le
+mécanisme central est `src/lib/auth/session.ts:34-48` (`requireUser` /
+`requireAdmin` / `requireOnboarded`).
 
 **Choix** : chaque layout protégé appelle une de ces fonctions _côté serveur_,
 avant que la moindre donnée protégée ne soit lue, plutôt que de masquer du
@@ -83,8 +84,9 @@ routes derrière des limites `<Suspense>` pour isoler ce qui peut réellement
 être statique, un chantier disproportionné à ce stade. `unstable_cache` cible
 précisément les deux lectures qui doivent être rapides et publiques
 (la liste des lieux et des espaces), sans toucher au reste de l'app — les
-pages `(app)`/`(admin)` continuent de lire les données sans cache, pour qu'une
-modification admin soit visible immédiatement pour l'admin lui-même.
+pages membre et `/admin` (toutes deux sous `(app)`) continuent de lire les
+données sans cache, pour qu'une modification admin soit visible immédiatement
+pour l'admin lui-même.
 **Vérifié** en build de production (`next build && next start`) : le
 comportement de cache/invalidation diffère en `next dev`, conformément à ce
 que documente Next.js lui-même sur le rendu en développement.
