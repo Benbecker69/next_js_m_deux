@@ -22,7 +22,7 @@ export function CancelReservationButton({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
-  const { showSuccess } = useToast();
+  const { showSuccess, showError } = useToast();
 
   if (!confirming) {
     return (
@@ -47,9 +47,9 @@ export function CancelReservationButton({
                 await cancelReservationAction(reservationId);
                 showSuccess(t.cancelSuccess);
               } catch (err) {
-                // Inline, not toasted too: the confirm panel stays open on
-                // failure, so it's already showing the error in context.
-                setError(err instanceof Error ? err.message : genericError);
+                const message = err instanceof Error ? err.message : genericError;
+                setError(message);
+                showError(message);
               }
             });
           }}

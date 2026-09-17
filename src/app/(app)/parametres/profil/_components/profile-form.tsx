@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import type { MemberType } from "@/types/domain";
+import { useActionToast } from "@/lib/feedback/use-action-toast";
 import { updateProfileAction, type ProfileFormState } from "../_actions";
 
 const initialState: ProfileFormState = { error: null, success: false };
@@ -21,6 +22,7 @@ export function ProfileForm({
   t: Dictionary["settings"];
 }) {
   const [state, formAction, pending] = useActionState(updateProfileAction, initialState);
+  useActionToast(state, t.profileSaved);
 
   const MEMBER_TYPES: { value: MemberType; label: string }[] = [
     { value: "freelance", label: t.freelance },
@@ -32,7 +34,7 @@ export function ProfileForm({
     <form action={formAction} className="flex flex-col gap-6">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="name">{t.name}</Label>
-        <Input id="name" name="name" defaultValue={name} required />
+        <Input id="name" name="name" defaultValue={state.name ?? name} required />
       </div>
 
       <fieldset>

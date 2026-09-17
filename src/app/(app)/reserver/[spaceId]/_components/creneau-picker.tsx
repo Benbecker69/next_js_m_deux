@@ -6,6 +6,7 @@ import { Alert } from "@/components/ui/alert";
 import { cn } from "@/lib/utils/cn";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import { INTL_LOCALE, type Locale } from "@/lib/i18n/locale-constants";
+import { useActionToast } from "@/lib/feedback/use-action-toast";
 import type { Reservation, Space } from "@/types/domain";
 import { createReservationAction, type ReservationFormState } from "../_actions";
 
@@ -52,6 +53,7 @@ export function CreneauPicker({
     createReservationAction,
     initialState,
   );
+  useActionToast(state);
 
   const day = days[selectedDay];
   const hours = Array.from(

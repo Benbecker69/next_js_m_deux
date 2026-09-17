@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import type { Location } from "@/types/domain";
+import { useActionToast } from "@/lib/feedback/use-action-toast";
 import { updatePreferencesAction, type PreferencesFormState } from "../_actions";
 
 const initialState: PreferencesFormState = { error: null, success: false };
@@ -25,6 +26,7 @@ export function PreferencesForm({
     updatePreferencesAction,
     initialState,
   );
+  useActionToast(state, t.preferencesSaved);
 
   return (
     <form action={formAction} className="flex flex-col gap-6">

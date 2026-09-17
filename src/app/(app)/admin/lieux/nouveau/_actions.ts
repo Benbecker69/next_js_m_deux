@@ -7,7 +7,10 @@ import { createLocation } from "@/lib/data/locations";
 import { slugify } from "@/lib/utils/slugify";
 import { locationSchema } from "@/lib/validation/location";
 import type { Location } from "@/types/domain";
-import type { LocationFormState } from "../_components/location-form";
+import type {
+  LocationFormState,
+  LocationFormValuesInput,
+} from "../_components/location-form";
 import { withFlash } from "@/lib/feedback/flash-messages";
 
 function parseLocationForm(formData: FormData) {
@@ -25,6 +28,18 @@ function parseLocationForm(formData: FormData) {
   });
 }
 
+function rawLocationValues(formData: FormData): LocationFormValuesInput {
+  return {
+    name: String(formData.get("name") ?? ""),
+    city: String(formData.get("city") ?? ""),
+    address: String(formData.get("address") ?? ""),
+    lat: String(formData.get("lat") ?? ""),
+    lng: String(formData.get("lng") ?? ""),
+    description: String(formData.get("description") ?? ""),
+    amenities: String(formData.get("amenities") ?? ""),
+  };
+}
+
 export async function createLocationAction(
   _prevState: LocationFormState,
   formData: FormData,
@@ -36,6 +51,7 @@ export async function createLocationAction(
     return {
       error: parsed.error.issues[0]?.message ?? "Formulaire invalide.",
       success: false,
+      values: rawLocationValues(formData),
     };
   }
 

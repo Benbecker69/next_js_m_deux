@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
+import { useToast } from "@/lib/feedback/toast-provider";
+import { useActionToast } from "@/lib/feedback/use-action-toast";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import type { User } from "@/types/domain";
 import { deleteUserAdminAction, type UserFormState } from "../_actions";
@@ -25,9 +27,11 @@ export function UserForm({
   genericError: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  useActionToast(state, t.saved);
   const [deletePending, startDeleteTransition] = useTransition();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const { showError } = useToast();
 
   const remove = () => {
     setDeleteError(null);
@@ -35,8 +39,10 @@ export function UserForm({
       try {
         await deleteUserAdminAction(user.id);
       } catch (err) {
+        const message = err instanceof Error ? err.message : genericError;
         setConfirmingDelete(false);
-        setDeleteError(err instanceof Error ? err.message : genericError);
+        setDeleteError(message);
+        showError(message);
       }
     });
   };

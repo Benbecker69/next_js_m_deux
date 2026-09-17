@@ -7,18 +7,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
+import { useActionToast } from "@/lib/feedback/use-action-toast";
 import { registerAction, type RegisterFormState } from "../_actions";
 
 const initialState: RegisterFormState = { error: null };
 
 export function RegisterForm({ t }: { t: Dictionary["auth"] }) {
   const [state, formAction, pending] = useActionState(registerAction, initialState);
+  useActionToast(state);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="name">{t.name}</Label>
-        <Input id="name" name="name" type="text" autoComplete="name" required />
+        <Input
+          id="name"
+          name="name"
+          type="text"
+          autoComplete="name"
+          defaultValue={state.values?.name}
+          required
+        />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">{t.email}</Label>
@@ -28,6 +37,7 @@ export function RegisterForm({ t }: { t: Dictionary["auth"] }) {
           type="email"
           autoComplete="email"
           spellCheck={false}
+          defaultValue={state.values?.email}
           required
         />
       </div>

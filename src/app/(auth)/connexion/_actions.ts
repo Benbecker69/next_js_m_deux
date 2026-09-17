@@ -8,24 +8,29 @@ import { withFlash } from "@/lib/feedback/flash-messages";
 
 export type LoginFormState = {
   error: string | null;
+  // Echoed back so a failed submission doesn't make the user retype the
+  // email too — never the password (see login-form.tsx's `defaultValue`).
+  email?: string;
 };
 
 export async function loginAction(
   _prevState: LoginFormState,
   formData: FormData,
 ): Promise<LoginFormState> {
+  const email = String(formData.get("email") ?? "");
+
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
   });
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Formulaire invalide." };
+    return { error: parsed.error.issues[0]?.message ?? "Formulaire invalide.", email };
   }
 
   const user = await verifyUserCredentials(parsed.data.email, parsed.data.password);
   if (!user) {
     // Deliberately generic — doesn't reveal whether the email exists.
-    return { error: "E-mail ou mot de passe incorrect." };
+    return { error: "E-mail ou mot de passe incorrect.", email };
   }
 
   await createSession(user.id);

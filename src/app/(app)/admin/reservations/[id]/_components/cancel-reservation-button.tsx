@@ -19,7 +19,7 @@ export function CancelReservationButton({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
-  const { showSuccess } = useToast();
+  const { showSuccess, showError } = useToast();
 
   if (!confirming) {
     return (
@@ -44,7 +44,9 @@ export function CancelReservationButton({
                 await adminCancelReservationAction(reservationId);
                 showSuccess(t.cancelSuccess);
               } catch (err) {
-                setError(err instanceof Error ? err.message : genericError);
+                const message = err instanceof Error ? err.message : genericError;
+                setError(message);
+                showError(message);
               }
             });
           }}

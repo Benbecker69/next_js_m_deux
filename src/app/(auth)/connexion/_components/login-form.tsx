@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
+import { useActionToast } from "@/lib/feedback/use-action-toast";
 import { loginAction, type LoginFormState } from "../_actions";
 
 const initialState: LoginFormState = { error: null };
@@ -23,6 +24,7 @@ const DEMO_PASSWORD = "demo1234";
 // form needs — no client-side locale plumbing required.
 export function LoginForm({ t }: { t: Dictionary["auth"] }) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
+  useActionToast(state);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +68,7 @@ export function LoginForm({ t }: { t: Dictionary["auth"] }) {
           type="email"
           autoComplete="email"
           spellCheck={false}
+          defaultValue={state.email}
           required
         />
       </div>

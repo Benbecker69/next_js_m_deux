@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import type { Location } from "@/types/domain";
+import { useActionToast } from "@/lib/feedback/use-action-toast";
 import { completeOnboardingAction, type OnboardingFormState } from "../_actions";
 
 const MEMBER_TYPES = [
@@ -28,6 +29,7 @@ export function OnboardingForm({ locations }: { locations: Location[] }) {
     completeOnboardingAction,
     initialState,
   );
+  useActionToast(state);
 
   return (
     <form action={formAction} className="flex flex-col gap-8">

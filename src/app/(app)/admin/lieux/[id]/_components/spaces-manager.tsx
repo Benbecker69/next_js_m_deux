@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { useToast } from "@/lib/feedback/toast-provider";
+import { useActionToast } from "@/lib/feedback/use-action-toast";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import { SPACE_TYPE_LABELS, type Space, type SpaceType } from "@/types/domain";
 import {
@@ -38,10 +39,12 @@ export function SpacesManager({
   genericError: string;
 }) {
   const [state, formAction, pending] = useActionState(createAction, initialState);
+  useActionToast(state, t.added);
+  const values = state.values;
   const [, startTransition] = useTransition();
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
   const [rowError, setRowError] = useState<string | null>(null);
-  const { showSuccess } = useToast();
+  const { showSuccess, showError } = useToast();
 
   const toggleStatus = (spaceId: string) => {
     setRowError(null);
@@ -50,7 +53,9 @@ export function SpacesManager({
         await toggleSpaceStatusAction(spaceId);
         showSuccess(t.statusUpdated);
       } catch (error) {
-        setRowError(error instanceof Error ? error.message : genericError);
+        const message = error instanceof Error ? error.message : genericError;
+        setRowError(message);
+        showError(message);
       }
     });
   };
@@ -63,7 +68,9 @@ export function SpacesManager({
         await deleteSpaceAction(spaceId);
         showSuccess(t.deleted);
       } catch (error) {
-        setRowError(error instanceof Error ? error.message : genericError);
+        const message = error instanceof Error ? error.message : genericError;
+        setRowError(message);
+        showError(message);
       }
     });
   };
@@ -142,14 +149,14 @@ export function SpacesManager({
       >
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="space-name">{t.name}</Label>
-          <Input id="space-name" name="name" required />
+          <Input id="space-name" name="name" defaultValue={values?.name} required />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="space-type">{t.type}</Label>
           <select
             id="space-type"
             name="type"
-            defaultValue="poste-flex"
+            defaultValue={values?.type ?? "poste-flex"}
             className="h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
           >
             {SPACE_TYPES.map((type) => (
@@ -166,7 +173,7 @@ export function SpacesManager({
             name="capacity"
             type="number"
             min={1}
-            defaultValue={1}
+            defaultValue={values?.capacity ?? 1}
             required
           />
         </div>
@@ -177,7 +184,7 @@ export function SpacesManager({
             name="pricePerHour"
             type="number"
             min={1}
-            defaultValue={4}
+            defaultValue={values?.pricePerHour ?? 4}
             required
           />
         </div>

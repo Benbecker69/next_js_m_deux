@@ -7,10 +7,24 @@ import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import type { Location } from "@/types/domain";
+import { useActionToast } from "@/lib/feedback/use-action-toast";
+
+export type LocationFormValuesInput = {
+  name: string;
+  city: string;
+  address: string;
+  lat: string;
+  lng: string;
+  description: string;
+  amenities: string;
+};
 
 export type LocationFormState = {
   error: string | null;
   success: boolean;
+  // Echoed back (raw, as typed) so a failed submission doesn't clear a form
+  // this long.
+  values?: LocationFormValuesInput;
 };
 
 type LocationFormValues = Pick<
@@ -33,17 +47,29 @@ export function LocationForm({
     error: null,
     success: false,
   });
+  useActionToast(state, t.saved);
+  const values = state.values;
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="name">{t.name}</Label>
-          <Input id="name" name="name" defaultValue={initialValues?.name} required />
+          <Input
+            id="name"
+            name="name"
+            defaultValue={values?.name ?? initialValues?.name}
+            required
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="city">{t.city}</Label>
-          <Input id="city" name="city" defaultValue={initialValues?.city} required />
+          <Input
+            id="city"
+            name="city"
+            defaultValue={values?.city ?? initialValues?.city}
+            required
+          />
         </div>
       </div>
 
@@ -52,7 +78,7 @@ export function LocationForm({
         <Input
           id="address"
           name="address"
-          defaultValue={initialValues?.address}
+          defaultValue={values?.address ?? initialValues?.address}
           required
         />
       </div>
@@ -65,7 +91,7 @@ export function LocationForm({
             name="lat"
             type="number"
             step="any"
-            defaultValue={initialValues?.lat}
+            defaultValue={values?.lat ?? initialValues?.lat}
             required
           />
         </div>
@@ -76,7 +102,7 @@ export function LocationForm({
             name="lng"
             type="number"
             step="any"
-            defaultValue={initialValues?.lng}
+            defaultValue={values?.lng ?? initialValues?.lng}
             required
           />
         </div>
@@ -88,7 +114,7 @@ export function LocationForm({
         <textarea
           id="description"
           name="description"
-          defaultValue={initialValues?.description}
+          defaultValue={values?.description ?? initialValues?.description}
           required
           rows={4}
           className="rounded-sm border border-line bg-surface px-3 py-2 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
@@ -100,7 +126,7 @@ export function LocationForm({
         <Input
           id="amenities"
           name="amenities"
-          defaultValue={initialValues?.amenities.join(", ")}
+          defaultValue={values?.amenities ?? initialValues?.amenities.join(", ")}
           placeholder={t.amenitiesPlaceholder}
         />
         <p className="text-xs text-ink-muted">{t.amenitiesHint}</p>

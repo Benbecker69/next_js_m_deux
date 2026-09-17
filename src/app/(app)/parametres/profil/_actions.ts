@@ -8,6 +8,8 @@ import { profileSchema } from "@/lib/validation/profile";
 export type ProfileFormState = {
   error: string | null;
   success: boolean;
+  // Echoed back so a failed submission doesn't clear what was typed.
+  name?: string;
 };
 
 export async function updateProfileAction(
@@ -15,6 +17,7 @@ export async function updateProfileAction(
   formData: FormData,
 ): Promise<ProfileFormState> {
   const user = await requireOnboarded();
+  const name = String(formData.get("name") ?? "");
 
   const parsed = profileSchema.safeParse({
     name: formData.get("name"),
@@ -24,6 +27,7 @@ export async function updateProfileAction(
     return {
       error: parsed.error.issues[0]?.message ?? "Formulaire invalide.",
       success: false,
+      name,
     };
   }
 

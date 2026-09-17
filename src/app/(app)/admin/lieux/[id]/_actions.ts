@@ -7,12 +7,28 @@ import { createSpace, deleteSpace, getSpaceById, updateSpace } from "@/lib/data/
 import { locationSchema } from "@/lib/validation/location";
 import { spaceSchema } from "@/lib/validation/space";
 import type { Space } from "@/types/domain";
-import type { LocationFormState } from "../_components/location-form";
+import type {
+  LocationFormState,
+  LocationFormValuesInput,
+} from "../_components/location-form";
 
 export type SpaceFormState = {
   error: string | null;
   success: boolean;
+  values?: { name: string; type: string; capacity: string; pricePerHour: string };
 };
+
+function rawLocationValues(formData: FormData): LocationFormValuesInput {
+  return {
+    name: String(formData.get("name") ?? ""),
+    city: String(formData.get("city") ?? ""),
+    address: String(formData.get("address") ?? ""),
+    lat: String(formData.get("lat") ?? ""),
+    lng: String(formData.get("lng") ?? ""),
+    description: String(formData.get("description") ?? ""),
+    amenities: String(formData.get("amenities") ?? ""),
+  };
+}
 
 export async function updateLocationAction(
   locationId: string,
@@ -20,6 +36,7 @@ export async function updateLocationAction(
   formData: FormData,
 ): Promise<LocationFormState> {
   await requireAdmin();
+  const values = rawLocationValues(formData);
 
   const parsed = locationSchema.safeParse({
     name: formData.get("name"),
@@ -37,12 +54,13 @@ export async function updateLocationAction(
     return {
       error: parsed.error.issues[0]?.message ?? "Formulaire invalide.",
       success: false,
+      values,
     };
   }
 
   const existing = await getLocationById(locationId);
   if (!existing) {
-    return { error: "Lieu introuvable.", success: false };
+    return { error: "Lieu introuvable.", success: false, values };
   }
 
   await updateLocation(locationId, parsed.data);
@@ -59,6 +77,12 @@ export async function createSpaceAction(
   formData: FormData,
 ): Promise<SpaceFormState> {
   await requireAdmin();
+  const values = {
+    name: String(formData.get("name") ?? ""),
+    type: String(formData.get("type") ?? ""),
+    capacity: String(formData.get("capacity") ?? ""),
+    pricePerHour: String(formData.get("pricePerHour") ?? ""),
+  };
 
   const parsed = spaceSchema.safeParse({
     locationId,
@@ -72,6 +96,7 @@ export async function createSpaceAction(
     return {
       error: parsed.error.issues[0]?.message ?? "Formulaire invalide.",
       success: false,
+      values,
     };
   }
 
