@@ -20,7 +20,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   return (
     <>
-      <div className="mx-auto max-w-5xl px-8 pt-12">
+      <div className="mx-auto max-w-5xl px-5 pt-10 sm:px-8 sm:pt-12">
         <AdminTabs tabs={TABS} />
       </div>
       {children}

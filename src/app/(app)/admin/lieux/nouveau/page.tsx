@@ -12,7 +12,7 @@ export default async function NewLocationPage() {
   const [, t] = await Promise.all([requireAdmin(), getT()]);
 
   return (
-    <div className="mx-auto max-w-2xl px-8 py-12">
+    <div className="mx-auto max-w-2xl px-5 py-10 sm:px-8 sm:py-12">
       <h1 className="font-display text-2xl font-medium text-ink">
         {t.adminLocationForm.createTitle}
       </h1>

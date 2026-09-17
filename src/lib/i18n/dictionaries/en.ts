@@ -23,6 +23,8 @@ export const en = {
     locations: "Locations",
     mobileVision: "Mobile vision",
     faq: "FAQ",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
   },
   footer: {
     tagline: "Find and book a coworking space near you.",
@@ -243,6 +245,8 @@ export const en = {
     settings: "Settings",
     creditsSuffix: "credits",
     goToAdmin: "Admin panel",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
   },
   dashboard: {
     greeting: "Hi",

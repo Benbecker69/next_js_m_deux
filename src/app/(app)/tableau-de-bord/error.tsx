@@ -15,7 +15,7 @@ export default function DashboardError({
   }, [error]);
 
   return (
-    <div className="mx-auto max-w-4xl px-8 py-12">
+    <div className="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-12">
       <h1 className="font-display text-xl font-medium text-ink">
         Une erreur est survenue
       </h1>

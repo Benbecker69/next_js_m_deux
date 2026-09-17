@@ -22,6 +22,8 @@ export const fr = {
     locations: "Lieux",
     mobileVision: "Vision mobile",
     faq: "FAQ",
+    openMenu: "Ouvrir le menu",
+    closeMenu: "Fermer le menu",
   },
   footer: {
     tagline: "Trouvez et réservez un espace de coworking près de chez vous.",
@@ -246,6 +248,8 @@ export const fr = {
     settings: "Paramètres",
     creditsSuffix: "crédits",
     goToAdmin: "Administration",
+    openMenu: "Ouvrir le menu",
+    closeMenu: "Fermer le menu",
   },
   dashboard: {
     greeting: "Bonjour",

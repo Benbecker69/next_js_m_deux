@@ -34,7 +34,7 @@ export default async function ReservationDetailPage({
   const badge = RESERVATION_STATUS_LABELS[reservation.status];
 
   return (
-    <div className="mx-auto max-w-2xl px-8 py-12">
+    <div className="mx-auto max-w-2xl px-5 py-10 sm:px-8 sm:py-12">
       <Link
         href="/reservations"
         className="text-sm text-ink-muted transition-colors hover:text-ink"

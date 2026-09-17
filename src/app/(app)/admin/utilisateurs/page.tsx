@@ -14,7 +14,7 @@ export default async function AdminUsersPage() {
   const sorted = [...users].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <div className="mx-auto max-w-5xl px-8 py-12">
+    <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-12">
       <h1 className="font-display text-2xl font-medium text-ink">{t.adminUsers.title}</h1>
 
       <ul className="mt-8 divide-y divide-line border-t border-line">
@@ -22,9 +22,9 @@ export default async function AdminUsersPage() {
           <li key={user.id} className="py-4">
             <Link
               href={`/admin/utilisateurs/${user.id}`}
-              className="flex items-center justify-between gap-4"
+              className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm text-ink">{user.name}</p>
                 <p className="mt-1 text-xs text-ink-muted">{user.email}</p>
               </div>

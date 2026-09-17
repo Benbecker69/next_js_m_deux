@@ -27,7 +27,13 @@ const ICONS = {
 // pathname, which only the client router knows (usePathname) — everything
 // else in this layout stays server-rendered. Labels come from the Server
 // Component parent, which already resolved the dictionary.
-export function AppNav({ items }: { items: { href: string; label: string }[] }) {
+export function AppNav({
+  items,
+  onNavigate,
+}: {
+  items: { href: string; label: string }[];
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
 
   return (
@@ -39,6 +45,7 @@ export function AppNav({ items }: { items: { href: string; label: string }[] }) 
           <Link
             key={href}
             href={href}
+            onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
               "flex items-center gap-2.5 rounded-sm px-3 py-2 text-sm transition-colors",

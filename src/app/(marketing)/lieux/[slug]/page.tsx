@@ -59,7 +59,10 @@ export default async function LocationDetailPage({ params }: PageProps<"/lieux/[
         </h2>
         <ul className="mt-4 divide-y divide-line border-t border-line">
           {locationSpaces.map((space) => (
-            <li key={space.id} className="flex items-center justify-between py-3 text-sm">
+            <li
+              key={space.id}
+              className="flex flex-col gap-1 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
+            >
               <span className="text-ink">
                 {space.name !== SPACE_TYPE_LABELS[space.type]
                   ? `${space.name} · ${SPACE_TYPE_LABELS[space.type]}`

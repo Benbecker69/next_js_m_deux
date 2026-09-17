@@ -37,7 +37,7 @@ export default async function AdminLocationDetailPage({
   const boundCreateSpace = createSpaceAction.bind(null, location.id);
 
   return (
-    <div className="mx-auto max-w-3xl px-8 py-12">
+    <div className="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-12">
       <h1 className="font-display text-2xl font-medium text-ink">{location.name}</h1>
       <p className="mt-1 text-sm text-ink-muted">{location.city}</p>
 

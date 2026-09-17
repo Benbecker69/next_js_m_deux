@@ -19,7 +19,7 @@ export default async function AdminLocationsPage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-5xl px-8 py-12">
+    <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-12">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-medium text-ink">
           {t.adminLocations.title}
@@ -36,9 +36,9 @@ export default async function AdminLocationsPage() {
             <li key={location.id} className="py-4">
               <Link
                 href={`/admin/lieux/${location.id}`}
-                className="flex items-center justify-between"
+                className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
               >
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm text-ink">{location.name}</p>
                   <p className="mt-1 text-xs text-ink-muted">{location.city}</p>
                 </div>

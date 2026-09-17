@@ -39,7 +39,7 @@ export default async function DashboardPage() {
     .reduce((total, reservation) => total + reservation.creditsSpent, 0);
 
   return (
-    <div className="mx-auto max-w-4xl px-8 py-12">
+    <div className="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-12">
       <h1 className="font-display text-2xl font-medium text-ink">
         {t.dashboard.greeting}, {user.name.split(" ")[0]}.
       </h1>
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
                   <li key={reservation.id} className="py-3 text-sm">
                     <Link
                       href={`/reservations/${reservation.id}`}
-                      className="flex items-center justify-between transition-colors hover:text-pine"
+                      className="flex flex-col gap-1 transition-colors hover:text-pine sm:flex-row sm:items-center sm:justify-between"
                     >
                       <span className="text-ink">
                         {space?.name ?? "Espace"} · {location?.name ?? ""}

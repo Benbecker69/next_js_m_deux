@@ -56,7 +56,7 @@ export default async function AdminOverviewPage() {
     .slice(0, 5);
 
   return (
-    <div className="mx-auto max-w-5xl px-8 py-12">
+    <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-12">
       <h1 className="font-display text-2xl font-medium text-ink">
         {t.adminOverview.title}
       </h1>

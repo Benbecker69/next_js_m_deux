@@ -8,6 +8,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { requireOnboarded } from "@/lib/auth/session";
 import { getLocale, getDictionary } from "@/lib/i18n/locale";
 import { AppNav } from "./_components/app-nav";
+import { AppMobileNav } from "./_components/app-mobile-nav";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const [user, locale] = await Promise.all([requireOnboarded(), getLocale()]);
@@ -23,14 +24,25 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
-      <aside className="flex flex-col justify-between border-b border-line p-6 md:w-60 md:shrink-0 md:border-r md:border-b-0">
+      <AppMobileNav
+        items={NAV_ITEMS}
+        locale={locale}
+        user={{ name: user.name, credits: user.credits }}
+        labels={{
+          creditsSuffix: t.appNav.creditsSuffix,
+          logout: t.common.logout,
+          openMenu: t.appNav.openMenu,
+          closeMenu: t.appNav.closeMenu,
+        }}
+      />
+      <aside className="hidden md:flex md:w-60 md:shrink-0 md:flex-col md:justify-between md:border-r md:border-line md:p-6">
         <div>
           <Link href="/tableau-de-bord">
             <Logo />
           </Link>
           <AppNav items={NAV_ITEMS} />
         </div>
-        <div className="mt-6 flex flex-col gap-4 md:mt-0">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2">
             <LocaleSwitcher locale={locale} dropUp />
             <ThemeToggle />

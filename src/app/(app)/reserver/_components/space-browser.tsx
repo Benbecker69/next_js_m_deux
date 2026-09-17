@@ -97,8 +97,11 @@ export function SpaceBrowser({
       ) : (
         <ul className="mt-8 divide-y divide-line border-t border-line">
           {filtered.map((space) => (
-            <li key={space.id} className="flex items-center justify-between gap-4 py-4">
-              <div>
+            <li
+              key={space.id}
+              className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+            >
+              <div className="min-w-0">
                 <p className="text-sm text-ink">
                   {space.name !== SPACE_TYPE_LABELS[space.type] ? (
                     <>

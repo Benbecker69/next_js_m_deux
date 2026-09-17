@@ -7,6 +7,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { buttonVariants } from "@/components/ui/button";
 import { getSession } from "@/lib/auth/session";
 import { getLocale, getDictionary } from "@/lib/i18n/locale";
+import { MobileNav } from "./mobile-nav";
 
 export async function SiteHeader() {
   const [user, locale] = await Promise.all([getSession(), getLocale()]);
@@ -22,7 +23,7 @@ export async function SiteHeader() {
 
   return (
     <header className="border-b border-line">
-      <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2 sm:flex-nowrap sm:gap-x-6 sm:px-6 sm:py-0">
+      <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:px-6 sm:py-0">
         <Link href="/">
           <Logo />
         </Link>
@@ -42,7 +43,7 @@ export async function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex flex-wrap items-center justify-end gap-2 sm:flex-nowrap sm:gap-3">
+        <div className="hidden items-center gap-3 md:flex">
           <LocaleSwitcher locale={locale} />
           <ThemeToggle />
           {user ? (
@@ -66,6 +67,20 @@ export async function SiteHeader() {
             </>
           )}
         </div>
+
+        <MobileNav
+          navLinks={NAV_LINKS}
+          locale={locale}
+          user={user ? { name: user.name } : null}
+          labels={{
+            login: t.common.login,
+            bookSpace: t.common.bookSpace,
+            logout: t.common.logout,
+            dashboard: t.appNav.dashboard,
+            openMenu: t.nav.openMenu,
+            closeMenu: t.nav.closeMenu,
+          }}
+        />
       </div>
     </header>
   );

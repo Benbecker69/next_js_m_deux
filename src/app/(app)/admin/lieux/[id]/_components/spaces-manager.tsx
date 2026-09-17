@@ -90,16 +90,16 @@ export function SpacesManager({
           {spaces.map((space) => (
             <li
               key={space.id}
-              className="flex items-center justify-between gap-4 py-3 text-sm"
+              className="flex flex-col gap-3 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
-              <div>
+              <div className="min-w-0">
                 <p className="text-ink">{space.name}</p>
                 <p className="mt-1 text-xs text-ink-muted">
                   {SPACE_TYPE_LABELS[space.type]} · {space.capacity} {t.capacitySuffix} ·{" "}
                   {space.pricePerHour} {t.creditsPerHour}
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <Badge variant={space.status === "active" ? "success" : "warning"}>
                   {space.status === "active" ? t.statusActive : t.statusMaintenance}
                 </Badge>

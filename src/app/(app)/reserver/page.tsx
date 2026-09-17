@@ -29,7 +29,7 @@ export default async function ReservePage() {
     });
 
   return (
-    <div className="mx-auto max-w-4xl px-8 py-12">
+    <div className="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-12">
       <h1 className="font-display text-2xl font-medium text-ink">{t.booking.title}</h1>
       <p className="mt-2 text-sm text-ink-muted">
         {activeSpaces.length} {t.booking.spacesAvailable} {locations.length}{" "}

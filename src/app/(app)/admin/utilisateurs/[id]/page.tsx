@@ -46,7 +46,7 @@ export default async function AdminUserDetailPage({
   const boundAction = updateUserAdminAction.bind(null, user.id);
 
   return (
-    <div className="mx-auto max-w-4xl px-8 py-12">
+    <div className="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-12">
       <h1 className="font-display text-2xl font-medium text-ink">{user.name}</h1>
       <p className="mt-1 text-sm text-ink-muted">{user.email}</p>
 
@@ -100,9 +100,9 @@ export default async function AdminUserDetailPage({
                   <li key={reservation.id} className="py-3 text-sm">
                     <Link
                       href={`/admin/reservations/${reservation.id}`}
-                      className="flex items-center justify-between gap-4 transition-colors hover:text-pine"
+                      className="flex flex-col gap-2 transition-colors hover:text-pine sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                     >
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-ink">
                           {space?.name ?? "Espace"} · {location?.name ?? ""}
                         </p>

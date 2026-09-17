@@ -37,7 +37,7 @@ export default async function ReserveSpacePage({
   ]);
 
   return (
-    <div className="mx-auto max-w-2xl px-8 py-12">
+    <div className="mx-auto max-w-2xl px-5 py-10 sm:px-8 sm:py-12">
       <Link
         href="/reserver"
         className="text-sm text-ink-muted transition-colors hover:text-ink"
