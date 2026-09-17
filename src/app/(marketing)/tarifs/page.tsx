@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { getT } from "@/lib/i18n/locale";
@@ -13,8 +14,23 @@ export default async function PricingPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-20">
-      <h1 className="font-display text-3xl font-medium text-ink">{t.pricing.title}</h1>
-      <p className="mt-4 max-w-xl text-ink-muted">{t.pricing.subtitle}</p>
+      <div className="grid gap-10 md:grid-cols-[1fr_auto] md:items-end">
+        <div>
+          <h1 className="font-display text-3xl font-medium text-ink">
+            {t.pricing.title}
+          </h1>
+          <p className="mt-4 max-w-xl text-ink-muted">{t.pricing.subtitle}</p>
+        </div>
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm border border-line md:w-72">
+          <Image
+            src="/images/marketing/pricing-hero.jpg"
+            alt={t.pricing.heroAlt}
+            fill
+            sizes="(min-width: 768px) 18rem, 100vw"
+            className="object-cover"
+          />
+        </div>
+      </div>
 
       <section className="mt-14">
         <h2 className="font-display text-lg font-medium text-ink">

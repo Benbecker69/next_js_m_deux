@@ -22,7 +22,7 @@ export async function SiteHeader() {
 
   return (
     <header className="border-b border-line">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:gap-6 sm:px-6">
+      <div className="mx-auto flex min-h-16 max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-2 sm:flex-nowrap sm:gap-x-6 sm:px-6 sm:py-0">
         <Link href="/">
           <Logo />
         </Link>
@@ -42,7 +42,7 @@ export async function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-2 sm:flex-nowrap sm:gap-3">
           <LocaleSwitcher locale={locale} />
           <ThemeToggle />
           {user ? (
@@ -56,7 +56,7 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/connexion"
-                className="hidden text-sm text-ink-muted transition-colors hover:text-ink sm:inline"
+                className={buttonVariants({ variant: "secondary", size: "sm" })}
               >
                 {t.common.login}
               </Link>
