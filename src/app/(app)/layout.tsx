@@ -18,6 +18,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     { href: "/reserver", label: t.appNav.book },
     { href: "/reservations", label: t.appNav.myReservations },
     { href: "/parametres", label: t.appNav.settings },
+    ...(user.role === "admin" ? [{ href: "/admin", label: t.appNav.goToAdmin }] : []),
   ];
 
   return (

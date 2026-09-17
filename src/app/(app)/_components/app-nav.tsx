@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, CalendarPlus, CalendarCheck, Settings } from "lucide-react";
+import {
+  LayoutDashboard,
+  CalendarPlus,
+  CalendarCheck,
+  Settings,
+  Shield,
+} from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 // Icons are chosen here, not passed down from the Server Component parent:
@@ -14,6 +20,7 @@ const ICONS = {
   "/reserver": CalendarPlus,
   "/reservations": CalendarCheck,
   "/parametres": Settings,
+  "/admin": Shield,
 } as const;
 
 // Client Component because highlighting the active link needs the current

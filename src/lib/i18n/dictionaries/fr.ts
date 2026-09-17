@@ -245,6 +245,7 @@ export const fr = {
     myReservations: "Mes réservations",
     settings: "Paramètres",
     creditsSuffix: "crédits",
+    goToAdmin: "Administration",
   },
   dashboard: {
     greeting: "Bonjour",

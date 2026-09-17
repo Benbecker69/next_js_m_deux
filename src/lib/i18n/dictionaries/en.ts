@@ -242,6 +242,7 @@ export const en = {
     myReservations: "My bookings",
     settings: "Settings",
     creditsSuffix: "credits",
+    goToAdmin: "Admin panel",
   },
   dashboard: {
     greeting: "Hi",
