@@ -3,8 +3,11 @@ import { cookies } from "next/headers";
 import { fr } from "./dictionaries/fr";
 import { en } from "./dictionaries/en";
 import type { Dictionary } from "./dictionaries/fr";
+import { INTL_LOCALE, type Locale } from "./locale-constants";
 
-export type Locale = "fr" | "en";
+export type { Locale };
+export { INTL_LOCALE };
+
 export const DEFAULT_LOCALE: Locale = "fr";
 export const LOCALE_COOKIE = "repere_locale";
 

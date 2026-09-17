@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
+import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import type { Location } from "@/types/domain";
 
 export type LocationFormState = {
@@ -21,10 +22,12 @@ export function LocationForm({
   action,
   initialValues,
   submitLabel,
+  t,
 }: {
   action: (state: LocationFormState, formData: FormData) => Promise<LocationFormState>;
   initialValues?: LocationFormValues;
   submitLabel: string;
+  t: Dictionary["adminLocationForm"];
 }) {
   const [state, formAction, pending] = useActionState(action, {
     error: null,
@@ -35,17 +38,17 @@ export function LocationForm({
     <form action={formAction} className="flex flex-col gap-5">
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name">Nom</Label>
+          <Label htmlFor="name">{t.name}</Label>
           <Input id="name" name="name" defaultValue={initialValues?.name} required />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="city">Ville</Label>
+          <Label htmlFor="city">{t.city}</Label>
           <Input id="city" name="city" defaultValue={initialValues?.city} required />
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="address">Adresse</Label>
+        <Label htmlFor="address">{t.address}</Label>
         <Input
           id="address"
           name="address"
@@ -56,7 +59,7 @@ export function LocationForm({
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="lat">Latitude</Label>
+          <Label htmlFor="lat">{t.latitude}</Label>
           <Input
             id="lat"
             name="lat"
@@ -67,7 +70,7 @@ export function LocationForm({
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="lng">Longitude</Label>
+          <Label htmlFor="lng">{t.longitude}</Label>
           <Input
             id="lng"
             name="lng"
@@ -78,12 +81,10 @@ export function LocationForm({
           />
         </div>
       </div>
-      <p className="-mt-3 text-xs text-ink-muted">
-        Coordonnées approximatives — utilisées pour le tri « autour de moi ».
-      </p>
+      <p className="-mt-3 text-xs text-ink-muted">{t.coordinatesHint}</p>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">{t.description}</Label>
         <textarea
           id="description"
           name="description"
@@ -95,22 +96,22 @@ export function LocationForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="amenities">Équipements</Label>
+        <Label htmlFor="amenities">{t.amenities}</Label>
         <Input
           id="amenities"
           name="amenities"
           defaultValue={initialValues?.amenities.join(", ")}
-          placeholder="Wi-fi fibre, Café inclus, Casiers"
+          placeholder={t.amenitiesPlaceholder}
         />
-        <p className="text-xs text-ink-muted">Séparés par des virgules.</p>
+        <p className="text-xs text-ink-muted">{t.amenitiesHint}</p>
       </div>
 
       {state.error && <Alert variant="error">{state.error}</Alert>}
-      {state.success && <Alert variant="success">Enregistré.</Alert>}
+      {state.success && <Alert variant="success">{t.saved}</Alert>}
 
       <div>
         <Button type="submit" disabled={pending}>
-          {pending ? "Enregistrement…" : submitLabel}
+          {pending ? t.saving : submitLabel}
         </Button>
       </div>
     </form>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { requireOnboarded } from "@/lib/auth/session";
 import { getPreferenceByUser } from "@/lib/data/preferences";
 import { listLocations } from "@/lib/data/locations";
+import { getT } from "@/lib/i18n/locale";
 import { PreferencesForm } from "./_components/preferences-form";
 
 export const metadata: Metadata = {
@@ -10,9 +11,10 @@ export const metadata: Metadata = {
 
 export default async function SettingsPreferencesPage() {
   const user = await requireOnboarded();
-  const [preference, locations] = await Promise.all([
+  const [preference, locations, t] = await Promise.all([
     getPreferenceByUser(user.id),
     listLocations(),
+    getT(),
   ]);
 
   return (
@@ -20,6 +22,7 @@ export default async function SettingsPreferencesPage() {
       locations={locations}
       defaultLocationId={preference.defaultLocationId}
       notificationsEnabled={preference.notificationsEnabled}
+      t={t.settings}
     />
   );
 }

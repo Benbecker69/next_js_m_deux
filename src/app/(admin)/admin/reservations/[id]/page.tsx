@@ -8,6 +8,7 @@ import { getReservationById } from "@/lib/data/reservations";
 import { getSpaceById } from "@/lib/data/spaces";
 import { getUserById } from "@/lib/data/users";
 import { RESERVATION_STATUS_LABELS } from "@/types/domain";
+import { getLocale, getDictionary, INTL_LOCALE } from "@/lib/i18n/locale";
 import { CancelReservationButton } from "./_components/cancel-reservation-button";
 
 export const metadata: Metadata = {
@@ -18,8 +19,13 @@ export default async function AdminReservationDetailPage({
   params,
 }: PageProps<"/admin/reservations/[id]">) {
   const { id } = await params;
-  const [, reservation] = await Promise.all([requireAdmin(), getReservationById(id)]);
+  const [, reservation, locale] = await Promise.all([
+    requireAdmin(),
+    getReservationById(id),
+    getLocale(),
+  ]);
   if (!reservation) notFound();
+  const t = getDictionary(locale);
 
   const [space, member] = await Promise.all([
     getSpaceById(reservation.spaceId),
@@ -34,7 +40,7 @@ export default async function AdminReservationDetailPage({
         href="/admin/reservations"
         className="text-sm text-ink-muted transition-colors hover:text-ink"
       >
-        ← Réservations
+        {t.adminReservationsPage.backToList}
       </Link>
       <div className="mt-4 flex items-center justify-between">
         <h1 className="font-display text-2xl font-medium text-ink">
@@ -48,29 +54,33 @@ export default async function AdminReservationDetailPage({
 
       <dl className="mt-8 divide-y divide-line border-t border-line text-sm">
         <div className="flex justify-between py-3">
-          <dt className="text-ink-muted">Membre</dt>
+          <dt className="text-ink-muted">{t.adminReservationsPage.member}</dt>
           <dd className="text-ink">
             {member?.name ?? "—"} ({member?.email ?? "—"})
           </dd>
         </div>
         <div className="flex justify-between py-3">
-          <dt className="text-ink-muted">Créneau</dt>
+          <dt className="text-ink-muted">{t.adminReservationsPage.slot}</dt>
           <dd className="text-ink">
-            {new Date(reservation.startAt).toLocaleString("fr-FR", {
+            {new Date(reservation.startAt).toLocaleString(INTL_LOCALE[locale], {
               dateStyle: "medium",
               timeStyle: "short",
             })}
           </dd>
         </div>
         <div className="flex justify-between py-3">
-          <dt className="text-ink-muted">Crédits débités</dt>
+          <dt className="text-ink-muted">{t.adminReservationsPage.creditsSpent}</dt>
           <dd className="text-ink">{reservation.creditsSpent}</dd>
         </div>
       </dl>
 
       {reservation.status === "confirmed" && (
         <div className="mt-8">
-          <CancelReservationButton reservationId={reservation.id} />
+          <CancelReservationButton
+            reservationId={reservation.id}
+            t={t.adminReservationsPage}
+            genericError={t.errors.generic}
+          />
         </div>
       )}
     </div>

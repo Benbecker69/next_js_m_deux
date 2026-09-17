@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth/session";
 import { getLocationById } from "@/lib/data/locations";
 import { listSpacesByLocation } from "@/lib/data/spaces";
+import { getT } from "@/lib/i18n/locale";
 import { LocationForm } from "../_components/location-form";
 import { SpacesManager } from "./_components/spaces-manager";
 import { createSpaceAction, updateLocationAction } from "./_actions";
@@ -24,7 +25,11 @@ export default async function AdminLocationDetailPage({
   // requireAdmin() doesn't need `location`, getLocationById() doesn't need
   // the admin check to resolve — independent, so they run in parallel
   // instead of one blocking the other.
-  const [, location] = await Promise.all([requireAdmin(), getLocationById(id)]);
+  const [, location, t] = await Promise.all([
+    requireAdmin(),
+    getLocationById(id),
+    getT(),
+  ]);
   if (!location) notFound();
 
   const spaces = await listSpacesByLocation(location.id);
@@ -40,13 +45,21 @@ export default async function AdminLocationDetailPage({
         <LocationForm
           action={boundUpdateLocation}
           initialValues={location}
-          submitLabel="Enregistrer"
+          submitLabel={t.adminLocationForm.save}
+          t={t.adminLocationForm}
         />
       </div>
 
       <div className="mt-14 border-t border-line pt-8">
-        <h2 className="font-display text-lg font-medium text-ink">Espaces</h2>
-        <SpacesManager spaces={spaces} createAction={boundCreateSpace} />
+        <h2 className="font-display text-lg font-medium text-ink">
+          {t.adminSpaces.title}
+        </h2>
+        <SpacesManager
+          spaces={spaces}
+          createAction={boundCreateSpace}
+          t={t.adminSpaces}
+          genericError={t.errors.generic}
+        />
       </div>
     </div>
   );

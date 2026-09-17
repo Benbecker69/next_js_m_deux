@@ -8,17 +8,11 @@ import { listReservationsByUser } from "@/lib/data/reservations";
 import { listSpaces } from "@/lib/data/spaces";
 import { RESERVATION_STATUS_LABELS, type ReservationStatus } from "@/types/domain";
 import { cn } from "@/lib/utils/cn";
+import { getLocale, getDictionary, INTL_LOCALE } from "@/lib/i18n/locale";
 
 export const metadata: Metadata = {
   title: "Mes réservations",
 };
-
-const STATUS_FILTERS: { value: ReservationStatus | "all"; label: string }[] = [
-  { value: "all", label: "Toutes" },
-  { value: "confirmed", label: "À venir" },
-  { value: "completed", label: "Passées" },
-  { value: "cancelled", label: "Annulées" },
-];
 
 // Filtering by status lives in the URL (searchParams), not client state — a
 // bookmarkable/shareable link and a server-rendered result, no client JS
@@ -26,10 +20,18 @@ const STATUS_FILTERS: { value: ReservationStatus | "all"; label: string }[] = [
 export default async function ReservationsPage({
   searchParams,
 }: PageProps<"/reservations">) {
-  const [user, resolvedSearchParams] = await Promise.all([
+  const [user, resolvedSearchParams, locale] = await Promise.all([
     requireOnboarded(),
     searchParams,
+    getLocale(),
   ]);
+  const t = getDictionary(locale);
+  const STATUS_FILTERS: { value: ReservationStatus | "all"; label: string }[] = [
+    { value: "all", label: t.myReservations.filterAll },
+    { value: "confirmed", label: t.myReservations.filterUpcoming },
+    { value: "completed", label: t.myReservations.filterPast },
+    { value: "cancelled", label: t.myReservations.filterCancelled },
+  ];
   const statusParam = resolvedSearchParams.status;
   const activeStatus = typeof statusParam === "string" ? statusParam : "all";
 
@@ -63,7 +65,9 @@ export default async function ReservationsPage({
 
   return (
     <div className="mx-auto max-w-4xl px-8 py-12">
-      <h1 className="font-display text-2xl font-medium text-ink">Mes réservations</h1>
+      <h1 className="font-display text-2xl font-medium text-ink">
+        {t.myReservations.title}
+      </h1>
 
       <div className="mt-6 flex flex-wrap gap-2">
         {STATUS_FILTERS.map((filter) => (
@@ -89,8 +93,8 @@ export default async function ReservationsPage({
       <div className="mt-8">
         {sorted.length === 0 ? (
           <EmptyState
-            title="Aucune réservation"
-            description="Rien à afficher pour ce filtre."
+            title={t.myReservations.emptyTitle}
+            description={t.myReservations.emptyDescription}
           />
         ) : (
           <ul className="divide-y divide-line border-t border-line">
@@ -111,10 +115,13 @@ export default async function ReservationsPage({
                         {space?.name ?? "Espace"} · {location?.name ?? ""}
                       </p>
                       <p className="mt-1 text-xs text-ink-muted">
-                        {new Date(reservation.startAt).toLocaleString("fr-FR", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
+                        {new Date(reservation.startAt).toLocaleString(
+                          INTL_LOCALE[locale],
+                          {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          },
+                        )}
                       </p>
                     </div>
                     <Badge variant={badge.variant}>{badge.label}</Badge>

@@ -8,14 +8,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { distanceKm } from "@/lib/geo/distance";
+import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import { SPACE_TYPE_LABELS, type Location, type Space } from "@/types/domain";
 
 type SpaceWithLocation = Space & { location: Location };
 
 // Client Component because it needs two browser-only things a server can't
 // provide: live text filtering as you type, and the Geolocation API for
-// "trier par distance" — both are pure front-end, no server round-trip.
-export function SpaceBrowser({ spaces }: { spaces: SpaceWithLocation[] }) {
+// "sort by distance" — both are pure front-end, no server round-trip.
+export function SpaceBrowser({
+  spaces,
+  t,
+}: {
+  spaces: SpaceWithLocation[];
+  t: Dictionary["booking"];
+}) {
   const [query, setQuery] = useState("");
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
   const [geoError, setGeoError] = useState<string | null>(null);
@@ -23,7 +30,7 @@ export function SpaceBrowser({ spaces }: { spaces: SpaceWithLocation[] }) {
 
   const findNearMe = () => {
     if (!("geolocation" in navigator)) {
-      setGeoError("La géolocalisation n'est pas disponible sur ce navigateur.");
+      setGeoError(t.geoUnavailable);
       return;
     }
     setLocating(true);
@@ -34,7 +41,7 @@ export function SpaceBrowser({ spaces }: { spaces: SpaceWithLocation[] }) {
         setLocating(false);
       },
       () => {
-        setGeoError("Localisation refusée ou indisponible.");
+        setGeoError(t.geoDenied);
         setLocating(false);
       },
       { timeout: 8000 },
@@ -64,7 +71,7 @@ export function SpaceBrowser({ spaces }: { spaces: SpaceWithLocation[] }) {
     <div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Input
-          placeholder="Filtrer par ville, lieu ou type d'espace…"
+          placeholder={t.filterPlaceholder}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           className="sm:max-w-xs"
@@ -76,11 +83,7 @@ export function SpaceBrowser({ spaces }: { spaces: SpaceWithLocation[] }) {
           onClick={findNearMe}
           disabled={locating}
         >
-          {locating
-            ? "Localisation…"
-            : origin
-              ? "Trié par distance"
-              : "Trier par distance"}
+          {locating ? t.locating : origin ? t.sortedByDistance : t.sortByDistance}
         </Button>
       </div>
       {geoError && (
@@ -90,9 +93,7 @@ export function SpaceBrowser({ spaces }: { spaces: SpaceWithLocation[] }) {
       )}
 
       {filtered.length === 0 ? (
-        <p className="mt-8 text-sm text-ink-muted">
-          Aucun espace ne correspond à cette recherche.
-        </p>
+        <p className="mt-8 text-sm text-ink-muted">{t.noResults}</p>
       ) : (
         <ul className="mt-8 divide-y divide-line border-t border-line">
           {filtered.map((space) => (
@@ -116,12 +117,14 @@ export function SpaceBrowser({ spaces }: { spaces: SpaceWithLocation[] }) {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Badge variant="neutral">{space.pricePerHour} crédits/h</Badge>
+                <Badge variant="neutral">
+                  {space.pricePerHour} {t.creditsPerHour}
+                </Badge>
                 <Link
                   href={`/reserver/${space.id}`}
                   className={buttonVariants({ size: "sm" })}
                 >
-                  Réserver
+                  {t.book}
                 </Link>
               </div>
             </li>

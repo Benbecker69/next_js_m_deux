@@ -6,6 +6,7 @@ import { getLocationById } from "@/lib/data/locations";
 import { listReservationsBySpace } from "@/lib/data/reservations";
 import { getSpaceById } from "@/lib/data/spaces";
 import { SPACE_TYPE_LABELS } from "@/types/domain";
+import { getLocale, getDictionary } from "@/lib/i18n/locale";
 import { CreneauPicker } from "./_components/creneau-picker";
 
 export async function generateMetadata({
@@ -22,8 +23,13 @@ export default async function ReserveSpacePage({
   params,
 }: PageProps<"/reserver/[spaceId]">) {
   const { spaceId } = await params;
-  const [user, space] = await Promise.all([requireOnboarded(), getSpaceById(spaceId)]);
+  const [user, space, locale] = await Promise.all([
+    requireOnboarded(),
+    getSpaceById(spaceId),
+    getLocale(),
+  ]);
   if (!space || space.status !== "active") notFound();
+  const t = getDictionary(locale);
 
   const [location, existingReservations] = await Promise.all([
     getLocationById(space.locationId),
@@ -36,7 +42,7 @@ export default async function ReserveSpacePage({
         href="/reserver"
         className="text-sm text-ink-muted transition-colors hover:text-ink"
       >
-        ← Tous les espaces
+        {t.booking.backToAllSpaces}
       </Link>
       <h1 className="mt-4 font-display text-2xl font-medium text-ink">{space.name}</h1>
       <p className="mt-1 text-sm text-ink-muted">
@@ -48,6 +54,8 @@ export default async function ReserveSpacePage({
           space={space}
           existingReservations={existingReservations}
           credits={user.credits}
+          t={t.booking}
+          locale={locale}
         />
       </div>
     </div>

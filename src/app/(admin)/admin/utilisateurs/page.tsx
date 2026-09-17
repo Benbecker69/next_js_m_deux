@@ -3,18 +3,19 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { requireAdmin } from "@/lib/auth/session";
 import { listUsers } from "@/lib/data/users";
+import { getT } from "@/lib/i18n/locale";
 
 export const metadata: Metadata = {
   title: "Utilisateurs",
 };
 
 export default async function AdminUsersPage() {
-  const [, users] = await Promise.all([requireAdmin(), listUsers()]);
+  const [, users, t] = await Promise.all([requireAdmin(), listUsers(), getT()]);
   const sorted = [...users].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="mx-auto max-w-5xl px-8 py-12">
-      <h1 className="font-display text-2xl font-medium text-ink">Utilisateurs</h1>
+      <h1 className="font-display text-2xl font-medium text-ink">{t.adminUsers.title}</h1>
 
       <ul className="mt-8 divide-y divide-line border-t border-line">
         {sorted.map((user) => (
@@ -28,9 +29,13 @@ export default async function AdminUsersPage() {
                 <p className="mt-1 text-xs text-ink-muted">{user.email}</p>
               </div>
               <div className="flex items-center gap-4">
-                <span className="text-sm text-ink-muted">{user.credits} crédits</span>
+                <span className="text-sm text-ink-muted">
+                  {user.credits} {t.adminUsers.creditsSuffix}
+                </span>
                 <Badge variant={user.role === "admin" ? "warning" : "neutral"}>
-                  {user.role === "admin" ? "Administrateur" : "Membre"}
+                  {user.role === "admin"
+                    ? t.adminUsers.administrator
+                    : t.adminUsers.member}
                 </Badge>
               </div>
             </Link>

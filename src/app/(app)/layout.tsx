@@ -2,13 +2,23 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { UserAvatar } from "@/components/user-avatar";
 import { LogoutButton } from "@/components/logout-button";
 import { requireOnboarded } from "@/lib/auth/session";
+import { getLocale, getDictionary } from "@/lib/i18n/locale";
 import { AppNav } from "./_components/app-nav";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const user = await requireOnboarded();
+  const [user, locale] = await Promise.all([requireOnboarded(), getLocale()]);
+  const t = getDictionary(locale);
+
+  const NAV_ITEMS = [
+    { href: "/tableau-de-bord", label: t.appNav.dashboard },
+    { href: "/reserver", label: t.appNav.book },
+    { href: "/reservations", label: t.appNav.myReservations },
+    { href: "/parametres", label: t.appNav.settings },
+  ];
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
@@ -17,10 +27,13 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           <Link href="/tableau-de-bord">
             <Logo />
           </Link>
-          <AppNav />
+          <AppNav items={NAV_ITEMS} />
         </div>
         <div className="mt-6 flex flex-col gap-4 md:mt-0">
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <LocaleSwitcher locale={locale} />
+            <ThemeToggle />
+          </div>
           <div className="flex items-center justify-between gap-2 border-t border-line pt-4">
             <Link
               href="/parametres/profil"
@@ -30,11 +43,11 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               <span className="min-w-0">
                 <span className="block truncate text-sm text-ink">{user.name}</span>
                 <span className="block text-xs text-ink-muted">
-                  {user.credits} crédits
+                  {user.credits} {t.appNav.creditsSuffix}
                 </span>
               </span>
             </Link>
-            <LogoutButton label="Déconnexion" />
+            <LogoutButton label={t.common.logout} />
           </div>
         </div>
       </aside>

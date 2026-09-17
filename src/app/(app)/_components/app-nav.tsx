@@ -2,35 +2,44 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LayoutDashboard, CalendarPlus, CalendarCheck, Settings } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
-const NAV_ITEMS = [
-  { href: "/tableau-de-bord", label: "Tableau de bord" },
-  { href: "/reserver", label: "Réserver" },
-  { href: "/reservations", label: "Mes réservations" },
-  { href: "/parametres", label: "Paramètres" },
-];
+// Icons are chosen here, not passed down from the Server Component parent:
+// Lucide components aren't plain serializable data, so they can't cross the
+// server→client boundary as props (only href/label, which need translation,
+// come from the server).
+const ICONS = {
+  "/tableau-de-bord": LayoutDashboard,
+  "/reserver": CalendarPlus,
+  "/reservations": CalendarCheck,
+  "/parametres": Settings,
+} as const;
 
 // Client Component because highlighting the active link needs the current
 // pathname, which only the client router knows (usePathname) — everything
-// else in this layout stays server-rendered.
-export function AppNav() {
+// else in this layout stays server-rendered. Labels come from the Server
+// Component parent, which already resolved the dictionary.
+export function AppNav({ items }: { items: { href: string; label: string }[] }) {
   const pathname = usePathname();
 
   return (
     <nav className="mt-10 flex flex-row flex-wrap gap-2 md:flex-col md:gap-1">
-      {NAV_ITEMS.map((item) => {
-        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+      {items.map(({ href, label }) => {
+        const active = pathname === href || pathname.startsWith(`${href}/`);
+        const Icon = ICONS[href as keyof typeof ICONS];
         return (
           <Link
-            key={item.href}
-            href={item.href}
+            key={href}
+            href={href}
+            aria-current={active ? "page" : undefined}
             className={cn(
-              "rounded-sm px-3 py-2 text-sm transition-colors",
+              "flex items-center gap-2.5 rounded-sm px-3 py-2 text-sm transition-colors",
               active ? "bg-pine/10 text-pine" : "text-ink-muted hover:text-ink",
             )}
           >
-            {item.label}
+            {Icon && <Icon className="h-4 w-4 shrink-0" strokeWidth={1.75} />}
+            {label}
           </Link>
         );
       })}

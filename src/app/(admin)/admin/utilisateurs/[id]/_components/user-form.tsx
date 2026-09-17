@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
+import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import type { User } from "@/types/domain";
 import { deleteUserAdminAction, type UserFormState } from "../_actions";
 
@@ -14,10 +15,14 @@ export function UserForm({
   user,
   isSelf,
   action,
+  t,
+  genericError,
 }: {
   user: User;
   isSelf: boolean;
   action: (state: UserFormState, formData: FormData) => Promise<UserFormState>;
+  t: Dictionary["adminUserDetail"];
+  genericError: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const [deletePending, startDeleteTransition] = useTransition();
@@ -31,7 +36,7 @@ export function UserForm({
         await deleteUserAdminAction(user.id);
       } catch (err) {
         setConfirmingDelete(false);
-        setDeleteError(err instanceof Error ? err.message : "Une erreur est survenue.");
+        setDeleteError(err instanceof Error ? err.message : genericError);
       }
     });
   };
@@ -40,7 +45,7 @@ export function UserForm({
     <Fragment>
       <form action={formAction} className="flex flex-col gap-5">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="role">Rôle</Label>
+          <Label htmlFor="role">{t.role}</Label>
           <select
             id="role"
             name="role"
@@ -48,18 +53,14 @@ export function UserForm({
             disabled={isSelf}
             className="h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option value="member">Membre</option>
-            <option value="admin">Administrateur</option>
+            <option value="member">{t.member}</option>
+            <option value="admin">{t.administrator}</option>
           </select>
-          {isSelf && (
-            <p className="text-xs text-ink-muted">
-              Vous ne pouvez pas modifier votre propre rôle.
-            </p>
-          )}
+          {isSelf && <p className="text-xs text-ink-muted">{t.cannotEditOwnRole}</p>}
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="credits">Crédits</Label>
+          <Label htmlFor="credits">{t.credits}</Label>
           <Input
             id="credits"
             name="credits"
@@ -71,18 +72,18 @@ export function UserForm({
         </div>
 
         {state.error && <Alert variant="error">{state.error}</Alert>}
-        {state.success && <Alert variant="success">Enregistré.</Alert>}
+        {state.success && <Alert variant="success">{t.saved}</Alert>}
 
         <div>
           <Button type="submit" disabled={pending}>
-            {pending ? "Enregistrement…" : "Enregistrer"}
+            {pending ? t.saving : t.save}
           </Button>
         </div>
       </form>
 
       {!isSelf && (
         <div className="mt-4 border-t border-line pt-6">
-          <p className="text-xs font-medium text-ink-muted">Zone de danger</p>
+          <p className="text-xs font-medium text-ink-muted">{t.dangerZone}</p>
           {deleteError && (
             <Alert variant="error" className="mt-3">
               {deleteError}
@@ -90,9 +91,7 @@ export function UserForm({
           )}
           {confirmingDelete ? (
             <div className="animate-toast-in mt-3 flex flex-col gap-3 rounded-sm border border-danger/30 bg-danger/5 p-4">
-              <p className="text-sm text-ink">
-                Supprimer définitivement ce compte ? Cette action est irréversible.
-              </p>
+              <p className="text-sm text-ink">{t.confirmDeletePrompt}</p>
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -101,7 +100,7 @@ export function UserForm({
                   disabled={deletePending}
                   onClick={remove}
                 >
-                  {deletePending ? "Suppression…" : "Confirmer la suppression"}
+                  {deletePending ? t.deleting : t.confirmDelete}
                 </Button>
                 <Button
                   type="button"
@@ -110,7 +109,7 @@ export function UserForm({
                   disabled={deletePending}
                   onClick={() => setConfirmingDelete(false)}
                 >
-                  Annuler
+                  {t.cancel}
                 </Button>
               </div>
             </div>
@@ -120,7 +119,7 @@ export function UserForm({
               className="mt-2 text-xs text-danger underline-offset-2 hover:underline"
               onClick={() => setConfirmingDelete(true)}
             >
-              Supprimer cet utilisateur
+              {t.deleteUser}
             </button>
           )}
         </div>

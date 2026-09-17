@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
+import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import type { Location } from "@/types/domain";
 import { updatePreferencesAction, type PreferencesFormState } from "../_actions";
 
@@ -13,10 +14,12 @@ export function PreferencesForm({
   locations,
   defaultLocationId,
   notificationsEnabled,
+  t,
 }: {
   locations: Location[];
   defaultLocationId: string | null;
   notificationsEnabled: boolean;
+  t: Dictionary["settings"];
 }) {
   const [state, formAction, pending] = useActionState(
     updatePreferencesAction,
@@ -26,14 +29,14 @@ export function PreferencesForm({
   return (
     <form action={formAction} className="flex flex-col gap-6">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="defaultLocationId">Lieu par défaut</Label>
+        <Label htmlFor="defaultLocationId">{t.defaultLocation}</Label>
         <select
           id="defaultLocationId"
           name="defaultLocationId"
           defaultValue={defaultLocationId ?? ""}
           className="h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
         >
-          <option value="">Aucun</option>
+          <option value="">{t.none}</option>
           {locations.map((location) => (
             <option key={location.id} value={location.id}>
               {location.name} — {location.city}
@@ -49,20 +52,17 @@ export function PreferencesForm({
           defaultChecked={notificationsEnabled}
           className="h-4 w-4 accent-[var(--pine)]"
         />
-        Recevoir un e-mail de rappel avant chaque réservation
+        {t.emailReminder}
       </label>
 
-      <p className="text-xs text-ink-muted">
-        L&apos;apparence (clair/sombre) se règle depuis le sélecteur dans la barre
-        latérale.
-      </p>
+      <p className="text-xs text-ink-muted">{t.themeHint}</p>
 
       {state.error && <Alert variant="error">{state.error}</Alert>}
-      {state.success && <Alert variant="success">Préférences mises à jour.</Alert>}
+      {state.success && <Alert variant="success">{t.preferencesSaved}</Alert>}
 
       <div>
         <Button type="submit" disabled={pending}>
-          {pending ? "Enregistrement…" : "Enregistrer"}
+          {pending ? t.saving : t.save}
         </Button>
       </div>
     </form>

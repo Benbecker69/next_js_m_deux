@@ -4,24 +4,28 @@ import { buttonVariants } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/auth/session";
 import { listLocations } from "@/lib/data/locations";
 import { listSpaces } from "@/lib/data/spaces";
+import { getT } from "@/lib/i18n/locale";
 
 export const metadata: Metadata = {
   title: "Lieux",
 };
 
 export default async function AdminLocationsPage() {
-  const [, locations, spaces] = await Promise.all([
+  const [, locations, spaces, t] = await Promise.all([
     requireAdmin(),
     listLocations(),
     listSpaces(),
+    getT(),
   ]);
 
   return (
     <div className="mx-auto max-w-5xl px-8 py-12">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-medium text-ink">Lieux</h1>
+        <h1 className="font-display text-2xl font-medium text-ink">
+          {t.adminLocations.title}
+        </h1>
         <Link href="/admin/lieux/nouveau" className={buttonVariants({ size: "sm" })}>
-          Ajouter un lieu
+          {t.adminLocations.addLocation}
         </Link>
       </div>
 
@@ -39,7 +43,8 @@ export default async function AdminLocationsPage() {
                   <p className="mt-1 text-xs text-ink-muted">{location.city}</p>
                 </div>
                 <p className="text-sm text-ink-muted">
-                  {count} espace{count > 1 ? "s" : ""}
+                  {count} {t.adminLocations.spacesCountSuffix}
+                  {count > 1 ? "s" : ""}
                 </p>
               </Link>
             </li>

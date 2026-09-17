@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { useToast } from "@/lib/feedback/toast-provider";
+import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import { SPACE_TYPE_LABELS, type Space, type SpaceType } from "@/types/domain";
 import {
   deleteSpaceAction,
@@ -28,9 +29,13 @@ const initialState: SpaceFormState = { error: null, success: false };
 export function SpacesManager({
   spaces,
   createAction,
+  t,
+  genericError,
 }: {
   spaces: Space[];
   createAction: (state: SpaceFormState, formData: FormData) => Promise<SpaceFormState>;
+  t: Dictionary["adminSpaces"];
+  genericError: string;
 }) {
   const [state, formAction, pending] = useActionState(createAction, initialState);
   const [, startTransition] = useTransition();
@@ -43,9 +48,9 @@ export function SpacesManager({
     startTransition(async () => {
       try {
         await toggleSpaceStatusAction(spaceId);
-        showSuccess("Statut de l'espace mis à jour.");
+        showSuccess(t.statusUpdated);
       } catch (error) {
-        setRowError(error instanceof Error ? error.message : "Une erreur est survenue.");
+        setRowError(error instanceof Error ? error.message : genericError);
       }
     });
   };
@@ -56,9 +61,9 @@ export function SpacesManager({
     startTransition(async () => {
       try {
         await deleteSpaceAction(spaceId);
-        showSuccess("Espace supprimé.");
+        showSuccess(t.deleted);
       } catch (error) {
-        setRowError(error instanceof Error ? error.message : "Une erreur est survenue.");
+        setRowError(error instanceof Error ? error.message : genericError);
       }
     });
   };
@@ -72,7 +77,7 @@ export function SpacesManager({
       )}
 
       {spaces.length === 0 ? (
-        <p className="text-sm text-ink-muted">Aucun espace pour l&apos;instant.</p>
+        <p className="text-sm text-ink-muted">{t.empty}</p>
       ) : (
         <ul className="divide-y divide-line border-t border-line">
           {spaces.map((space) => (
@@ -83,37 +88,37 @@ export function SpacesManager({
               <div>
                 <p className="text-ink">{space.name}</p>
                 <p className="mt-1 text-xs text-ink-muted">
-                  {SPACE_TYPE_LABELS[space.type]} · {space.capacity} pers. ·{" "}
-                  {space.pricePerHour} crédits/h
+                  {SPACE_TYPE_LABELS[space.type]} · {space.capacity} {t.capacitySuffix} ·{" "}
+                  {space.pricePerHour} {t.creditsPerHour}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Badge variant={space.status === "active" ? "success" : "warning"}>
-                  {space.status === "active" ? "Actif" : "Maintenance"}
+                  {space.status === "active" ? t.statusActive : t.statusMaintenance}
                 </Badge>
                 <button
                   type="button"
                   className="text-xs text-ink-muted underline-offset-2 transition-colors hover:text-ink hover:underline"
                   onClick={() => toggleStatus(space.id)}
                 >
-                  Basculer
+                  {t.toggle}
                 </button>
                 {confirmingDeleteId === space.id ? (
                   <span className="animate-toast-in flex items-center gap-2 text-xs">
-                    <span className="text-ink-muted">Sûr ?</span>
+                    <span className="text-ink-muted">{t.confirmShort}</span>
                     <button
                       type="button"
                       className="text-danger underline-offset-2 hover:underline"
                       onClick={() => remove(space.id)}
                     >
-                      Oui
+                      {t.yes}
                     </button>
                     <button
                       type="button"
                       className="text-ink-muted underline-offset-2 hover:underline"
                       onClick={() => setConfirmingDeleteId(null)}
                     >
-                      Non
+                      {t.no}
                     </button>
                   </span>
                 ) : (
@@ -122,7 +127,7 @@ export function SpacesManager({
                     className="text-xs text-danger underline-offset-2 hover:underline"
                     onClick={() => setConfirmingDeleteId(space.id)}
                   >
-                    Supprimer
+                    {t.delete}
                   </button>
                 )}
               </div>
@@ -136,11 +141,11 @@ export function SpacesManager({
         className="mt-8 grid gap-4 border-t border-line pt-6 sm:grid-cols-2"
       >
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="space-name">Nom</Label>
+          <Label htmlFor="space-name">{t.name}</Label>
           <Input id="space-name" name="name" required />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="space-type">Type</Label>
+          <Label htmlFor="space-type">{t.type}</Label>
           <select
             id="space-type"
             name="type"
@@ -155,7 +160,7 @@ export function SpacesManager({
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="space-capacity">Capacité</Label>
+          <Label htmlFor="space-capacity">{t.capacity}</Label>
           <Input
             id="space-capacity"
             name="capacity"
@@ -166,7 +171,7 @@ export function SpacesManager({
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="space-price">Crédits / heure</Label>
+          <Label htmlFor="space-price">{t.pricePerHour}</Label>
           <Input
             id="space-price"
             name="pricePerHour"
@@ -184,13 +189,13 @@ export function SpacesManager({
         )}
         {state.success && (
           <Alert variant="success" className="sm:col-span-2">
-            Espace ajouté.
+            {t.added}
           </Alert>
         )}
 
         <div className="sm:col-span-2">
           <Button type="submit" variant="secondary" disabled={pending}>
-            {pending ? "Ajout…" : "Ajouter l'espace"}
+            {pending ? t.adding : t.addSpace}
           </Button>
         </div>
       </form>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { requireOnboarded } from "@/lib/auth/session";
+import { getT } from "@/lib/i18n/locale";
 import { ProfileForm } from "./_components/profile-form";
 
 export const metadata: Metadata = {
@@ -7,6 +8,6 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsProfilePage() {
-  const user = await requireOnboarded();
-  return <ProfileForm name={user.name} memberType={user.memberType} />;
+  const [user, t] = await Promise.all([requireOnboarded(), getT()]);
+  return <ProfileForm name={user.name} memberType={user.memberType} t={t.settings} />;
 }

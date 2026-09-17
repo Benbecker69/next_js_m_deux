@@ -4,6 +4,8 @@ import { useActionState, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { cn } from "@/lib/utils/cn";
+import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
+import { INTL_LOCALE, type Locale } from "@/lib/i18n/locale-constants";
 import type { Reservation, Space } from "@/types/domain";
 import { createReservationAction, type ReservationFormState } from "../_actions";
 
@@ -34,10 +36,14 @@ export function CreneauPicker({
   space,
   existingReservations,
   credits,
+  t,
+  locale,
 }: {
   space: Space;
   existingReservations: Reservation[];
   credits: number;
+  t: Dictionary["booking"];
+  locale: Locale;
 }) {
   const days = useMemo(() => buildDayOptions(), []);
   const [selectedDay, setSelectedDay] = useState(0);
@@ -75,7 +81,7 @@ export function CreneauPicker({
       <input type="hidden" name="endAt" value={endAt} />
 
       <div>
-        <p className="text-sm font-medium text-ink">Jour</p>
+        <p className="text-sm font-medium text-ink">{t.day}</p>
         <div className="mt-2 flex flex-wrap gap-2">
           {days.map((d, index) => (
             <button
@@ -92,7 +98,7 @@ export function CreneauPicker({
                   : "text-ink-muted hover:text-ink",
               )}
             >
-              {d.toLocaleDateString("fr-FR", {
+              {d.toLocaleDateString(INTL_LOCALE[locale], {
                 weekday: "short",
                 day: "numeric",
                 month: "short",
@@ -103,7 +109,7 @@ export function CreneauPicker({
       </div>
 
       <div>
-        <p className="text-sm font-medium text-ink">Heure</p>
+        <p className="text-sm font-medium text-ink">{t.hour}</p>
         <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5">
           {hours.map((hour) => {
             const taken = isTaken(hour);
@@ -130,22 +136,19 @@ export function CreneauPicker({
       {selectedHour !== null && (
         <div className="border-t border-line pt-4 text-sm text-ink">
           <p>
-            {space.pricePerHour} crédits pour ce créneau d&apos;une heure — il vous reste{" "}
-            {credits} crédits.
+            {space.pricePerHour} {t.creditsForSlotMiddle} {credits} {t.creditsWord}
           </p>
         </div>
       )}
 
       {state.error && <Alert variant="error">{state.error}</Alert>}
-      {insufficientCredits && (
-        <Alert variant="error">Crédits insuffisants pour réserver cet espace.</Alert>
-      )}
+      {insufficientCredits && <Alert variant="error">{t.insufficientCredits}</Alert>}
 
       <Button
         type="submit"
         disabled={selectedHour === null || pending || insufficientCredits}
       >
-        {pending ? "Confirmation…" : "Confirmer la réservation"}
+        {pending ? t.confirming : t.confirmBooking}
       </Button>
     </form>
   );
