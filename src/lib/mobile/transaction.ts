@@ -29,15 +29,27 @@ export async function withSerializableTransaction<T>(
   }
 }
 
+/**
+ * Deliberately duck-typed rather than `error instanceof
+ * Prisma.PrismaClientKnownRequestError`: under `next dev` (Turbopack, Fast
+ * Refresh) the generated Prisma module can be reloaded into a fresh module
+ * instance, so the thrown error's class and the `Prisma` imported here stop
+ * being the same object and `instanceof` silently returns false — verified by
+ * hitting this in dev (P2034 in the log) while `instanceof` still failed.
+ * Reading `.code`/`.cause` survives that; it's also what Prisma itself
+ * recommends as the portable alternative to `instanceof` for this error.
+ */
 function isSerializationConflict(error: unknown): boolean {
-  if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
+  if (typeof error !== "object" || error === null) return false;
+  if ("code" in error && (error as { code?: string }).code === "P2034") {
     return true;
   }
   // With the `pg` driver adapter (Prisma 7) PostgreSQL's serialization failure,
-  // SQLSTATE 40001, does not come back as P2034: it arrives as a
-  // DriverAdapterError whose `cause` carries the original code.
-  if (typeof error === "object" && error !== null && "cause" in error) {
-    const cause = error.cause as { originalCode?: string; kind?: string } | null;
+  // SQLSTATE 40001, can also arrive as a DriverAdapterError whose `cause`
+  // carries the original code, instead of being wrapped into P2034.
+  if ("cause" in error) {
+    const cause = (error as { cause?: { originalCode?: string; kind?: string } | null })
+      .cause;
     return cause?.originalCode === "40001" || cause?.kind === "TransactionWriteConflict";
   }
   return false;
