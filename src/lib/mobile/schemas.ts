@@ -20,6 +20,11 @@ export const nearbyQuerySchema = z
     startAt: z.iso.datetime({ message: "Créneau de début invalide." }).optional(),
     endAt: z.iso.datetime({ message: "Créneau de fin invalide." }).optional(),
     limit: z.coerce.number().int().min(1).max(MOBILE_CONFIG.nearby.maxLimit).optional(),
+    // Query strings are text: "true" keeps the busy spaces in the list.
+    includeBusy: z
+      .enum(["true", "false"], { message: "Valeur de includeBusy invalide." })
+      .transform((value) => value === "true")
+      .optional(),
   })
   .refine((value) => (value.lat === undefined) === (value.lng === undefined), {
     message: "La latitude et la longitude vont ensemble.",
@@ -38,4 +43,9 @@ export const checkInBodySchema = z.object({
   accuracyM: z.number().min(0, "Précision invalide.").max(100_000, "Précision invalide."),
   // ISO 8601 UTC ("...Z"), as produced by Date.prototype.toISOString().
   capturedAt: z.iso.datetime({ message: "Horodatage de la position invalide." }),
+});
+
+export const availabilityQuerySchema = z.object({
+  from: z.iso.datetime({ message: "Date de début invalide." }).optional(),
+  to: z.iso.datetime({ message: "Date de fin invalide." }).optional(),
 });
