@@ -52,8 +52,10 @@ model User {
   onboardingCompletedAt DateTime?
   createdAt             DateTime    @default(now())
 
-  reservations Reservation[]
-  preference   Preference?
+  reservations   Reservation[]
+  preference     Preference?
+  mobileSessions MobileSession[]
+  checkIns       CheckIn[]
 
   @@map("users")
 }
@@ -106,6 +108,8 @@ model Reservation {
   creditsSpent Int
   createdAt    DateTime          @default(now())
 
+  checkIns CheckIn[]
+
   @@index([userId])
   @@index([spaceId])
   @@map("reservations")
@@ -120,4 +124,46 @@ model Preference {
   notificationsEnabled Boolean @default(true)
 
   @@map("preferences")
+}
+
+// Sessions of the mobile app (see docs/api-mobile.md). The opaque bearer token
+// is never stored — only its SHA-256 hash — so a leaked database cannot be used
+// to impersonate a phone. `revokedAt` makes logout real on the server side.
+model MobileSession {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  deviceName String?
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+
+  @@index([userId])
+  @@map("mobile_sessions")
+}
+
+// One row per check-in attempt from the mobile app, accepted or refused, so the
+// history is a real trace of the action. `reason` is null when accepted; when
+// refused it holds a stable code (TOO_EARLY, TOO_LATE, TOO_FAR, LOW_ACCURACY,
+// STALE_POSITION, NOT_CONFIRMED) — a plain string for the same reason as
+// `Space.type`: the finite set is enforced in code (src/lib/mobile/checkin.ts).
+model CheckIn {
+  id            String      @id @default(uuid())
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lat           Float
+  lng           Float
+  accuracyM     Float
+  distanceM     Float
+  accepted      Boolean
+  reason        String?
+  createdAt     DateTime    @default(now())
+
+  @@index([reservationId])
+  @@index([userId, createdAt])
+  @@map("check_ins")
 }
