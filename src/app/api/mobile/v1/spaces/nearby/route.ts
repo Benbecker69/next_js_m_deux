@@ -14,6 +14,7 @@ export async function GET(request: Request) {
         startAt: query.startAt ? new Date(query.startAt) : undefined,
         endAt: query.endAt ? new Date(query.endAt) : undefined,
         limit: query.limit,
+        includeBusy: query.includeBusy,
       }),
     );
   });

@@ -9,6 +9,10 @@ import { assertBookableSlot, computeCredits } from "./reservations";
  * Active spaces that are free on the given slot (default: now → +1 h), nearest
  * first. Without a position — the phone refused the permission — the list is
  * not empty: it falls back to alphabetical order, so the app keeps working.
+ *
+ * With `includeBusy` the spaces already taken on the slot stay in the list,
+ * flagged `busy: true` (the app's browse and search screen must be able to
+ * show every space, not only the ones free right now).
  */
 export async function listNearbySpaces(input: {
   lat?: number;
@@ -16,6 +20,7 @@ export async function listNearbySpaces(input: {
   startAt?: Date;
   endAt?: Date;
   limit?: number;
+  includeBusy?: boolean;
 }) {
   const startAt = input.startAt ?? new Date();
   const endAt =
@@ -43,12 +48,13 @@ export async function listNearbySpaces(input: {
       : null;
 
   const items = spaces
-    .filter((space) => !busyIds.has(space.id))
+    .filter((space) => input.includeBusy || !busyIds.has(space.id))
     .map((space) => ({
       space: toSpaceDto(space),
       location: toLocationDto(space.location),
       distanceM: here ? Math.round(distanceKm(here, space.location) * 1000) : null,
       estimatedCredits: computeCredits(space.pricePerHour, startAt, endAt),
+      busy: busyIds.has(space.id),
     }))
     .sort(
       (a, b) =>

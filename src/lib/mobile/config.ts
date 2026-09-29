@@ -19,6 +19,12 @@ export const MOBILE_CONFIG = {
   booking: {
     // A slot may start "now": allow a little clock drift between phone and server.
     startToleranceMs: 5 * MINUTE_MS,
+    // "One month ahead at most": the app's calendar stops on today's date one
+    // month later (28-31 days, last slot starting at 17:00). 32 days keeps a
+    // day of margin so that anything the calendar offers is accepted here,
+    // whatever the phone's time zone, while a direct API call still can't
+    // book months away.
+    maxAdvanceMs: 32 * DAY_MS,
     minDurationMs: 30 * MINUTE_MS,
     maxDurationMs: 12 * HOUR_MS,
     defaultDurationMs: HOUR_MS,

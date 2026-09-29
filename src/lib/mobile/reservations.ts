@@ -21,12 +21,20 @@ export function computeCredits(pricePerHour: number, startAt: Date, endAt: Date)
 }
 
 export function assertBookableSlot(startAt: Date, endAt: Date, now: Date): void {
-  const { startToleranceMs, minDurationMs, maxDurationMs } = MOBILE_CONFIG.booking;
+  const { startToleranceMs, maxAdvanceMs, minDurationMs, maxDurationMs } =
+    MOBILE_CONFIG.booking;
   if (startAt.getTime() < now.getTime() - startToleranceMs) {
     throw new ApiError(
       422,
       "SLOT_IN_PAST",
       "Le créneau doit commencer maintenant ou plus tard.",
+    );
+  }
+  if (startAt.getTime() > now.getTime() + maxAdvanceMs) {
+    throw new ApiError(
+      422,
+      "SLOT_TOO_FAR",
+      "Vous pouvez réserver jusqu'à un mois à l'avance.",
     );
   }
   const duration = endAt.getTime() - startAt.getTime();

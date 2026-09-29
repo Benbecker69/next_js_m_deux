@@ -37,20 +37,21 @@ Le cahier des charges demande de justifier chaque Route Handler.
 
 ## Routes
 
-| Route                              | Auth | Entrée                                     | Réponse                          |
-| ---------------------------------- | ---- | ------------------------------------------ | -------------------------------- |
-| `GET /health`                      | non  | —                                          | `{ status, api, version, time }` |
-| `POST /auth/register`              | non  | `{ name, email, password, deviceName? }`   | `201 { token, expiresAt, user }` |
-| `POST /auth/login`                 | non  | `{ email, password, deviceName? }`         | `{ token, expiresAt, user }`     |
-| `POST /auth/logout`                | oui  | —                                          | `204`                            |
-| `GET /me`                          | oui  | —                                          | `{ user }`                       |
-| `GET /spaces/nearby`               | oui  | `lat, lng, startAt?, endAt?, limit?`       | `{ slot, hasPosition, items[] }` |
-| `GET /reservations`                | oui  | `scope=upcoming\|past\|all, limit, cursor` | `{ items[], nextCursor }`        |
-| `POST /reservations`               | oui  | `{ spaceId, startAt, endAt }`              | `201 { reservation, credits }`   |
-| `GET /reservations/{id}`           | oui  | —                                          | `{ reservation }`                |
-| `POST /reservations/{id}/cancel`   | oui  | —                                          | `{ reservation, credits }`       |
-| `POST /reservations/{id}/check-in` | oui  | `{ lat, lng, accuracyM, capturedAt }`      | `201 { checkIn, radiusM }`       |
-| `GET /check-ins`                   | oui  | `limit, cursor`                            | `{ items[], nextCursor }`        |
+| Route                              | Auth | Entrée                                             | Réponse                            |
+| ---------------------------------- | ---- | -------------------------------------------------- | ---------------------------------- |
+| `GET /health`                      | non  | —                                                  | `{ status, api, version, time }`   |
+| `POST /auth/register`              | non  | `{ name, email, password, deviceName? }`           | `201 { token, expiresAt, user }`   |
+| `POST /auth/login`                 | non  | `{ email, password, deviceName? }`                 | `{ token, expiresAt, user }`       |
+| `POST /auth/logout`                | oui  | —                                                  | `204`                              |
+| `GET /me`                          | oui  | —                                                  | `{ user }`                         |
+| `GET /spaces/nearby`               | oui  | `lat, lng, startAt?, endAt?, limit?, includeBusy?` | `{ slot, hasPosition, items[] }`   |
+| `GET /spaces/{id}/availability`    | oui  | `from?, to?` (ISO, défaut maintenant→+7j)          | `{ space, location, busySlots[] }` |
+| `GET /reservations`                | oui  | `scope=upcoming\|past\|all, limit, cursor`         | `{ items[], nextCursor }`          |
+| `POST /reservations`               | oui  | `{ spaceId, startAt, endAt }`                      | `201 { reservation, credits }`     |
+| `GET /reservations/{id}`           | oui  | —                                                  | `{ reservation }`                  |
+| `POST /reservations/{id}/cancel`   | oui  | —                                                  | `{ reservation, credits }`         |
+| `POST /reservations/{id}/check-in` | oui  | `{ lat, lng, accuracyM, capturedAt }`              | `201 { checkIn, radiusM }`         |
+| `GET /check-ins`                   | oui  | `limit, cursor`                                    | `{ items[], nextCursor }`          |
 
 Conventions : dates en ISO 8601 UTC (`2026-09-21T10:00:00.000Z`) ; pagination par
 curseur (`nextCursor` est `null` en fin de liste) ; réponses jamais mises en cache
@@ -60,6 +61,16 @@ telle quelle, seulement les formes de `src/lib/mobile/dto.ts`.
 `GET /spaces/nearby` sans `lat`/`lng` reste utile : la liste est triée par ordre
 alphabétique (`hasPosition: false`, `distanceM: null`), ce qui permet à l'app de
 fonctionner quand l'utilisateur refuse la permission de position.
+
+Par défaut la liste ne contient que les espaces **libres** sur le créneau. Avec
+`includeBusy=true`, les espaces déjà pris restent dans la liste (`busy: true`, sinon
+`false`) : c'est ce qui permet à l'écran « Réserver » de tous les afficher et de les
+chercher par nom. `limit` va jusqu'à 30.
+
+`GET /spaces/{id}/availability` sert l'écran « choisir un espace et un créneau
+précis » : l'espace, son lieu, et les créneaux déjà pris (`busySlots`, uniquement
+`startAt`/`endAt` — aucune autre réservation n'est identifiable). Période bornée à
+30 jours. `404 SPACE_NOT_FOUND` si l'espace n'existe pas ou n'est plus actif.
 
 ## Format d'erreur
 
@@ -79,14 +90,17 @@ fonctionner quand l'utilisateur refuse la permission de position.
 | 402    | `INSUFFICIENT_CREDITS`                                                                                                   |
 | 404    | `RESERVATION_NOT_FOUND`, `SPACE_NOT_FOUND`                                                                               |
 | 409    | `EMAIL_TAKEN`, `SLOT_TAKEN`, `SPACE_UNAVAILABLE`, `NOT_CANCELLABLE`, `ALREADY_STARTED`, `ALREADY_CHECKED_IN`, `CONFLICT` |
-| 422    | `VALIDATION_ERROR`, `SLOT_IN_PAST`, `SLOT_TOO_SHORT`, `SLOT_TOO_LONG`                                                    |
+| 422    | `VALIDATION_ERROR`, `SLOT_IN_PAST`, `SLOT_TOO_FAR`, `SLOT_TOO_SHORT`, `SLOT_TOO_LONG`                                    |
 | 429    | `TOO_MANY_ATTEMPTS`                                                                                                      |
 | 500    | `INTERNAL_ERROR` (le détail reste dans le journal du serveur)                                                            |
 
 ## Règles métier (côté serveur, `src/lib/mobile/`)
 
 - **Réservation.** Coût = `round(prix/h × heures)`, comme sur le site. Durée de 30
-  minutes à 12 heures, début « maintenant » (5 minutes de tolérance) ou plus tard.
+  minutes à 12 heures, début « maintenant » (5 minutes de tolérance) ou plus tard,
+  au plus tard un mois à l'avance (`SLOT_TOO_FAR` au-delà de 32 jours : le
+  calendrier de l'app s'arrête au même jour du mois suivant, le serveur garde un
+  jour de marge pour les fuseaux horaires).
   Refus si l'espace est inactif ou si le créneau chevauche une réservation
   `confirmed`. Le débit est un `UPDATE … WHERE credits >= coût` : le solde ne peut
   pas devenir négatif.
