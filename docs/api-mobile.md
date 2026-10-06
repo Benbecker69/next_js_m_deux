@@ -47,6 +47,7 @@ Le cahier des charges demande de justifier chaque Route Handler.
 | `PATCH /me`                        | oui  | `{ name, memberType }`                                 | `{ user }`                         |
 | `POST /me/password`                | oui  | `{ currentPassword, newPassword }`                     | `204`                              |
 | `POST /me/email`                   | oui  | `{ currentPassword, email }`                           | `{ user }`                         |
+| `GET /me/summary`                  | oui  | —                                                      | `{ summary }`                      |
 | `GET /spaces/nearby`               | oui  | `lat, lng, startAt?, endAt?, limit?, includeBusy?`     | `{ slot, hasPosition, items[] }`   |
 | `GET /spaces/{id}/availability`    | oui  | `from?, to?` (ISO, défaut maintenant→+7j)              | `{ space, location, busySlots[] }` |
 | `GET /reservations`                | oui  | `scope=upcoming\|past\|all, limit, cursor`             | `{ items[], nextCursor }`          |
@@ -100,6 +101,18 @@ un appareil qui n'avait que l'ancien mot de passe, ou un jeton volé, cesse de
 fonctionner. `POST /me/email` refuse `409 EMAIL_TAKEN` si l'adresse
 appartient déjà à un autre compte (même vérification, en deux temps comme à
 l'inscription, qu'à `POST /auth/register`).
+
+`GET /me/summary` alimente l'écran d'accueil de l'app : `upcoming.count`
+(même définition que `scope=upcoming`), `recent` (`reservations`, `hours`,
+`creditsSpent` sur les `windowDays` = 30 derniers jours, réservations annulées
+exclues), `attendance` (`past` réservations terminées, dont `attended` avec une
+arrivée validée — l'app en tire un pourcentage, `past` peut valoir 0) et
+`favoriteLocation` (`{ id, name, city, visits }` ou `null`). Ces chiffres sont
+calculés par le serveur parce que l'app ne charge ses listes que page par page :
+compter ce qu'elle a en mémoire serait faux dès la deuxième page. Fenêtre
+glissante plutôt que mois civil : le serveur est en UTC, le téléphone dans le
+fuseau de son propriétaire. Présence et lieu favori portent sur les 200
+dernières réservations terminées.
 
 **Check-in par QR.** `Space` n'a pas de coordonnées propres — seule sa
 `Location` en a (`prisma/schema.prisma`) — donc le rayon de 150 m ne peut
