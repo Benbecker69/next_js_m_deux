@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils/cn";
  * one with exactly this crosshair-in-a-circle symbol. Ties the mark to the
  * word instead of reaching for the generic location-pin cliché, and reads
  * as one more hairline instrument on the "architect's plan" aesthetic
- * already used across the app (SpacePlan, the NFC/radar diagrams).
+ * already used across the app (the NFC/radar diagrams).
  * `currentColor` throughout so it themes for free with the text next to it.
  */
 function LogoMark({ className }: { className?: string }) {

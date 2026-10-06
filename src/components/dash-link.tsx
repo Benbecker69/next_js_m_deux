@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 
 /**
  * A secondary "see more" link marked by a hairline dash instead of an
- * underline or arrow — the same fine-line vocabulary as SpacePlan and the
- * location illustrations, not a new decorative flourish. The dash grows on
+ * underline or arrow — the same fine-line vocabulary as the logo and the
+ * NFC diagram, not a new decorative flourish. The dash grows on
  * hover/focus; the whole thing is compositor-only (width transition on a
  * 1px element, no layout-affecting properties elsewhere).
  */

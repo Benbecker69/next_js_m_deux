@@ -32,6 +32,8 @@ export const fr = {
   home: {
     heroTitlePrefix: "Un bureau, pas une adresse à ",
     heroTitleEmphasis: "deviner.",
+    heroImageAlt:
+      "Trois personnes travaillent ensemble autour d'une table, ordinateurs ouverts, en riant.",
     heroSubtitle:
       "Repère référence des espaces de coworking dans toute la France et vous laisse réserver un bureau, une salle ou un poste flex pour la journée, en quelques clics.",
     howItWorks: "Comment ça marche",
@@ -248,6 +250,7 @@ export const fr = {
     settings: "Paramètres",
     creditsSuffix: "crédits",
     goToAdmin: "Administration",
+    backToSite: "Retour au site",
     openMenu: "Ouvrir le menu",
     closeMenu: "Fermer le menu",
   },

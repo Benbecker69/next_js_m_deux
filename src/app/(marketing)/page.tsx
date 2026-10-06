@@ -1,13 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { buttonVariants } from "@/components/ui/button";
-import { LocationArt } from "@/components/location-art";
+import { LocationPhoto } from "@/components/location-photo";
 import { DashLink } from "@/components/dash-link";
 import { SPACE_TYPE_LABELS } from "@/types/domain";
 import { getCachedLocations } from "@/lib/data/locations";
 import { getCachedSpaces } from "@/lib/data/spaces";
 import { getT } from "@/lib/i18n/locale";
-import { SpacePlan } from "./_components/space-plan";
 
 export default async function MarketingHomePage() {
   const [locations, spaces, t] = await Promise.all([
@@ -50,8 +49,15 @@ export default async function MarketingHomePage() {
               </Link>
             </div>
           </div>
-          <div className="animate-hero-reveal [animation-delay:150ms]">
-            <SpacePlan />
+          <div className="animate-hero-reveal relative aspect-[4/3] overflow-hidden rounded-sm border border-line [animation-delay:150ms] md:aspect-[7/6]">
+            <Image
+              src="/images/marketing/home-hero.jpg"
+              alt={t.home.heroImageAlt}
+              fill
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="object-cover"
+              priority
+            />
           </div>
         </div>
       </section>
@@ -104,7 +110,7 @@ export default async function MarketingHomePage() {
                 href={`/lieux/${location.slug}`}
                 className="group block transition-transform duration-150 hover:-translate-y-0.5"
               >
-                <LocationArt
+                <LocationPhoto
                   slug={location.slug}
                   variant="top"
                   zoom

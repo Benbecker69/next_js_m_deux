@@ -20,6 +20,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     { href: "/reservations", label: t.appNav.myReservations },
     { href: "/parametres", label: t.appNav.settings },
     ...(user.role === "admin" ? [{ href: "/admin", label: t.appNav.goToAdmin }] : []),
+    // The public site stays reachable once signed in: its header shows the
+    // member's avatar, which leads back here.
+    { href: "/", label: t.appNav.backToSite },
   ];
 
   return (
