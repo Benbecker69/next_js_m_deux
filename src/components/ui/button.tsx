@@ -1,7 +1,8 @@
 import { type ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/utils/cn";
 
-type Variant = "primary" | "secondary" | "ghost" | "destructive";
+type Variant =
+  "primary" | "secondary" | "ghost" | "destructive" | "inverse" | "inverse-outline";
 type Size = "sm" | "md" | "lg";
 
 // Filled variants get a subtle shadow tinted with their own color (not a
@@ -16,6 +17,10 @@ const variantClasses: Record<Variant, string> = {
   secondary:
     "bg-surface text-ink border border-line shadow-sm hover:border-ink/30 hover:shadow-md",
   ghost: "bg-transparent text-ink hover:bg-surface",
+  // For a button placed on a pine-filled band: the colors swap.
+  inverse: "bg-pine-contrast text-pine hover:brightness-95",
+  "inverse-outline":
+    "border border-pine-contrast/40 bg-transparent text-pine-contrast hover:bg-pine-contrast/10",
   destructive:
     "bg-danger text-danger-contrast shadow-sm shadow-danger/25 hover:shadow-md hover:shadow-danger/30 hover:brightness-95",
 };

@@ -2,35 +2,61 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { LocateFixed, MapPin, Users } from "lucide-react";
+import { SpacePhoto } from "@/components/space-photo";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
+import { SPACE_TYPES } from "@/lib/catalog";
 import { distanceKm } from "@/lib/geo/distance";
+import { useToast } from "@/lib/feedback/toast-provider";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import { SPACE_TYPE_LABELS, type Location, type Space } from "@/types/domain";
 
 type SpaceWithLocation = Space & { location: Location };
 
 // Client Component because it needs two browser-only things a server can't
-// provide: live text filtering as you type, and the Geolocation API for
-// "sort by distance" — both are pure front-end, no server round-trip.
+// provide: filtering as you type, and the Geolocation API for "sort by
+// distance" — both are pure front-end, no server round-trip. The first
+// filters can come from the URL (`/reserver?lieu=…&type=…`, read by the
+// page), which is how a location page sends a member straight to its spaces.
 export function SpaceBrowser({
   spaces,
+  locations,
+  initialLocationId = "",
+  initialType = "",
   t,
+  f,
 }: {
   spaces: SpaceWithLocation[];
+  locations: Location[];
+  initialLocationId?: string;
+  initialType?: string;
+  /** Geolocation and sorting labels (`booking`). */
   t: Dictionary["booking"];
+  /** Filters and cards (`bookingFlow`). */
+  f: Dictionary["bookingFlow"];
 }) {
   const [query, setQuery] = useState("");
+  const [type, setType] = useState(initialType);
+  const [locationId, setLocationId] = useState(initialLocationId);
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
+  const { showSuccess, showError } = useToast();
+
+  const failLocating = (message: string) => {
+    setGeoError(message);
+    showError(message, t.geoErrorTitle);
+    setLocating(false);
+  };
 
   const findNearMe = () => {
     if (!("geolocation" in navigator)) {
-      setGeoError(t.geoUnavailable);
+      failLocating(t.geoUnavailable);
       return;
     }
     setLocating(true);
@@ -39,10 +65,14 @@ export function SpaceBrowser({
       (position) => {
         setOrigin({ lat: position.coords.latitude, lng: position.coords.longitude });
         setLocating(false);
+        showSuccess(t.geoSuccess);
       },
-      () => {
-        setGeoError(t.geoDenied);
-        setLocating(false);
+      // The browser says which of three things went wrong: each one calls
+      // for a different fix, so each one gets its own sentence.
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) failLocating(t.geoDenied);
+        else if (error.code === error.TIMEOUT) failLocating(t.geoTimeout);
+        else failLocating(t.geoPositionUnavailable);
       },
       { timeout: 8000 },
     );
@@ -50,86 +80,164 @@ export function SpaceBrowser({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    let result = spaces;
-    if (q) {
-      result = result.filter(
-        (space) =>
+    let result = spaces.filter(
+      (space) =>
+        (!type || space.type === type) &&
+        (!locationId || space.locationId === locationId) &&
+        (!q ||
+          space.name.toLowerCase().includes(q) ||
           space.location.city.toLowerCase().includes(q) ||
-          space.location.name.toLowerCase().includes(q) ||
-          SPACE_TYPE_LABELS[space.type].toLowerCase().includes(q),
-      );
-    }
+          space.location.name.toLowerCase().includes(q)),
+    );
     if (origin) {
       result = [...result].sort(
         (a, b) => distanceKm(origin, a.location) - distanceKm(origin, b.location),
       );
     }
     return result;
-  }, [spaces, query, origin]);
+  }, [spaces, query, type, locationId, origin]);
+
+  const filtering = Boolean(query || type || locationId);
+  const reset = () => {
+    setQuery("");
+    setType("");
+    setLocationId("");
+  };
 
   return (
     <div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Input
-          placeholder={t.filterPlaceholder}
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          className="sm:max-w-xs"
-        />
+      <div className="grid gap-4 rounded-sm border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_auto] lg:items-end">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="space-search">{f.searchLabel}</Label>
+          <Input
+            id="space-search"
+            type="search"
+            placeholder={f.searchPlaceholder}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="space-type">{f.typeLabel}</Label>
+          <Select
+            id="space-type"
+            value={type}
+            onChange={(event) => setType(event.target.value)}
+          >
+            <option value="">{f.allTypes}</option>
+            {SPACE_TYPES.map((item) => (
+              <option key={item} value={item}>
+                {SPACE_TYPE_LABELS[item]}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="space-location">{f.locationLabel}</Label>
+          <Select
+            id="space-location"
+            value={locationId}
+            onChange={(event) => setLocationId(event.target.value)}
+          >
+            <option value="">{f.allLocations}</option>
+            {locations.map((location) => (
+              <option key={location.id} value={location.id}>
+                {location.name} — {location.city}
+              </option>
+            ))}
+          </Select>
+        </div>
         <Button
           type="button"
           variant="secondary"
-          size="sm"
           onClick={findNearMe}
           disabled={locating}
         >
+          <LocateFixed className="h-4 w-4" strokeWidth={1.75} />
           {locating ? t.locating : origin ? t.sortedByDistance : t.sortByDistance}
         </Button>
       </div>
       {geoError && (
-        <Alert variant="error" className="mt-2">
+        <Alert variant="error" className="mt-3">
           {geoError}
         </Alert>
       )}
 
+      <div className="mt-6 flex items-center justify-between gap-4">
+        <p className="text-sm text-ink-muted" aria-live="polite">
+          {filtered.length} {filtered.length === 1 ? f.countOne : f.countMany}
+          {origin ? ` · ${f.nearest}` : ""}
+        </p>
+        {filtering && (
+          <button
+            type="button"
+            onClick={reset}
+            className="text-sm text-pine underline-offset-2 hover:underline"
+          >
+            {f.reset}
+          </button>
+        )}
+      </div>
+
       {filtered.length === 0 ? (
-        <p className="mt-8 text-sm text-ink-muted">{t.noResults}</p>
+        <EmptyState
+          className="mt-4"
+          title={f.emptyTitle}
+          description={f.emptyBody}
+          action={
+            <Button type="button" size="sm" onClick={reset}>
+              {f.reset}
+            </Button>
+          }
+        />
       ) : (
-        <ul className="mt-8 divide-y divide-line border-t border-line">
+        <ul className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((space) => (
-            <li
-              key={space.id}
-              className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-            >
-              <div className="min-w-0">
-                <p className="text-sm text-ink">
-                  {space.name !== SPACE_TYPE_LABELS[space.type] ? (
-                    <>
-                      {space.name}{" "}
-                      <span className="text-ink-muted">
-                        · {SPACE_TYPE_LABELS[space.type]}
-                      </span>
-                    </>
-                  ) : (
-                    space.name
+            <li key={space.id}>
+              <Link
+                href={`/reserver/${space.id}`}
+                className="group flex h-full flex-col overflow-hidden rounded-sm border border-line bg-surface transition-colors duration-150 hover:border-pine"
+              >
+                <SpacePhoto
+                  type={space.type}
+                  variant="cover"
+                  sizes="(min-width: 1024px) 20rem, (min-width: 640px) 50vw, 100vw"
+                />
+                <div className="flex flex-1 flex-col p-4">
+                  <h2 className="font-display text-lg font-medium text-ink">
+                    {space.name}
+                  </h2>
+                  {space.name !== SPACE_TYPE_LABELS[space.type] && (
+                    <p className="text-sm text-ink-muted">
+                      {SPACE_TYPE_LABELS[space.type]}
+                    </p>
                   )}
-                </p>
-                <p className="mt-1 text-xs text-ink-muted">
-                  {space.location.name} — {space.location.city}
-                  {origin ? ` · ${distanceKm(origin, space.location).toFixed(1)} km` : ""}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Badge variant="neutral">
-                  {space.pricePerHour} {t.creditsPerHour}
-                </Badge>
-                <Link
-                  href={`/reserver/${space.id}`}
-                  className={buttonVariants({ size: "sm" })}
-                >
-                  {t.book}
-                </Link>
-              </div>
+                  <p className="mt-3 flex items-center gap-1.5 text-sm text-ink-muted">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+                    <span className="truncate">
+                      {space.location.name}, {space.location.city}
+                      {origin
+                        ? ` · ${distanceKm(origin, space.location).toFixed(1)} km`
+                        : ""}
+                    </span>
+                  </p>
+                  <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-muted">
+                    <Users className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+                    {space.capacity} {f.capacity}
+                  </p>
+                  <div className="mt-auto flex items-end justify-between gap-3 pt-4">
+                    <p className="text-sm text-ink-muted">
+                      <span className="font-display text-xl font-medium tabular-nums text-ink">
+                        {space.pricePerHour}
+                      </span>{" "}
+                      {f.perHour}
+                    </p>
+                    <span className="text-sm font-medium text-pine group-hover:underline">
+                      {f.choose}
+                    </span>
+                  </div>
+                </div>
+              </Link>
             </li>
           ))}
         </ul>

@@ -1,82 +1,86 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BadgeCheck, History, MapPin, QrCode } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import { getT } from "@/lib/i18n/locale";
-import { NfcTapDiagram } from "./_components/nfc-tap-diagram";
+import { CtaBand } from "../_components/cta-band";
+import { PhoneMock } from "../_components/phone-mock";
+import { PageIntro, Section } from "../_components/section";
 import { GeolocRadarDiagram } from "./_components/geoloc-radar-diagram";
+import { NfcTapDiagram } from "./_components/nfc-tap-diagram";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getT();
-  return { title: t.nav.mobileVision, description: t.visionMobile.metaDescription };
+  return { title: t.nav.mobileVision, description: t.site.appPage.lead };
 }
 
-export default async function VisionMobilePage() {
+// Same order as `t.site.appPage.features`: book nearby, confirm arrival,
+// scan the space's code, keep the record.
+const FEATURE_ICONS = [MapPin, BadgeCheck, QrCode, History];
+
+// The page describes the app as it is — what it does today first, what is
+// only planned (the NFC badge) last and labelled as such.
+export default async function MobileAppPage() {
   const t = await getT();
-  const comparison = [
-    { title: t.visionMobile.todayTitle, description: t.visionMobile.todayDescription },
-    {
-      title: t.visionMobile.tomorrowTitle,
-      description: t.visionMobile.tomorrowDescription,
-    },
-  ];
+  const app = t.site.appPage;
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-20">
-      <Badge variant="warning">{t.visionMobile.badge}</Badge>
-      <h1 className="mt-4 font-display text-3xl font-medium text-ink">
-        {t.visionMobile.title}
-      </h1>
-      <p className="mt-4 max-w-xl text-ink-muted">
-        {t.visionMobile.subtitlePrefix}
-        <strong className="font-medium text-ink">
-          {t.visionMobile.subtitleEmphasis}
-        </strong>
-        {t.visionMobile.subtitleSuffix}
-      </p>
+    <>
+      <PageIntro
+        eyebrow={<Badge variant="success">{app.status}</Badge>}
+        title={app.title}
+        lead={app.lead}
+        aside={<PhoneMock t={t.site.app} />}
+      />
 
-      <div className="mt-14 grid gap-8 border-t border-line pt-10 sm:grid-cols-2">
-        <div>
-          <NfcTapDiagram />
-          <h2 className="mt-6 font-display text-lg font-medium text-ink">
-            {t.visionMobile.nfcTitle}
-          </h2>
-          <p className="mt-2 text-sm text-ink-muted">{t.visionMobile.nfcDescription}</p>
-        </div>
+      <Section title={app.featuresTitle}>
+        <ul className="grid gap-5 sm:grid-cols-2">
+          {app.features.map((feature, index) => {
+            const Icon = FEATURE_ICONS[index];
+            return (
+              <li
+                key={feature.title}
+                className="rounded-sm border border-line bg-surface p-6"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-sm bg-pine/10 text-pine">
+                  <Icon className="h-5 w-5" strokeWidth={1.75} />
+                </span>
+                <h3 className="mt-4 font-display text-xl font-medium text-ink">
+                  {feature.title}
+                </h3>
+                <p className="mt-2 text-ink-muted">{feature.description}</p>
+              </li>
+            );
+          })}
+        </ul>
+      </Section>
 
-        <div>
+      <Section tinted>
+        <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-16">
           <GeolocRadarDiagram />
-          <h2 className="mt-6 font-display text-lg font-medium text-ink">
-            {t.visionMobile.geoTitle}
-          </h2>
-          <p className="mt-2 text-sm text-ink-muted">{t.visionMobile.geoDescription}</p>
+          <div>
+            <h2 className="font-display text-3xl font-medium text-ink">
+              {app.sharedTitle}
+            </h2>
+            <p className="mt-4 text-lg text-ink-muted">{app.sharedBody}</p>
+            <p className="mt-4 text-ink-muted">{t.visionMobile.todayDescription}</p>
+          </div>
         </div>
-      </div>
+      </Section>
 
-      <div className="mt-16 border-t border-line pt-10">
-        <h2 className="font-display text-lg font-medium text-ink">
-          {t.visionMobile.comparisonTitle}
-        </h2>
-        <div className="mt-8 divide-y divide-line border-t border-line">
-          {comparison.map((item) => (
-            <div
-              key={item.title}
-              className="grid gap-2 py-8 sm:grid-cols-[240px_1fr] sm:gap-8"
-            >
-              <h3 className="font-display text-base font-medium text-ink">
-                {item.title}
-              </h3>
-              <p className="text-sm text-ink-muted">{item.description}</p>
-            </div>
-          ))}
+      <Section title={app.nextTitle}>
+        <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-16">
+          <div>
+            <Badge variant="warning">{t.visionMobile.badge}</Badge>
+            <h3 className="mt-4 font-display text-2xl font-medium text-ink">
+              {t.visionMobile.nfcTitle}
+            </h3>
+            <p className="mt-3 text-ink-muted">{t.visionMobile.nfcDescription}</p>
+          </div>
+          <NfcTapDiagram />
         </div>
-      </div>
+      </Section>
 
-      <div className="mt-16">
-        <Link href="/lieux" className={buttonVariants({ size: "lg" })}>
-          {t.visionMobile.exploreCta}
-        </Link>
-      </div>
-    </div>
+      <CtaBand />
+    </>
   );
 }

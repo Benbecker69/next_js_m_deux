@@ -20,7 +20,7 @@ export const fr = {
     features: "Fonctionnalités",
     pricing: "Tarifs",
     locations: "Lieux",
-    mobileVision: "Vision mobile",
+    mobileVision: "Application",
     faq: "FAQ",
     openMenu: "Ouvrir le menu",
     closeMenu: "Fermer le menu",
@@ -82,7 +82,7 @@ export const fr = {
       {
         title: "Pensé pour le mobile",
         description:
-          "Une application mobile est en préparation : badge NFC pour l'accès aux lieux, géolocalisation en temps réel pour trouver un espace libre autour de vous.",
+          "L'application mobile prend le relais sur place : elle propose l'espace libre le plus proche et valide votre arrivée par géolocalisation ou en scannant le code de l'espace. Même compte, mêmes crédits que sur le site.",
       },
     ],
   },
@@ -153,7 +153,7 @@ export const fr = {
       {
         question: "Y a-t-il une application mobile ?",
         answer:
-          "Une application est en préparation. Elle utilisera le NFC pour l'accès aux lieux et la géolocalisation pour repérer un espace libre à proximité — pas une simple copie du site.",
+          "Oui, sur iPhone, en démonstration. Elle sert sur place : réserver l'espace libre le plus proche et valider votre arrivée par géolocalisation ou en scannant le code de l'espace. Le badge NFC viendra ensuite.",
       },
       {
         question: "Comment référencer mon lieu sur Repère ?",
@@ -454,6 +454,198 @@ export const fr = {
     confirm: "Confirmer",
     back: "Retour",
     cancelSuccess: "Réservation annulée, crédits recrédités au membre.",
+  },
+  site: {
+    mySpace: "Mon espace",
+    createAccount: "Créer un compte",
+    footerDiscover: "Découvrir",
+    footerAccount: "Compte",
+    footerNote:
+      "Les lieux présentés sont fictifs : Repère est un projet de démonstration.",
+    search: {
+      city: "Ville",
+      allCities: "Toutes les villes",
+      type: "Type d'espace",
+      allTypes: "Tous les types",
+      submit: "Voir les lieux",
+    },
+    facts: {
+      locations: "lieux visités puis référencés",
+      spaces: "espaces réservables à l'heure",
+      price: "crédits l'heure, le premier prix",
+    },
+    types: {
+      title: "Quatre façons de travailler",
+      subtitle:
+        "Du poste dans l'espace commun à la salle pour six : vous payez l'heure, au prix du type d'espace.",
+      from: "dès",
+      perHour: "crédits / heure",
+      pitch: {
+        "poste-flex": "Un bureau dans l'espace commun, pour une matinée ou la journée.",
+        "phone-booth": "Une cabine insonorisée, le temps d'un appel ou d'une visio.",
+        "bureau-prive": "Une pièce fermée, pour vous seul.",
+        "salle-reunion": "Une table, un écran, de quatre à six personnes.",
+      },
+    },
+    places: {
+      title: "Les lieux",
+      subtitle: "Chaque lieu est visité avant d'être publié.",
+      spaces: "espaces",
+      space: "espace",
+      from: "dès",
+      perHour: "crédits / heure",
+    },
+    credits: {
+      title: "Des crédits, sans abonnement obligatoire",
+      body: "Chaque heure réservée consomme des crédits selon le type d'espace. Vous n'en dépensez qu'en réservant, et une annulation avant le début du créneau vous les rend en entier.",
+      points: [
+        "20 crédits offerts à l'inscription",
+        "Débités à la réservation, rendus à l'annulation",
+        "À l'unité, en pack ou par abonnement mensuel",
+      ],
+      cta: "Voir les tarifs",
+    },
+    app: {
+      title: "Sur place, l'application prend le relais",
+      body: "Le site sert à choisir et à planifier. L'application sert au moment d'arriver : trouver l'espace libre le plus proche, puis valider votre présence.",
+      points: [
+        "Réserver l'espace libre le plus proche, en un geste",
+        "Valider votre arrivée par la position, ou en scannant le code de l'espace",
+        "Retrouver vos réservations, vos crédits et votre historique",
+      ],
+      cta: "Découvrir l'application",
+      mockNext: "Prochaine réservation",
+      mockSlot: "14h–17h",
+      mockPlace: "Salle Ampère · Le Chantier",
+      mockArrival: "Arrivée disponible",
+      mockBalance: "Solde",
+      mockCredits: "crédits",
+    },
+    faqTeaser: {
+      title: "Questions fréquentes",
+      cta: "Toutes les questions",
+    },
+    finalCta: {
+      body: "Créez votre compte, recevez 20 crédits et réservez votre premier créneau.",
+      secondary: "Voir les lieux",
+      loggedBody: "Vos crédits vous attendent : choisissez un espace et un créneau.",
+    },
+    locationsPage: {
+      lead: "Filtrez par ville ou par type d'espace : chaque lieu indique ce qu'il propose et son premier prix.",
+      all: "Tous",
+      none: "Aucun lieu ne correspond à ces filtres.",
+      noneHint: "Retirez un filtre pour élargir la recherche.",
+      reset: "Voir tous les lieux",
+      countOne: "lieu",
+      countMany: "lieux",
+    },
+    locationDetail: {
+      about: "Le lieu",
+      capacity: "pers.",
+      bookTitle: "Réserver dans ce lieu",
+      bookBody: "Choisissez un espace, un jour dans le mois qui vient, puis vos heures.",
+      bookCta: "Choisir un créneau",
+      signupCta: "Créer un compte pour réserver",
+      signupHint: "20 crédits offerts à l'inscription.",
+      from: "À partir de",
+      address: "Adresse",
+    },
+    pricingPage: {
+      examplesTitle: "Ce que ça donne",
+      examples: [
+        {
+          label: "Une matinée en poste flex, 3 heures",
+          value: "12 crédits",
+        },
+        {
+          label: "Un appel d'une heure en phone booth",
+          value: "3 crédits",
+        },
+        {
+          label: "Une réunion de 2 heures à six",
+          value: "34 à 44 crédits",
+        },
+      ],
+      rulesTitle: "Bon à savoir",
+      rules: [
+        "Les crédits sont débités au moment de la réservation.",
+        "Annuler avant le début du créneau vous rend tous les crédits.",
+        "20 crédits sont offerts à la création du compte.",
+      ],
+      ctaBody: "Le compte est gratuit : vous ne payez que les heures réservées.",
+    },
+    appPage: {
+      status: "Application iOS, en démonstration",
+      title: "L'application Repère, pour le moment où vous arrivez.",
+      lead: "Le site sert à choisir et à planifier. L'application sert sur place : trouver l'espace libre le plus proche et prouver que vous y êtes.",
+      featuresTitle: "Ce qu'elle fait aujourd'hui",
+      features: [
+        {
+          title: "Réserver près de vous",
+          description:
+            "L'application lit votre position une seule fois, quand vous le demandez, et propose l'espace libre le plus proche pour l'heure qui vient.",
+        },
+        {
+          title: "Valider votre arrivée",
+          description:
+            "À moins de 150 mètres du lieu, à partir de quinze minutes avant votre créneau, un geste confirme votre présence. C'est le serveur qui vérifie, pas le téléphone.",
+        },
+        {
+          title: "Scanner le code de l'espace",
+          description:
+            "Chaque espace porte un QR code. Le scanner confirme que vous êtes dans la bonne salle, en plus de la position.",
+        },
+        {
+          title: "Garder la trace",
+          description:
+            "Chaque tentative d'arrivée, acceptée ou refusée, reste dans votre historique avec son motif.",
+        },
+      ],
+      sharedTitle: "Un seul compte, les mêmes données",
+      sharedBody:
+        "Une réservation faite sur le site apparaît dans l'application, et l'inverse. Vos crédits sont les mêmes des deux côtés.",
+      nextTitle: "Ce qui viendra ensuite",
+      cta: "Créer un compte",
+    },
+  },
+  bookingFlow: {
+    lead: "Choisissez un espace, puis un jour et vos heures.",
+    searchLabel: "Rechercher",
+    searchPlaceholder: "Un lieu, une ville…",
+    typeLabel: "Type d'espace",
+    locationLabel: "Lieu",
+    allTypes: "Tous les types",
+    allLocations: "Tous les lieux",
+    countOne: "espace",
+    countMany: "espaces",
+    capacity: "pers.",
+    perHour: "crédits / heure",
+    choose: "Choisir un créneau",
+    emptyTitle: "Aucun espace ne correspond",
+    emptyBody: "Élargissez la recherche ou retirez un filtre.",
+    reset: "Réinitialiser les filtres",
+    nearest: "Du plus proche au plus éloigné",
+    stepDay: "Jour",
+    stepStart: "Heure de début",
+    stepEnd: "Heure de fin",
+    horizon: "Vous pouvez réserver jusqu'à un mois à l'avance, entre 9h et 18h.",
+    dayFull: "Plus aucun créneau libre ce jour-là. Choisissez un autre jour.",
+    pickStartFirst: "Choisissez d'abord une heure de début.",
+    prevMonth: "Mois précédent",
+    nextMonth: "Mois suivant",
+    summaryTitle: "Votre réservation",
+    summaryEmpty: "Choisissez un jour et vos heures : le coût s'affichera ici.",
+    day: "Jour",
+    slot: "Créneau",
+    duration: "Durée",
+    cost: "Coût",
+    balance: "Solde actuel",
+    balanceAfter: "Solde après réservation",
+    credits: "crédits",
+    credit: "crédit",
+    missing: "Il vous manque",
+    missingSuffix: "pour ce créneau.",
+    weekdays: ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."],
   },
 };
 

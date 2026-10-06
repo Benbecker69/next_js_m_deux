@@ -6,6 +6,7 @@ import { requireOnboarded } from "@/lib/auth/session";
 import { createReservation, listReservationsBySpace } from "@/lib/data/reservations";
 import { getSpaceById } from "@/lib/data/spaces";
 import { updateUser } from "@/lib/data/users";
+import { maxBookingDate } from "@/lib/booking/slots";
 import { createReservationSchema } from "@/lib/validation/reservation";
 import { withFlash } from "@/lib/feedback/flash-messages";
 import {
@@ -53,6 +54,15 @@ export async function createReservationAction(
       if (new Date(startAt) < new Date()) {
         return {
           error: `Le créneau du ${formatSlot(startAt)} est déjà passé. Choisissez une heure à venir.`,
+        };
+      }
+
+      // One day of margin: the server may not be in the member's time zone.
+      const latestStart = maxBookingDate(new Date()).getTime() + 24 * 3_600_000;
+      if (new Date(startAt).getTime() > latestStart) {
+        return {
+          error:
+            "Vous pouvez réserver jusqu'à un mois à l'avance. Choisissez un jour plus proche.",
         };
       }
 
