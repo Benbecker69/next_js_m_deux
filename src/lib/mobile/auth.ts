@@ -70,3 +70,19 @@ export async function revokeMobileSession(sessionId: string): Promise<void> {
     data: { revokedAt: new Date() },
   });
 }
+
+/**
+ * Revokes every other active session of a user — called after a password
+ * change: a device that had the old password (or a stolen token) stops
+ * working, while the one making this request stays signed in. `revokedAt`
+ * is only ever set once, so an already-revoked or expired row is left alone.
+ */
+export async function revokeOtherMobileSessions(
+  userId: string,
+  exceptSessionId: string,
+): Promise<void> {
+  await prisma.mobileSession.updateMany({
+    where: { userId, id: { not: exceptSessionId }, revokedAt: null },
+    data: { revokedAt: new Date() },
+  });
+}

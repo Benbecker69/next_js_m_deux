@@ -49,3 +49,16 @@ export const availabilityQuerySchema = z.object({
   from: z.iso.datetime({ message: "Date de début invalide." }).optional(),
   to: z.iso.datetime({ message: "Date de fin invalide." }).optional(),
 });
+
+// Same password rule as sign-up (registerSchema.password): one bar for "a
+// password strong enough to use", whether it's being set for the first time
+// or changed.
+export const changePasswordBodySchema = z.object({
+  currentPassword: z.string().min(1, "Mot de passe actuel requis."),
+  newPassword: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères."),
+});
+
+export const changeEmailBodySchema = z.object({
+  currentPassword: z.string().min(1, "Mot de passe actuel requis."),
+  email: z.string().email("Adresse e-mail invalide."),
+});

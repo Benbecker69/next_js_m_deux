@@ -1,5 +1,5 @@
 import "server-only";
-import type { Prisma, User as UserRow } from "@/generated/prisma";
+import { Prisma, type User as UserRow } from "@/generated/prisma";
 import { prisma } from "@/lib/db/prisma";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import type { User } from "@/types/domain";
@@ -76,6 +76,62 @@ export async function deleteUser(id: string): Promise<boolean> {
     return true;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Verifies a user's current password by id, not email — the mobile
+ * change-password/change-email flows already have the id (from the bearer
+ * session), not a fresh login form. `passwordHash` never leaves this file.
+ */
+export async function verifyUserPasswordById(
+  id: string,
+  password: string,
+): Promise<boolean> {
+  const row = await prisma.user.findUnique({ where: { id } });
+  if (!row) return false;
+  return verifyPassword(password, row.passwordHash);
+}
+
+/**
+ * `updateUser`'s `Partial<User>` can't touch the password: `passwordHash`
+ * isn't part of the public `User` domain type. `false` on any error, same
+ * convention as `deleteUser`.
+ */
+export async function updateUserPassword(
+  id: string,
+  newPassword: string,
+): Promise<boolean> {
+  try {
+    const passwordHash = await hashPassword(newPassword);
+    await prisma.user.update({ where: { id }, data: { passwordHash } });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export type ChangeEmailResult = "ok" | "email_taken" | "error";
+
+/**
+ * Unlike `updateUser` (which swallows every error into a generic `null`),
+ * this distinguishes a uniqueness conflict — the same race `createUser`
+ * already guards against at registration (`P2002` on two sign-ups with the
+ * same address at once) — from any other failure, so the caller can return
+ * the same `EMAIL_TAKEN` the registration endpoint already uses.
+ */
+export async function updateUserEmail(
+  id: string,
+  email: string,
+): Promise<ChangeEmailResult> {
+  try {
+    await prisma.user.update({ where: { id }, data: { email: email.toLowerCase() } });
+    return "ok";
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return "email_taken";
+    }
+    return "error";
   }
 }
 
