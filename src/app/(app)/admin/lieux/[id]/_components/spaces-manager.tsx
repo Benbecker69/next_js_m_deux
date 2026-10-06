@@ -1,12 +1,14 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
-import { useToast } from "@/lib/feedback/toast-provider";
+import { FieldError, fieldProps } from "@/components/ui/field-error";
+import { useRunAction } from "@/lib/feedback/use-run-action";
 import { useActionToast } from "@/lib/feedback/use-action-toast";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import { SPACE_TYPE_LABELS, type Space, type SpaceType } from "@/types/domain";
@@ -31,48 +33,27 @@ export function SpacesManager({
   spaces,
   createAction,
   t,
-  genericError,
 }: {
   spaces: Space[];
   createAction: (state: SpaceFormState, formData: FormData) => Promise<SpaceFormState>;
   t: Dictionary["adminSpaces"];
-  genericError: string;
 }) {
   const [state, formAction, pending] = useActionState(createAction, initialState);
   useActionToast(state, t.added);
   const values = state.values;
-  const [, startTransition] = useTransition();
+  const errors = state.fieldErrors;
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
-  const [rowError, setRowError] = useState<string | null>(null);
-  const { showSuccess, showError } = useToast();
+  // One row action at a time: `pending` disables the row buttons meanwhile.
+  const rowAction = useRunAction();
+  const rowError = rowAction.error;
 
   const toggleStatus = (spaceId: string) => {
-    setRowError(null);
-    startTransition(async () => {
-      try {
-        await toggleSpaceStatusAction(spaceId);
-        showSuccess(t.statusUpdated);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : genericError;
-        setRowError(message);
-        showError(message);
-      }
-    });
+    rowAction.run(() => toggleSpaceStatusAction(spaceId));
   };
 
   const remove = (spaceId: string) => {
-    setRowError(null);
     setConfirmingDeleteId(null);
-    startTransition(async () => {
-      try {
-        await deleteSpaceAction(spaceId);
-        showSuccess(t.deleted);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : genericError;
-        setRowError(message);
-        showError(message);
-      }
-    });
+    rowAction.run(() => deleteSpaceAction(spaceId));
   };
 
   return (
@@ -105,7 +86,8 @@ export function SpacesManager({
                 </Badge>
                 <button
                   type="button"
-                  className="text-xs text-ink-muted underline-offset-2 transition-colors hover:text-ink hover:underline"
+                  className="text-xs text-ink-muted underline-offset-2 transition-colors hover:text-ink hover:underline disabled:opacity-50"
+                  disabled={rowAction.pending}
                   onClick={() => toggleStatus(space.id)}
                 >
                   {t.toggle}
@@ -131,7 +113,8 @@ export function SpacesManager({
                 ) : (
                   <button
                     type="button"
-                    className="text-xs text-danger underline-offset-2 hover:underline"
+                    className="text-xs text-danger underline-offset-2 hover:underline disabled:opacity-50"
+                    disabled={rowAction.pending}
                     onClick={() => setConfirmingDeleteId(space.id)}
                   >
                     {t.delete}
@@ -146,25 +129,34 @@ export function SpacesManager({
       <form
         action={formAction}
         className="mt-8 grid gap-4 border-t border-line pt-6 sm:grid-cols-2"
+        noValidate
       >
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="space-name">{t.name}</Label>
-          <Input id="space-name" name="name" defaultValue={values?.name} required />
+          <Input
+            id="space-name"
+            name="name"
+            defaultValue={values?.name}
+            required
+            {...fieldProps("space-name", errors?.name)}
+          />
+          <FieldError field="space-name" message={errors?.name} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="space-type">{t.type}</Label>
-          <select
+          <Select
             id="space-type"
             name="type"
             defaultValue={values?.type ?? "poste-flex"}
-            className="h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+            {...fieldProps("space-type", errors?.type)}
           >
             {SPACE_TYPES.map((type) => (
               <option key={type} value={type}>
                 {SPACE_TYPE_LABELS[type]}
               </option>
             ))}
-          </select>
+          </Select>
+          <FieldError field="space-type" message={errors?.type} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="space-capacity">{t.capacity}</Label>
@@ -175,7 +167,9 @@ export function SpacesManager({
             min={1}
             defaultValue={values?.capacity ?? 1}
             required
+            {...fieldProps("space-capacity", errors?.capacity)}
           />
+          <FieldError field="space-capacity" message={errors?.capacity} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="space-price">{t.pricePerHour}</Label>
@@ -186,17 +180,20 @@ export function SpacesManager({
             min={1}
             defaultValue={values?.pricePerHour ?? 4}
             required
+            {...fieldProps("space-price", errors?.pricePerHour)}
           />
+          <FieldError field="space-price" message={errors?.pricePerHour} />
         </div>
 
-        {state.error && (
+        {/* A field error is already shown under its field. */}
+        {state.error && !errors && (
           <Alert variant="error" className="sm:col-span-2">
             {state.error}
           </Alert>
         )}
         {state.success && (
           <Alert variant="success" className="sm:col-span-2">
-            {t.added}
+            {state.message ?? t.added}
           </Alert>
         )}
 

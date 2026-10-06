@@ -1,12 +1,16 @@
 "use server";
 
 import { requireOnboarded } from "@/lib/auth/session";
+import { getLocationById } from "@/lib/data/locations";
 import { updatePreference } from "@/lib/data/preferences";
 import { preferencesFormSchema } from "@/lib/validation/preferences";
+import { validationFailure, type FieldErrors } from "@/lib/feedback/action-result";
+import { guardAction } from "@/lib/feedback/guard-action";
 
 export type PreferencesFormState = {
   error: string | null;
   success: boolean;
+  fieldErrors?: FieldErrors;
 };
 
 export async function updatePreferencesAction(
@@ -21,16 +25,26 @@ export async function updatePreferencesAction(
     notificationsEnabled: formData.get("notificationsEnabled") === "on",
   });
   if (!parsed.success) {
-    return {
-      error: parsed.error.issues[0]?.message ?? "Formulaire invalide.",
-      success: false,
-    };
+    return { ...validationFailure(parsed.error), success: false };
   }
 
-  await updatePreference(user.id, {
-    defaultLocationId: parsed.data.defaultLocationId,
-    notificationsEnabled: parsed.data.notificationsEnabled,
-  });
+  return guardAction<PreferencesFormState>(
+    async () => {
+      const { defaultLocationId, notificationsEnabled } = parsed.data;
+      // The list was sent with the page: the place may have been removed since.
+      if (defaultLocationId && !(await getLocationById(defaultLocationId))) {
+        const message =
+          "Ce lieu n'est plus proposé. Choisissez-en un autre dans la liste.";
+        return {
+          error: message,
+          success: false,
+          fieldErrors: { defaultLocationId: message },
+        };
+      }
 
-  return { error: null, success: true };
+      await updatePreference(user.id, { defaultLocationId, notificationsEnabled });
+      return { error: null, success: true };
+    },
+    (error) => ({ error, success: false }),
+  );
 }

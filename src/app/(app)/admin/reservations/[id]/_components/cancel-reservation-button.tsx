@@ -1,25 +1,21 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
-import { useToast } from "@/lib/feedback/toast-provider";
+import { useRunAction } from "@/lib/feedback/use-run-action";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import { adminCancelReservationAction } from "../_actions";
 
 export function CancelReservationButton({
   reservationId,
   t,
-  genericError,
 }: {
   reservationId: string;
   t: Dictionary["adminReservationsPage"];
-  genericError: string;
 }) {
-  const [pending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
+  const { run, pending, error } = useRunAction();
   const [confirming, setConfirming] = useState(false);
-  const { showSuccess, showError } = useToast();
 
   if (!confirming) {
     return (
@@ -38,18 +34,7 @@ export function CancelReservationButton({
           variant="destructive"
           size="sm"
           disabled={pending}
-          onClick={() => {
-            startTransition(async () => {
-              try {
-                await adminCancelReservationAction(reservationId);
-                showSuccess(t.cancelSuccess);
-              } catch (err) {
-                const message = err instanceof Error ? err.message : genericError;
-                setError(message);
-                showError(message);
-              }
-            });
-          }}
+          onClick={() => run(() => adminCancelReservationAction(reservationId))}
         >
           {pending ? t.cancelling : t.confirm}
         </Button>

@@ -3,7 +3,9 @@
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
+import { FieldError, fieldProps } from "@/components/ui/field-error";
 import type { Location } from "@/types/domain";
 import { useActionToast } from "@/lib/feedback/use-action-toast";
 import { completeOnboardingAction, type OnboardingFormState } from "../_actions";
@@ -30,10 +32,12 @@ export function OnboardingForm({ locations }: { locations: Location[] }) {
     initialState,
   );
   useActionToast(state);
+  const errors = state.fieldErrors;
+  const values = state.values;
 
   return (
-    <form action={formAction} className="flex flex-col gap-8">
-      <fieldset>
+    <form action={formAction} className="flex flex-col gap-8" noValidate>
+      <fieldset {...fieldProps("memberType", errors?.memberType)}>
         <legend className="text-sm font-medium text-ink">Vous êtes</legend>
         <div className="mt-3 flex flex-col gap-2">
           {MEMBER_TYPES.map((type) => (
@@ -45,6 +49,7 @@ export function OnboardingForm({ locations }: { locations: Location[] }) {
                 type="radio"
                 name="memberType"
                 value={type.value}
+                defaultChecked={values?.memberType === type.value}
                 required
                 className="mt-1 accent-[var(--pine)]"
               />
@@ -55,16 +60,19 @@ export function OnboardingForm({ locations }: { locations: Location[] }) {
             </label>
           ))}
         </div>
+        <div className="mt-2">
+          <FieldError field="memberType" message={errors?.memberType} />
+        </div>
       </fieldset>
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="defaultLocationId">Lieu par défaut</Label>
-        <select
+        <Select
           id="defaultLocationId"
           name="defaultLocationId"
           required
-          defaultValue=""
-          className="h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+          defaultValue={values?.defaultLocationId ?? ""}
+          {...fieldProps("defaultLocationId", errors?.defaultLocationId)}
         >
           <option value="" disabled>
             Choisissez un lieu
@@ -74,10 +82,11 @@ export function OnboardingForm({ locations }: { locations: Location[] }) {
               {location.name} — {location.city}
             </option>
           ))}
-        </select>
+        </Select>
+        <FieldError field="defaultLocationId" message={errors?.defaultLocationId} />
       </div>
 
-      {state.error && <Alert variant="error">{state.error}</Alert>}
+      {state.error && !errors && <Alert variant="error">{state.error}</Alert>}
 
       <Button type="submit" disabled={pending}>
         {pending ? "Enregistrement…" : "Terminer"}

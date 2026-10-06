@@ -3,10 +3,13 @@
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
+import { FieldError, fieldProps } from "@/components/ui/field-error";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import type { Location } from "@/types/domain";
+import type { FieldErrors } from "@/lib/feedback/action-result";
 import { useActionToast } from "@/lib/feedback/use-action-toast";
 
 export type LocationFormValuesInput = {
@@ -22,6 +25,7 @@ export type LocationFormValuesInput = {
 export type LocationFormState = {
   error: string | null;
   success: boolean;
+  fieldErrors?: FieldErrors;
   // Echoed back (raw, as typed) so a failed submission doesn't clear a form
   // this long.
   values?: LocationFormValuesInput;
@@ -49,9 +53,10 @@ export function LocationForm({
   });
   useActionToast(state, t.saved);
   const values = state.values;
+  const errors = state.fieldErrors;
 
   return (
-    <form action={formAction} className="flex flex-col gap-5">
+    <form action={formAction} className="flex flex-col gap-5" noValidate>
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="name">{t.name}</Label>
@@ -60,7 +65,9 @@ export function LocationForm({
             name="name"
             defaultValue={values?.name ?? initialValues?.name}
             required
+            {...fieldProps("name", errors?.name)}
           />
+          <FieldError field="name" message={errors?.name} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="city">{t.city}</Label>
@@ -69,7 +76,9 @@ export function LocationForm({
             name="city"
             defaultValue={values?.city ?? initialValues?.city}
             required
+            {...fieldProps("city", errors?.city)}
           />
+          <FieldError field="city" message={errors?.city} />
         </div>
       </div>
 
@@ -80,7 +89,9 @@ export function LocationForm({
           name="address"
           defaultValue={values?.address ?? initialValues?.address}
           required
+          {...fieldProps("address", errors?.address)}
         />
+        <FieldError field="address" message={errors?.address} />
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -93,7 +104,9 @@ export function LocationForm({
             step="any"
             defaultValue={values?.lat ?? initialValues?.lat}
             required
+            {...fieldProps("lat", errors?.lat)}
           />
+          <FieldError field="lat" message={errors?.lat} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="lng">{t.longitude}</Label>
@@ -104,21 +117,24 @@ export function LocationForm({
             step="any"
             defaultValue={values?.lng ?? initialValues?.lng}
             required
+            {...fieldProps("lng", errors?.lng)}
           />
+          <FieldError field="lng" message={errors?.lng} />
         </div>
       </div>
       <p className="-mt-3 text-xs text-ink-muted">{t.coordinatesHint}</p>
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="description">{t.description}</Label>
-        <textarea
+        <Textarea
           id="description"
           name="description"
           defaultValue={values?.description ?? initialValues?.description}
           required
           rows={4}
-          className="rounded-sm border border-line bg-surface px-3 py-2 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+          {...fieldProps("description", errors?.description)}
         />
+        <FieldError field="description" message={errors?.description} />
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -132,7 +148,8 @@ export function LocationForm({
         <p className="text-xs text-ink-muted">{t.amenitiesHint}</p>
       </div>
 
-      {state.error && <Alert variant="error">{state.error}</Alert>}
+      {/* A field error is already shown under its field. */}
+      {state.error && !errors && <Alert variant="error">{state.error}</Alert>}
       {state.success && <Alert variant="success">{t.saved}</Alert>}
 
       <div>

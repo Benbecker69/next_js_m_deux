@@ -79,7 +79,6 @@ export default async function AdminReservationDetailPage({
           <CancelReservationButton
             reservationId={reservation.id}
             t={t.adminReservationsPage}
-            genericError={t.errors.generic}
           />
         </div>
       )}

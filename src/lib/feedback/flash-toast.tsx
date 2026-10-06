@@ -33,9 +33,9 @@ export function FlashToast() {
 
     const entry = FLASH_MESSAGES[code];
     if (entry.variant === "success") {
-      showSuccess(entry.message);
+      showSuccess(entry.message, entry.title);
     } else {
-      showError(entry.message);
+      showError(entry.message, entry.title);
     }
 
     const params = new URLSearchParams(searchParams);

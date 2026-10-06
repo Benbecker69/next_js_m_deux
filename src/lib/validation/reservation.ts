@@ -2,12 +2,14 @@ import { z } from "zod";
 
 export const createReservationSchema = z
   .object({
-    spaceId: z.string().min(1, "Choisissez un espace."),
-    startAt: z.iso.datetime({ message: "Créneau de début invalide." }),
-    endAt: z.iso.datetime({ message: "Créneau de fin invalide." }),
+    spaceId: z
+      .string({ error: "Choisissez un espace à réserver." })
+      .min(1, "Choisissez un espace à réserver."),
+    startAt: z.iso.datetime({ error: "Choisissez un jour et une heure de début." }),
+    endAt: z.iso.datetime({ error: "Choisissez un jour et une heure de début." }),
   })
   .refine((value) => new Date(value.endAt) > new Date(value.startAt), {
-    message: "Le créneau de fin doit être après le créneau de début.",
+    message: "L'heure de fin doit être après l'heure de début.",
     path: ["endAt"],
   });
 

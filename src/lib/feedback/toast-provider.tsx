@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -12,16 +13,20 @@ import { CircleAlert, CircleCheck, X } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 type ToastVariant = "success" | "error";
-type ToastItem = { id: number; variant: ToastVariant; message: string };
+type ToastItem = { id: number; variant: ToastVariant; title?: string; message: string };
 
 type ToastContextValue = {
-  showSuccess: (message: string) => void;
-  showError: (message: string) => void;
+  /** `title` is optional: a short bold line above the message. */
+  showSuccess: (message: string, title?: string) => void;
+  showError: (message: string, title?: string) => void;
 };
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
-const AUTO_DISMISS_MS = 5000;
+// An error has to be read and acted on, a confirmation only noticed.
+const DISMISS_MS: Record<ToastVariant, number> = { success: 4500, error: 9000 };
+// Older toasts drop off the top so the stack never covers the page.
+const MAX_VISIBLE = 3;
 
 /**
  * App-wide toast stack, mounted once in the root layout. Covers the cases a
@@ -32,23 +37,31 @@ const AUTO_DISMISS_MS = 5000;
  */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const nextId = useRef(1);
 
   const dismiss = useCallback((id: number) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
   }, []);
 
-  const push = useCallback((variant: ToastVariant, message: string) => {
-    const id = Date.now() + Math.random();
-    setToasts((current) => [...current, { id, variant, message }]);
-    setTimeout(() => {
-      setToasts((current) => current.filter((toast) => toast.id !== id));
-    }, AUTO_DISMISS_MS);
-  }, []);
+  const push = useCallback(
+    (variant: ToastVariant, message: string, title?: string) => {
+      const id = nextId.current++;
+      setToasts((current) => {
+        // Clicking twice on a failing button must not stack the same text.
+        const others = current.filter(
+          (toast) => !(toast.variant === variant && toast.message === message),
+        );
+        return [...others, { id, variant, title, message }].slice(-MAX_VISIBLE);
+      });
+      setTimeout(() => dismiss(id), DISMISS_MS[variant]);
+    },
+    [dismiss],
+  );
 
   const value = useMemo<ToastContextValue>(
     () => ({
-      showSuccess: (message) => push("success", message),
-      showError: (message) => push("error", message),
+      showSuccess: (message, title) => push("success", message, title),
+      showError: (message, title) => push("error", message, title),
     }),
     [push],
   );
@@ -71,23 +84,34 @@ function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
 
   return (
     <div
+      // "alert" interrupts a screen reader, "status" waits for a pause.
       role={isError ? "alert" : "status"}
       className={cn(
-        "pointer-events-auto flex w-full max-w-sm items-start gap-2 rounded-sm border bg-surface px-4 py-3 text-sm shadow-sm",
+        "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-sm border border-l-4 bg-surface px-4 py-3 text-sm shadow-md",
         "animate-toast-in",
-        isError ? "border-danger/30" : "border-pine/30",
+        isError ? "border-danger/30 border-l-danger" : "border-pine/30 border-l-pine",
       )}
     >
       <Icon
         className={cn("mt-0.5 h-4 w-4 shrink-0", isError ? "text-danger" : "text-pine")}
         strokeWidth={1.75}
       />
-      <p className="flex-1 text-ink">{toast.message}</p>
+      <div className="min-w-0 flex-1">
+        {toast.title && <p className="font-medium text-ink">{toast.title}</p>}
+        <p
+          className={cn(
+            "break-words",
+            toast.title ? "mt-0.5 text-ink-muted" : "text-ink",
+          )}
+        >
+          {toast.message}
+        </p>
+      </div>
       <button
         type="button"
         onClick={onDismiss}
         aria-label="Fermer cette notification"
-        className="text-ink-muted transition-colors hover:text-ink"
+        className="-m-1 rounded-sm p-1 text-ink-muted transition-colors hover:text-ink"
       >
         <X className="h-4 w-4" strokeWidth={1.75} />
       </button>

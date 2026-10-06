@@ -8,15 +8,50 @@
  * error, not a silently-missing toast.
  */
 export const FLASH_MESSAGES = {
-  "reservation-confirmee": { variant: "success", message: "Réservation confirmée." },
-  "lieu-cree": { variant: "success", message: "Lieu créé." },
-  "connexion-reussie": { variant: "success", message: "Connexion réussie." },
+  "reservation-confirmee": {
+    variant: "success",
+    title: "Réservation confirmée",
+    message: "Votre créneau est réservé et les crédits ont été débités de votre solde.",
+  },
+  "lieu-cree": {
+    variant: "success",
+    title: "Lieu créé",
+    message: "Ajoutez-lui maintenant des espaces pour qu'il puisse être réservé.",
+  },
+  "connexion-reussie": {
+    variant: "success",
+    title: "Connexion réussie",
+    message: "Heureux de vous revoir.",
+  },
+  "compte-cree": {
+    variant: "success",
+    title: "Compte créé",
+    message: "20 crédits de bienvenue ont été ajoutés à votre solde.",
+  },
   "profil-complete": {
     variant: "success",
-    message: "Profil complété. Bienvenue sur votre tableau de bord !",
+    title: "Profil complété",
+    message: "Bienvenue sur votre tableau de bord !",
   },
-  "utilisateur-supprime": { variant: "success", message: "Utilisateur supprimé." },
-} as const satisfies Record<string, { variant: "success" | "error"; message: string }>;
+  "utilisateur-supprime": {
+    variant: "success",
+    title: "Utilisateur supprimé",
+    message: "Son compte et ses réservations ont été supprimés.",
+  },
+  deconnexion: {
+    variant: "success",
+    title: "Vous êtes déconnecté",
+    message: "À bientôt sur Repère.",
+  },
+  "connexion-requise": {
+    variant: "error",
+    title: "Connexion requise",
+    message: "Connectez-vous pour accéder à cette page.",
+  },
+} as const satisfies Record<
+  string,
+  { variant: "success" | "error"; title: string; message: string }
+>;
 
 export type FlashCode = keyof typeof FLASH_MESSAGES;
 

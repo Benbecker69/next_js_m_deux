@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
+import { FieldError, fieldProps } from "@/components/ui/field-error";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import { useActionToast } from "@/lib/feedback/use-action-toast";
 import { registerAction, type RegisterFormState } from "../_actions";
@@ -15,9 +16,10 @@ const initialState: RegisterFormState = { error: null };
 export function RegisterForm({ t }: { t: Dictionary["auth"] }) {
   const [state, formAction, pending] = useActionState(registerAction, initialState);
   useActionToast(state);
+  const errors = state.fieldErrors;
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <form action={formAction} className="flex flex-col gap-4" noValidate>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="name">{t.name}</Label>
         <Input
@@ -27,7 +29,9 @@ export function RegisterForm({ t }: { t: Dictionary["auth"] }) {
           autoComplete="name"
           defaultValue={state.values?.name}
           required
+          {...fieldProps("name", errors?.name)}
         />
+        <FieldError field="name" message={errors?.name} />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">{t.email}</Label>
@@ -39,7 +43,9 @@ export function RegisterForm({ t }: { t: Dictionary["auth"] }) {
           spellCheck={false}
           defaultValue={state.values?.email}
           required
+          {...fieldProps("email", errors?.email)}
         />
+        <FieldError field="email" message={errors?.email} />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="password">{t.password}</Label>
@@ -49,11 +55,20 @@ export function RegisterForm({ t }: { t: Dictionary["auth"] }) {
           type="password"
           autoComplete="new-password"
           required
+          aria-describedby={errors?.password ? "password-error" : "password-hint"}
+          aria-invalid={errors?.password ? true : undefined}
         />
+        {errors?.password ? (
+          <FieldError field="password" message={errors.password} />
+        ) : (
+          <p id="password-hint" className="text-xs text-ink-muted">
+            {t.passwordHint}
+          </p>
+        )}
       </div>
-      {/* registerAction's error text is server-generated and stays French
-          for now — see the i18n scope note in this commit's summary. */}
-      {state.error && <Alert variant="error">{state.error}</Alert>}
+      {/* registerAction's messages are written on the server, in French. A
+          field error is already shown under its field. */}
+      {state.error && !errors && <Alert variant="error">{state.error}</Alert>}
       <Button type="submit" disabled={pending}>
         {pending ? t.registerPending : t.registerCta}
       </Button>

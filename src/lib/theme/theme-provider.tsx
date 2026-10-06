@@ -46,6 +46,17 @@ function getSnapshot(): Theme {
   return isTheme(stored) ? stored : "system";
 }
 
+/**
+ * Re-applies the saved theme to <html>. The blocking script in the layout
+ * normally does this before hydration, but an inline script does not run
+ * when React has to render the document on the client — which is what
+ * happens after a server error. The error screen calls this on mount so it
+ * never shows up in the wrong theme.
+ */
+export function applyStoredTheme() {
+  applyTheme(getSnapshot());
+}
+
 function getServerSnapshot(): Theme {
   return "system";
 }

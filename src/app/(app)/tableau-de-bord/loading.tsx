@@ -1,17 +1,22 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  HeadingSkeleton,
+  ListSkeleton,
+  SkeletonPage,
+  StatGridSkeleton,
+  TitleSkeleton,
+} from "@/components/skeletons";
 
 export default function DashboardLoading() {
   return (
-    <div className="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-12">
-      <Skeleton className="h-8 w-48" />
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <Skeleton className="h-20" />
-        <Skeleton className="h-20" />
-      </div>
+    <SkeletonPage width="4xl">
+      <TitleSkeleton />
+      <StatGridSkeleton count={4} className="mt-8" />
       <div className="mt-12">
-        <Skeleton className="h-6 w-40" />
-        <Skeleton className="mt-4 h-24" />
+        <HeadingSkeleton />
+        <div className="mt-4">
+          <ListSkeleton rows={3} trailing={false} />
+        </div>
       </div>
-    </div>
+    </SkeletonPage>
   );
 }

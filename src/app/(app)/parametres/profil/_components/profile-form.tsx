@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
+import { FieldError, fieldProps } from "@/components/ui/field-error";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import type { MemberType } from "@/types/domain";
 import { useActionToast } from "@/lib/feedback/use-action-toast";
@@ -23,6 +24,7 @@ export function ProfileForm({
 }) {
   const [state, formAction, pending] = useActionState(updateProfileAction, initialState);
   useActionToast(state, t.profileSaved);
+  const errors = state.fieldErrors;
 
   const MEMBER_TYPES: { value: MemberType; label: string }[] = [
     { value: "freelance", label: t.freelance },
@@ -31,13 +33,20 @@ export function ProfileForm({
   ];
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    <form action={formAction} className="flex flex-col gap-6" noValidate>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="name">{t.name}</Label>
-        <Input id="name" name="name" defaultValue={state.name ?? name} required />
+        <Input
+          id="name"
+          name="name"
+          defaultValue={state.name ?? name}
+          required
+          {...fieldProps("name", errors?.name)}
+        />
+        <FieldError field="name" message={errors?.name} />
       </div>
 
-      <fieldset>
+      <fieldset {...fieldProps("memberType", errors?.memberType)}>
         <legend className="text-sm font-medium text-ink">{t.youAre}</legend>
         <div className="mt-2 flex flex-wrap gap-2">
           {MEMBER_TYPES.map((type) => (
@@ -55,9 +64,12 @@ export function ProfileForm({
             </label>
           ))}
         </div>
+        <div className="mt-2">
+          <FieldError field="memberType" message={errors?.memberType} />
+        </div>
       </fieldset>
 
-      {state.error && <Alert variant="error">{state.error}</Alert>}
+      {state.error && !errors && <Alert variant="error">{state.error}</Alert>}
       {state.success && <Alert variant="success">{t.profileSaved}</Alert>}
 
       <div>

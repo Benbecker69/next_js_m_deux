@@ -3,7 +3,9 @@
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
+import { FieldError, fieldProps } from "@/components/ui/field-error";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import type { Location } from "@/types/domain";
 import { useActionToast } from "@/lib/feedback/use-action-toast";
@@ -27,16 +29,17 @@ export function PreferencesForm({
     initialState,
   );
   useActionToast(state, t.preferencesSaved);
+  const errors = state.fieldErrors;
 
   return (
-    <form action={formAction} className="flex flex-col gap-6">
+    <form action={formAction} className="flex flex-col gap-6" noValidate>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="defaultLocationId">{t.defaultLocation}</Label>
-        <select
+        <Select
           id="defaultLocationId"
           name="defaultLocationId"
           defaultValue={defaultLocationId ?? ""}
-          className="h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+          {...fieldProps("defaultLocationId", errors?.defaultLocationId)}
         >
           <option value="">{t.none}</option>
           {locations.map((location) => (
@@ -44,7 +47,8 @@ export function PreferencesForm({
               {location.name} — {location.city}
             </option>
           ))}
-        </select>
+        </Select>
+        <FieldError field="defaultLocationId" message={errors?.defaultLocationId} />
       </div>
 
       <label className="flex items-center gap-2 text-sm text-ink">
@@ -59,7 +63,7 @@ export function PreferencesForm({
 
       <p className="text-xs text-ink-muted">{t.themeHint}</p>
 
-      {state.error && <Alert variant="error">{state.error}</Alert>}
+      {state.error && !errors && <Alert variant="error">{state.error}</Alert>}
       {state.success && <Alert variant="success">{t.preferencesSaved}</Alert>}
 
       <div>

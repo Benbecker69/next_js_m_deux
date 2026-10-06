@@ -75,7 +75,6 @@ export default async function AdminUserDetailPage({
               isSelf={user.id === admin.id}
               action={boundAction}
               t={t.adminUserDetail}
-              genericError={t.errors.generic}
             />
           </div>
         </div>

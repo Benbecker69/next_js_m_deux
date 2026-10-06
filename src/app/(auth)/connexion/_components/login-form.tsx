@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
+import { FieldError, fieldProps } from "@/components/ui/field-error";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import { useActionToast } from "@/lib/feedback/use-action-toast";
 import { loginAction, type LoginFormState } from "../_actions";
@@ -25,6 +26,7 @@ const DEMO_PASSWORD = "demo1234";
 export function LoginForm({ t }: { t: Dictionary["auth"] }) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
   useActionToast(state);
+  const errors = state.fieldErrors;
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -37,7 +39,7 @@ export function LoginForm({ t }: { t: Dictionary["auth"] }) {
   };
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <form action={formAction} className="flex flex-col gap-4" noValidate>
       <div className="rounded-sm border border-dashed border-line p-3">
         <p className="text-xs text-ink-muted">{t.demoAccountsLabel}</p>
         <div className="mt-2 flex gap-2">
@@ -70,7 +72,9 @@ export function LoginForm({ t }: { t: Dictionary["auth"] }) {
           spellCheck={false}
           defaultValue={state.email}
           required
+          {...fieldProps("email", errors?.email)}
         />
+        <FieldError field="email" message={errors?.email} />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="password">{t.password}</Label>
@@ -81,11 +85,13 @@ export function LoginForm({ t }: { t: Dictionary["auth"] }) {
           type="password"
           autoComplete="current-password"
           required
+          {...fieldProps("password", errors?.password)}
         />
+        <FieldError field="password" message={errors?.password} />
       </div>
-      {/* loginAction's error text is server-generated and stays French for
-          now — see the i18n scope note in this commit's summary. */}
-      {state.error && <Alert variant="error">{state.error}</Alert>}
+      {/* loginAction's messages are written on the server, in French. A
+          field error is already shown under its field. */}
+      {state.error && !errors && <Alert variant="error">{state.error}</Alert>}
       <Button type="submit" disabled={pending}>
         {pending ? t.loginPending : t.loginCta}
       </Button>

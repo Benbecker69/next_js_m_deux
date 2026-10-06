@@ -1,30 +1,24 @@
 "use client";
 
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+// Scoped to the dashboard: same screen as the rest of the member area, with
+// a sentence that names what failed to load.
+import { ErrorScreen } from "@/components/error-screen";
 
 export default function DashboardError({
   error,
-  reset,
+  retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 }) {
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
-
   return (
-    <div className="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-12">
-      <h1 className="font-display text-xl font-medium text-ink">
-        Une erreur est survenue
-      </h1>
-      <p className="mt-2 text-sm text-ink-muted">
-        Le tableau de bord n&apos;a pas pu être chargé. Réessayez, ou revenez plus tard.
-      </p>
-      <div className="mt-6">
-        <Button onClick={reset}>Réessayer</Button>
-      </div>
-    </div>
+    <ErrorScreen
+      error={error}
+      retry={retry}
+      title="Votre tableau de bord n'a pas pu être chargé."
+      description="Vos crédits et vos réservations n'ont pas pu être récupérés. Ils ne sont pas touchés : réessayez, ou passez par « Mes réservations »."
+      homeHref="/reservations"
+      homeLabel="Voir mes réservations"
+    />
   );
 }

@@ -209,6 +209,7 @@ export const en = {
     demoMember: "Member",
     email: "Email",
     password: "Password",
+    passwordHint: "At least 8 characters.",
     loginCta: "Log in",
     loginPending: "Logging in…",
     noAccount: "No account yet?",
@@ -224,6 +225,9 @@ export const en = {
   errors: {
     notFoundMetaTitle: "Page not found",
     notFoundCode: "404",
+    appNotFoundTitle: "This item can't be found.",
+    appNotFoundBody:
+      "It may have been deleted, or the link you followed is no longer valid. Nothing is lost: start again from your dashboard.",
     notFoundTitle: "This landmark doesn't exist.",
     notFoundBody:
       "The page you're looking for is gone, or never existed. Check the address, or head back to familiar ground.",
@@ -268,8 +272,16 @@ export const en = {
     sortByDistance: "Sort by distance",
     sortedByDistance: "Sorted by distance",
     locating: "Locating…",
-    geoUnavailable: "Geolocation isn't available on this browser.",
-    geoDenied: "Location access denied or unavailable.",
+    geoUnavailable:
+      "This browser doesn't offer geolocation. Use the city search to find a space.",
+    geoDenied:
+      "You declined access to your location. Allow it in the site settings (icon left of the address), then try again.",
+    geoTimeout:
+      "Your location is taking too long to arrive. Check that location is enabled on your device, then try again.",
+    geoPositionUnavailable:
+      "Your location couldn't be determined. Try again in a moment, or use the city search.",
+    geoErrorTitle: "Couldn't locate you",
+    geoSuccess: "Spaces sorted from nearest to farthest.",
     noResults: "No space matches this search.",
     creditsPerHour: "credits/hr",
     book: "Book",

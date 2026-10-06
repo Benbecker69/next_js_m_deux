@@ -212,6 +212,7 @@ export const fr = {
     demoMember: "Membre",
     email: "E-mail",
     password: "Mot de passe",
+    passwordHint: "8 caractères au minimum.",
     loginCta: "Se connecter",
     loginPending: "Connexion…",
     noAccount: "Pas encore de compte ?",
@@ -227,6 +228,9 @@ export const fr = {
   errors: {
     notFoundMetaTitle: "Page introuvable",
     notFoundCode: "404",
+    appNotFoundTitle: "Cet élément est introuvable.",
+    appNotFoundBody:
+      "Il a peut-être été supprimé, ou le lien que vous avez suivi n'est plus valable. Rien n'est perdu : repartez de votre tableau de bord.",
     notFoundTitle: "Ce repère n'existe pas.",
     notFoundBody:
       "La page que vous cherchez a disparu, ou n'a jamais existé. Vérifiez l'adresse, ou repartez d'un point connu.",
@@ -272,8 +276,16 @@ export const fr = {
     sortByDistance: "Trier par distance",
     sortedByDistance: "Trié par distance",
     locating: "Localisation…",
-    geoUnavailable: "La géolocalisation n'est pas disponible sur ce navigateur.",
-    geoDenied: "Localisation refusée ou indisponible.",
+    geoUnavailable:
+      "Ce navigateur ne propose pas la géolocalisation. Utilisez la recherche par ville pour trouver un espace.",
+    geoDenied:
+      "Vous avez refusé l'accès à votre position. Autorisez-le dans les réglages du site (icône à gauche de l'adresse), puis réessayez.",
+    geoTimeout:
+      "Votre position met trop de temps à arriver. Vérifiez que la localisation est activée sur votre appareil, puis réessayez.",
+    geoPositionUnavailable:
+      "Votre position n'a pas pu être déterminée. Réessayez dans un instant, ou utilisez la recherche par ville.",
+    geoErrorTitle: "Localisation impossible",
+    geoSuccess: "Espaces triés du plus proche au plus éloigné.",
     noResults: "Aucun espace ne correspond à cette recherche.",
     creditsPerHour: "crédits/h",
     book: "Réserver",

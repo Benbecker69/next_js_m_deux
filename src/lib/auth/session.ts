@@ -3,6 +3,7 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getUserById } from "@/lib/data/users";
+import { withFlash } from "@/lib/feedback/flash-messages";
 import type { User } from "@/types/domain";
 
 const SESSION_COOKIE = "repere_session";
@@ -46,7 +47,8 @@ export const getSession = cache(async (): Promise<User | null> => {
  */
 export async function requireUser(): Promise<User> {
   const user = await getSession();
-  if (!user) redirect("/connexion");
+  // The toast on arrival says why the page changed (see flash-messages.ts).
+  if (!user) redirect(withFlash("/connexion", "connexion-requise"));
   return user;
 }
 

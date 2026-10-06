@@ -69,11 +69,7 @@ export default async function ReservationDetailPage({
 
       {canCancel && (
         <div className="mt-8">
-          <CancelReservationButton
-            reservationId={reservation.id}
-            t={t.myReservations}
-            genericError={t.errors.generic}
-          />
+          <CancelReservationButton reservationId={reservation.id} t={t.myReservations} />
         </div>
       )}
     </div>

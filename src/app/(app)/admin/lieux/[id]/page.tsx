@@ -58,7 +58,6 @@ export default async function AdminLocationDetailPage({
           spaces={spaces}
           createAction={boundCreateSpace}
           t={t.adminSpaces}
-          genericError={t.errors.generic}
         />
       </div>
     </div>

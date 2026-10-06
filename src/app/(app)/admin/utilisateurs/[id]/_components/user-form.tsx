@@ -1,11 +1,13 @@
 "use client";
 
-import { Fragment, useActionState, useState, useTransition } from "react";
+import { Fragment, useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
-import { useToast } from "@/lib/feedback/toast-provider";
+import { FieldError, fieldProps } from "@/components/ui/field-error";
+import { useRunAction } from "@/lib/feedback/use-run-action";
 import { useActionToast } from "@/lib/feedback/use-action-toast";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
 import type { User } from "@/types/domain";
@@ -18,50 +20,42 @@ export function UserForm({
   isSelf,
   action,
   t,
-  genericError,
 }: {
   user: User;
   isSelf: boolean;
   action: (state: UserFormState, formData: FormData) => Promise<UserFormState>;
   t: Dictionary["adminUserDetail"];
-  genericError: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   useActionToast(state, t.saved);
-  const [deletePending, startDeleteTransition] = useTransition();
+  const errors = state.fieldErrors;
+  const deletion = useRunAction();
+  const deletePending = deletion.pending;
+  const deleteError = deletion.error;
   const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-  const { showError } = useToast();
 
+  // On success the action redirects to the list (with its own toast): only
+  // a refusal ever comes back here.
   const remove = () => {
-    setDeleteError(null);
-    startDeleteTransition(async () => {
-      try {
-        await deleteUserAdminAction(user.id);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : genericError;
-        setConfirmingDelete(false);
-        setDeleteError(message);
-        showError(message);
-      }
-    });
+    deletion.run(() => deleteUserAdminAction(user.id));
   };
 
   return (
     <Fragment>
-      <form action={formAction} className="flex flex-col gap-5">
+      <form action={formAction} className="flex flex-col gap-5" noValidate>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="role">{t.role}</Label>
-          <select
+          <Select
             id="role"
             name="role"
             defaultValue={user.role}
             disabled={isSelf}
-            className="h-10 rounded-sm border border-line bg-surface px-3 text-sm text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:cursor-not-allowed disabled:opacity-50"
+            {...fieldProps("role", errors?.role)}
           >
             <option value="member">{t.member}</option>
             <option value="admin">{t.administrator}</option>
-          </select>
+          </Select>
+          <FieldError field="role" message={errors?.role} />
           {isSelf && <p className="text-xs text-ink-muted">{t.cannotEditOwnRole}</p>}
         </div>
 
@@ -72,12 +66,14 @@ export function UserForm({
             name="credits"
             type="number"
             min={0}
-            defaultValue={user.credits}
+            defaultValue={state.values?.credits ?? user.credits}
             required
+            {...fieldProps("credits", errors?.credits)}
           />
+          <FieldError field="credits" message={errors?.credits} />
         </div>
 
-        {state.error && <Alert variant="error">{state.error}</Alert>}
+        {state.error && !errors && <Alert variant="error">{state.error}</Alert>}
         {state.success && <Alert variant="success">{t.saved}</Alert>}
 
         <div>

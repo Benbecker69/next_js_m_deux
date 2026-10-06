@@ -5,9 +5,16 @@ import { setLocaleAction } from "@/lib/i18n/actions";
 import type { Locale } from "@/lib/i18n/locale";
 import { cn } from "@/lib/utils/cn";
 import { FlagIcon } from "@/components/flag-icon";
+import { MESSAGES } from "@/lib/feedback/action-result";
+import { useToast } from "@/lib/feedback/toast-provider";
 
 const LABEL: Record<Locale, string> = { fr: "Français", en: "English" };
 const LOCALES: Locale[] = ["fr", "en"];
+// Written in the language just chosen: it is the one the reader asked for.
+const CHANGED: Record<Locale, string> = {
+  fr: "Le site est maintenant en français.",
+  en: "The site is now in English.",
+};
 
 // Locale lives server-side only (a cookie read in getLocale()) — this just
 // renders the current value passed down from a Server Component parent and
@@ -30,6 +37,7 @@ export function LocaleSwitcher({
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const containerRef = useRef<HTMLDivElement>(null);
+  const { showSuccess, showError } = useToast();
 
   useEffect(() => {
     if (!open) return;
@@ -50,7 +58,14 @@ export function LocaleSwitcher({
 
   const select = (next: Locale) => {
     setOpen(false);
-    startTransition(() => setLocaleAction(next));
+    startTransition(async () => {
+      try {
+        await setLocaleAction(next);
+        showSuccess(CHANGED[next]);
+      } catch {
+        showError(MESSAGES.network);
+      }
+    });
   };
 
   const otherLocales = LOCALES.filter((value) => value !== locale);
