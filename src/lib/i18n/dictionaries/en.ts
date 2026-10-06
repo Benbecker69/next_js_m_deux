@@ -33,6 +33,7 @@ export const en = {
   home: {
     heroTitlePrefix: "A desk, not an address to ",
     heroTitleEmphasis: "guess at.",
+    heroImageAlt: "Three people working together around a table, laptops open, laughing.",
     heroSubtitle:
       "Repère lists coworking spaces all across France and lets you book a desk, a room, or a flex seat for the day, in a few clicks.",
     howItWorks: "How it works",

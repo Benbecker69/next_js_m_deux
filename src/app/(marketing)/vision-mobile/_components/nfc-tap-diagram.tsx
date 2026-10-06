@@ -1,7 +1,6 @@
 import { Smartphone, DoorOpen } from "lucide-react";
 
-// Decorative but content-grounded (same principle as SpacePlan on the
-// homepage): a schematic of a badge tap at a real referenced location, not a
+// Decorative but content-grounded: a schematic of a badge tap at a real referenced location, not a
 // generic "connectivity" illustration. Hidden from assistive tech — the
 // heading and body copy next to it carry the actual message.
 export function NfcTapDiagram() {

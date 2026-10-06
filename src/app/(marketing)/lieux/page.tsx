@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { LocationArt } from "@/components/location-art";
+import { LocationPhoto } from "@/components/location-photo";
 import { getCachedLocations } from "@/lib/data/locations";
 import { getCachedSpaces } from "@/lib/data/spaces";
 import { getT } from "@/lib/i18n/locale";
@@ -53,7 +53,7 @@ export default async function LocationsPage() {
                 href={`/lieux/${location.slug}`}
                 className="group block transition-transform duration-150 hover:-translate-y-0.5"
               >
-                <LocationArt
+                <LocationPhoto
                   slug={location.slug}
                   variant="top"
                   zoom
