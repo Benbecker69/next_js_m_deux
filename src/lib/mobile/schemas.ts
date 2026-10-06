@@ -43,9 +43,25 @@ export const checkInBodySchema = z.object({
   accuracyM: z.number().min(0, "Précision invalide.").max(100_000, "Précision invalide."),
   // ISO 8601 UTC ("...Z"), as produced by Date.prototype.toISOString().
   capturedAt: z.iso.datetime({ message: "Horodatage de la position invalide." }),
+  // The space id read from a scanned QR code — optional, most attempts stay
+  // GPS-only. See WRONG_SPACE in src/lib/mobile/checkin.ts.
+  scannedSpaceId: z.string().min(1).optional(),
 });
 
 export const availabilityQuerySchema = z.object({
   from: z.iso.datetime({ message: "Date de début invalide." }).optional(),
   to: z.iso.datetime({ message: "Date de fin invalide." }).optional(),
+});
+
+// Same password rule as sign-up (registerSchema.password): one bar for "a
+// password strong enough to use", whether it's being set for the first time
+// or changed.
+export const changePasswordBodySchema = z.object({
+  currentPassword: z.string().min(1, "Mot de passe actuel requis."),
+  newPassword: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères."),
+});
+
+export const changeEmailBodySchema = z.object({
+  currentPassword: z.string().min(1, "Mot de passe actuel requis."),
+  email: z.string().email("Adresse e-mail invalide."),
 });

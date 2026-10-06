@@ -18,6 +18,7 @@ export async function POST(
       lng: body.lng,
       accuracyM: body.accuracyM,
       capturedAt: new Date(body.capturedAt),
+      scannedSpaceId: body.scannedSpaceId,
     });
     return json(result, 201);
   });

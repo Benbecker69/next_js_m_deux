@@ -37,21 +37,24 @@ Le cahier des charges demande de justifier chaque Route Handler.
 
 ## Routes
 
-| Route                              | Auth | Entrée                                             | Réponse                            |
-| ---------------------------------- | ---- | -------------------------------------------------- | ---------------------------------- |
-| `GET /health`                      | non  | —                                                  | `{ status, api, version, time }`   |
-| `POST /auth/register`              | non  | `{ name, email, password, deviceName? }`           | `201 { token, expiresAt, user }`   |
-| `POST /auth/login`                 | non  | `{ email, password, deviceName? }`                 | `{ token, expiresAt, user }`       |
-| `POST /auth/logout`                | oui  | —                                                  | `204`                              |
-| `GET /me`                          | oui  | —                                                  | `{ user }`                         |
-| `GET /spaces/nearby`               | oui  | `lat, lng, startAt?, endAt?, limit?, includeBusy?` | `{ slot, hasPosition, items[] }`   |
-| `GET /spaces/{id}/availability`    | oui  | `from?, to?` (ISO, défaut maintenant→+7j)          | `{ space, location, busySlots[] }` |
-| `GET /reservations`                | oui  | `scope=upcoming\|past\|all, limit, cursor`         | `{ items[], nextCursor }`          |
-| `POST /reservations`               | oui  | `{ spaceId, startAt, endAt }`                      | `201 { reservation, credits }`     |
-| `GET /reservations/{id}`           | oui  | —                                                  | `{ reservation }`                  |
-| `POST /reservations/{id}/cancel`   | oui  | —                                                  | `{ reservation, credits }`         |
-| `POST /reservations/{id}/check-in` | oui  | `{ lat, lng, accuracyM, capturedAt }`              | `201 { checkIn, radiusM }`         |
-| `GET /check-ins`                   | oui  | `limit, cursor`                                    | `{ items[], nextCursor }`          |
+| Route                              | Auth | Entrée                                                 | Réponse                            |
+| ---------------------------------- | ---- | ------------------------------------------------------ | ---------------------------------- |
+| `GET /health`                      | non  | —                                                      | `{ status, api, version, time }`   |
+| `POST /auth/register`              | non  | `{ name, email, password, deviceName? }`               | `201 { token, expiresAt, user }`   |
+| `POST /auth/login`                 | non  | `{ email, password, deviceName? }`                     | `{ token, expiresAt, user }`       |
+| `POST /auth/logout`                | oui  | —                                                      | `204`                              |
+| `GET /me`                          | oui  | —                                                      | `{ user }`                         |
+| `PATCH /me`                        | oui  | `{ name, memberType }`                                 | `{ user }`                         |
+| `POST /me/password`                | oui  | `{ currentPassword, newPassword }`                     | `204`                              |
+| `POST /me/email`                   | oui  | `{ currentPassword, email }`                           | `{ user }`                         |
+| `GET /spaces/nearby`               | oui  | `lat, lng, startAt?, endAt?, limit?, includeBusy?`     | `{ slot, hasPosition, items[] }`   |
+| `GET /spaces/{id}/availability`    | oui  | `from?, to?` (ISO, défaut maintenant→+7j)              | `{ space, location, busySlots[] }` |
+| `GET /reservations`                | oui  | `scope=upcoming\|past\|all, limit, cursor`             | `{ items[], nextCursor }`          |
+| `POST /reservations`               | oui  | `{ spaceId, startAt, endAt }`                          | `201 { reservation, credits }`     |
+| `GET /reservations/{id}`           | oui  | —                                                      | `{ reservation }`                  |
+| `POST /reservations/{id}/cancel`   | oui  | —                                                      | `{ reservation, credits }`         |
+| `POST /reservations/{id}/check-in` | oui  | `{ lat, lng, accuracyM, capturedAt, scannedSpaceId? }` | `201 { checkIn, radiusM }`         |
+| `GET /check-ins`                   | oui  | `limit, cursor`                                        | `{ items[], nextCursor }`          |
 
 Conventions : dates en ISO 8601 UTC (`2026-09-21T10:00:00.000Z`) ; pagination par
 curseur (`nextCursor` est `null` en fin de liste) ; réponses jamais mises en cache
@@ -72,6 +75,44 @@ précis » : l'espace, son lieu, et les créneaux déjà pris (`busySlots`, uniq
 `startAt`/`endAt` — aucune autre réservation n'est identifiable). Période bornée à
 30 jours. `404 SPACE_NOT_FOUND` si l'espace n'existe pas ou n'est plus actif.
 
+`PATCH /me` modifie le profil : mêmes champs, même schéma zod
+(`profileSchema`) et même appel `updateUser` que l'onglet « Profil » du site
+(`(app)/parametres/profil/_actions.ts`) — une seule ligne dans `users`, donc un
+changement fait sur l'app est immédiatement visible sur le site et
+réciproquement, sans mécanisme de synchronisation séparé. `avatarUrl` reste
+hors périmètre : le formulaire web ne le modifie pas non plus. `404
+USER_NOT_FOUND` dans le cas limite où le compte a été supprimé entre
+l'authentification et l'écriture (même limite pour `POST /me/password` et
+`POST /me/email`).
+
+`POST /me/password` et `POST /me/email` **n'existent pas sur le site** : sa
+page « Sécurité » (`(app)/parametres/securite/page.tsx`) est en lecture
+seule et annonce explicitement que la modification du mot de passe
+« arrivera dans une prochaine mise à jour ». Ce n'est donc pas une reprise
+d'une action web existante, mais une nouvelle capacité construite sur les
+mêmes primitives (`src/lib/auth/password.ts`, scrypt) et les mêmes codes
+d'erreur que le reste de l'API (`INVALID_CREDENTIALS`, `EMAIL_TAKEN`). Les
+deux exigent `currentPassword` : un jeton de session seul ne suffit pas à
+prouver que c'est bien l'utilisateur qui tape, pas un appareil qui aurait
+volé le jeton. `POST /me/password` révoque en plus **toutes les autres**
+sessions mobiles de l'utilisateur (celle qui fait la requête reste active) —
+un appareil qui n'avait que l'ancien mot de passe, ou un jeton volé, cesse de
+fonctionner. `POST /me/email` refuse `409 EMAIL_TAKEN` si l'adresse
+appartient déjà à un autre compte (même vérification, en deux temps comme à
+l'inscription, qu'à `POST /auth/register`).
+
+**Check-in par QR.** `Space` n'a pas de coordonnées propres — seule sa
+`Location` en a (`prisma/schema.prisma`) — donc le rayon de 150 m ne peut
+jamais distinguer deux espaces qui partagent un même lieu. Scanner le QR
+collé sur un espace (payload `repere:space:{id}`) et envoyer son id dans
+`scannedSpaceId` ajoute cette précision, **en plus** de la position, pas à
+sa place : si `scannedSpaceId` ne correspond pas à l'espace réservé, refus
+immédiat (`WRONG_SPACE`), avant même de regarder l'heure ou la distance. Le
+champ reste optionnel : un check-in sans scan continue de fonctionner
+exactement comme avant. `scannedSpaceId` est aussi stocké sur la ligne
+`check_ins`, qu'il corresponde ou non, pour que la trace montre si une
+tentative a été corroborée par un scan.
+
 ## Format d'erreur
 
 ```json
@@ -88,7 +129,7 @@ précis » : l'espace, son lieu, et les créneaux déjà pris (`busySlots`, uniq
 | 400    | `INVALID_JSON`                                                                                                           |
 | 401    | `UNAUTHENTICATED`, `INVALID_TOKEN`, `SESSION_REVOKED`, `SESSION_EXPIRED`, `INVALID_CREDENTIALS`                          |
 | 402    | `INSUFFICIENT_CREDITS`                                                                                                   |
-| 404    | `RESERVATION_NOT_FOUND`, `SPACE_NOT_FOUND`                                                                               |
+| 404    | `RESERVATION_NOT_FOUND`, `SPACE_NOT_FOUND`, `USER_NOT_FOUND`                                                             |
 | 409    | `EMAIL_TAKEN`, `SLOT_TAKEN`, `SPACE_UNAVAILABLE`, `NOT_CANCELLABLE`, `ALREADY_STARTED`, `ALREADY_CHECKED_IN`, `CONFLICT` |
 | 422    | `VALIDATION_ERROR`, `SLOT_IN_PAST`, `SLOT_TOO_FAR`, `SLOT_TOO_SHORT`, `SLOT_TOO_LONG`                                    |
 | 429    | `TOO_MANY_ATTEMPTS`                                                                                                      |
@@ -110,11 +151,14 @@ précis » : l'espace, son lieu, et les créneaux déjà pris (`busySlots`, uniq
   versé qu'une fois.
 - **Check-in.** Fenêtre : de 15 minutes avant le début jusqu'à la fin. Position
   précise à 100 m ou mieux, prise il y a moins de 60 s, à **150 m ou moins** du lieu.
-  La première règle qui échoue donne le motif (`NOT_CONFIRMED`, `TOO_EARLY`,
-  `TOO_LATE`, `LOW_ACCURACY`, `STALE_POSITION`, `TOO_FAR`). **Chaque tentative**,
-  acceptée ou refusée, est enregistrée dans `check_ins` : c'est la trace. La
-  réponse est `201` dans les deux cas : l'app lit `checkIn.accepted` et
-  `checkIn.reason`. Une arrivée déjà validée renvoie `409 ALREADY_CHECKED_IN`.
+  `scannedSpaceId` optionnel (voir « Check-in par QR » ci-dessous) : s'il est
+  fourni et ne correspond pas à l'espace réservé, c'est la toute première règle
+  vérifiée. La première règle qui échoue donne le motif (`NOT_CONFIRMED`,
+  `WRONG_SPACE`, `TOO_EARLY`, `TOO_LATE`, `LOW_ACCURACY`, `STALE_POSITION`,
+  `TOO_FAR`). **Chaque tentative**, acceptée ou refusée, est enregistrée dans
+  `check_ins` : c'est la trace. La réponse est `201` dans les deux cas : l'app
+  lit `checkIn.accepted` et `checkIn.reason`. Une arrivée déjà validée renvoie
+  `409 ALREADY_CHECKED_IN`.
 - **Transactions.** Réservation et check-in tournent en isolation `SERIALIZABLE` :
   si deux requêtes conflictuelles arrivent en même temps, PostgreSQL en annule une
   (`40001`) et le code la rejoue (3 essais). Avec l'adaptateur `pg` de Prisma 7,

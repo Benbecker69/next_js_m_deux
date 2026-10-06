@@ -12,15 +12,27 @@ import { withSerializableTransaction } from "./transaction";
 
 export type CheckInRefusal =
   | "NOT_CONFIRMED"
+  | "WRONG_SPACE"
   | "TOO_EARLY"
   | "TOO_LATE"
   | "LOW_ACCURACY"
   | "STALE_POSITION"
   | "TOO_FAR";
 
-/** First rule that fails wins; null means the check-in is accepted. */
+/**
+ * First rule that fails wins; null means the check-in is accepted.
+ * `scannedSpaceId` is optional — most attempts are still GPS-only, and that
+ * path is unchanged. When present, it must match the reservation's own
+ * space: a reservation's GPS radius is checked against its *Location*
+ * (`Space` has no coordinates of its own, see `prisma/schema.prisma`), so
+ * two spaces sharing a building are otherwise indistinguishable by position
+ * alone. Checked before the time/position rules — a wrong scan doesn't need
+ * a distance computed to already be wrong.
+ */
 export function refusalReason(input: {
   status: string;
+  spaceId: string;
+  scannedSpaceId?: string;
   startAt: Date;
   endAt: Date;
   now: Date;
@@ -32,6 +44,9 @@ export function refusalReason(input: {
     MOBILE_CONFIG.checkIn;
   const now = input.now.getTime();
   if (input.status !== "confirmed") return "NOT_CONFIRMED";
+  if (input.scannedSpaceId && input.scannedSpaceId !== input.spaceId) {
+    return "WRONG_SPACE";
+  }
   if (now < input.startAt.getTime() - opensBeforeStartMs) return "TOO_EARLY";
   if (now > input.endAt.getTime()) return "TOO_LATE";
   if (input.accuracyM > maxAccuracyM) return "LOW_ACCURACY";
@@ -45,7 +60,13 @@ export function refusalReason(input: {
 export async function performCheckIn(
   userId: string,
   reservationId: string,
-  input: { lat: number; lng: number; accuracyM: number; capturedAt: Date },
+  input: {
+    lat: number;
+    lng: number;
+    accuracyM: number;
+    capturedAt: Date;
+    scannedSpaceId?: string;
+  },
 ) {
   return withSerializableTransaction(async (tx) => {
     const reservation = await tx.reservation.findUnique({
@@ -65,6 +86,8 @@ export async function performCheckIn(
     const distanceM = Math.round(distanceKm(input, reservation.space.location) * 1000);
     const reason = refusalReason({
       status: reservation.status,
+      spaceId: reservation.spaceId,
+      scannedSpaceId: input.scannedSpaceId,
       startAt: reservation.startAt,
       endAt: reservation.endAt,
       now: new Date(),
@@ -84,6 +107,7 @@ export async function performCheckIn(
         distanceM,
         accepted: reason === null,
         reason,
+        scannedSpaceId: input.scannedSpaceId ?? null,
       },
     });
     return { checkIn: toCheckInDto(row), radiusM: MOBILE_CONFIG.checkIn.radiusM };

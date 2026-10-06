@@ -106,6 +106,7 @@ export function toCheckInDto(row: CheckInRow) {
     reason: row.reason,
     distanceM: Math.round(row.distanceM),
     accuracyM: Math.round(row.accuracyM),
+    scannedSpaceId: row.scannedSpaceId,
     createdAt: row.createdAt.toISOString(),
   };
 }
