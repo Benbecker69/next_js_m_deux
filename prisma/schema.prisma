@@ -150,18 +150,23 @@ model MobileSession {
 // STALE_POSITION, NOT_CONFIRMED) — a plain string for the same reason as
 // `Space.type`: the finite set is enforced in code (src/lib/mobile/checkin.ts).
 model CheckIn {
-  id            String      @id @default(uuid())
-  reservationId String
-  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  userId        String
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lat           Float
-  lng           Float
-  accuracyM     Float
-  distanceM     Float
-  accepted      Boolean
-  reason        String?
-  createdAt     DateTime    @default(now())
+  id             String      @id @default(uuid())
+  reservationId  String
+  reservation    Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lat            Float
+  lng            Float
+  accuracyM      Float
+  distanceM      Float
+  accepted       Boolean
+  reason         String?
+  // The space id read from a scanned QR code, when the attempt used one —
+  // nullable: most attempts are still GPS-only. Lets the trace show whether
+  // a check-in was corroborated by scanning the specific space, not just
+  // the surrounding Location (see WRONG_SPACE in src/lib/mobile/checkin.ts).
+  scannedSpaceId String?
+  createdAt      DateTime    @default(now())
 
   @@index([reservationId])
   @@index([userId, createdAt])

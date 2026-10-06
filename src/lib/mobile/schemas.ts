@@ -43,6 +43,9 @@ export const checkInBodySchema = z.object({
   accuracyM: z.number().min(0, "Précision invalide.").max(100_000, "Précision invalide."),
   // ISO 8601 UTC ("...Z"), as produced by Date.prototype.toISOString().
   capturedAt: z.iso.datetime({ message: "Horodatage de la position invalide." }),
+  // The space id read from a scanned QR code — optional, most attempts stay
+  // GPS-only. See WRONG_SPACE in src/lib/mobile/checkin.ts.
+  scannedSpaceId: z.string().min(1).optional(),
 });
 
 export const availabilityQuerySchema = z.object({
