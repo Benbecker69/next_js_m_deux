@@ -246,6 +246,7 @@ export const en = {
     settings: "Settings",
     creditsSuffix: "credits",
     goToAdmin: "Admin panel",
+    backToSite: "Back to the website",
     openMenu: "Open menu",
     closeMenu: "Close menu",
   },

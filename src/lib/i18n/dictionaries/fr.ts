@@ -250,6 +250,7 @@ export const fr = {
     settings: "Paramètres",
     creditsSuffix: "crédits",
     goToAdmin: "Administration",
+    backToSite: "Retour au site",
     openMenu: "Ouvrir le menu",
     closeMenu: "Fermer le menu",
   },

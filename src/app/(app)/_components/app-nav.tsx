@@ -8,6 +8,7 @@ import {
   CalendarCheck,
   Settings,
   Shield,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -21,6 +22,7 @@ const ICONS = {
   "/reservations": CalendarCheck,
   "/parametres": Settings,
   "/admin": Shield,
+  "/": Globe,
 } as const;
 
 // Client Component because highlighting the active link needs the current
