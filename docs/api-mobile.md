@@ -1,8 +1,13 @@
 # API mobile — `/api/mobile/v1`
 
-Ce document vit dans `docs/` (suivi par git), comme `choix-de-rendu.md` et
-`base-de-donnees.md`. Il décrit l'API HTTP que l'application mobile Expo
-(dépôt séparé) utilise pour réutiliser le backend du site.
+Ce document décrit l'API HTTP que l'application mobile Expo
+([dépôt séparé](https://github.com/Benbecker69/react_native_eemi)) utilise pour
+réutiliser le backend du site : routes, authentification, format d'erreur,
+règles métier et limites.
+
+Documents liés : [rendu, données et mutations](choix-de-rendu.md) ·
+[authentification et sécurité](authentification-et-securite.md) ·
+[base de données](base-de-donnees.md).
 
 ## Pourquoi des Route Handlers (et pas des Server Actions)
 
@@ -15,11 +20,13 @@ Le cahier des charges demande de justifier chaque Route Handler.
   Une Server Action est un point d'entrée interne à Next.js, lié au rendu et à des
   identifiants générés : ce n'est pas une API qu'un client tiers peut appeler
   de façon stable.
-- **Le cookie du site ne peut pas servir de jeton.** `repere_session` contient
-  l'identifiant utilisateur brut, non signé : le distribuer à un téléphone
-  reviendrait à donner une clé que quiconque connaît un identifiant peut forger.
-  L'API mobile a donc son propre jeton (voir plus bas), sans toucher à la session du
-  site (`src/lib/auth/session.ts` n'est pas modifié).
+- **Le cookie du site ne convient pas à un téléphone.** Un cookie est géré par
+  le navigateur (attributs `httpOnly`, `sameSite`, domaine) ; une application
+  native n'en a pas l'usage et envoie son jeton elle-même, dans un en-tête.
+  L'API mobile a donc son propre jeton et sa propre table de sessions (voir plus
+  bas), indépendants de la session du site (`src/lib/auth/session.ts`). Les
+  deux reposent sur le même principe : un jeton aléatoire, dont seule
+  l'empreinte est en base.
 
 ## Authentification
 
@@ -76,31 +83,36 @@ précis » : l'espace, son lieu, et les créneaux déjà pris (`busySlots`, uniq
 `startAt`/`endAt` — aucune autre réservation n'est identifiable). Période bornée à
 30 jours. `404 SPACE_NOT_FOUND` si l'espace n'existe pas ou n'est plus actif.
 
-`PATCH /me` modifie le profil : mêmes champs, même schéma zod
-(`profileSchema`) et même appel `updateUser` que l'onglet « Profil » du site
+`PATCH /me` modifie le profil : mêmes informations (`name`, `memberType`) et
+même appel `updateUser` que l'onglet « Profil » du site
 (`(app)/parametres/profil/_actions.ts`) — une seule ligne dans `users`, donc un
 changement fait sur l'app est immédiatement visible sur le site et
-réciproquement, sans mécanisme de synchronisation séparé. `avatarUrl` reste
-hors périmètre : le formulaire web ne le modifie pas non plus. `404
-USER_NOT_FOUND` dans le cas limite où le compte a été supprimé entre
-l'authentification et l'écriture (même limite pour `POST /me/password` et
-`POST /me/email`).
+réciproquement, sans mécanisme de synchronisation séparé. Seule la saisie
+diffère : le formulaire du site demande le prénom et le nom dans deux champs
+(`profileFormSchema`) et les réunit en un seul `name` ; l'API reçoit `name`
+directement (`profileSchema`). `avatarUrl` reste hors périmètre : le
+formulaire web ne le modifie pas non plus. `404 USER_NOT_FOUND` dans le cas
+limite où le compte a été supprimé entre l'authentification et l'écriture
+(même limite pour `POST /me/password` et `POST /me/email`).
 
-`POST /me/password` et `POST /me/email` **n'existent pas sur le site** : sa
-page « Sécurité » (`(app)/parametres/securite/page.tsx`) est en lecture
-seule et annonce explicitement que la modification du mot de passe
-« arrivera dans une prochaine mise à jour ». Ce n'est donc pas une reprise
-d'une action web existante, mais une nouvelle capacité construite sur les
-mêmes primitives (`src/lib/auth/password.ts`, scrypt) et les mêmes codes
-d'erreur que le reste de l'API (`INVALID_CREDENTIALS`, `EMAIL_TAKEN`). Les
-deux exigent `currentPassword` : un jeton de session seul ne suffit pas à
-prouver que c'est bien l'utilisateur qui tape, pas un appareil qui aurait
-volé le jeton. `POST /me/password` révoque en plus **toutes les autres**
-sessions mobiles de l'utilisateur (celle qui fait la requête reste active) —
-un appareil qui n'avait que l'ancien mot de passe, ou un jeton volé, cesse de
-fonctionner. `POST /me/email` refuse `409 EMAIL_TAKEN` si l'adresse
-appartient déjà à un autre compte (même vérification, en deux temps comme à
-l'inscription, qu'à `POST /auth/register`).
+`POST /me/password` et `POST /me/email` ont leur équivalent sur le site :
+l'onglet « Sécurité » (`(app)/parametres/securite/`) propose les deux mêmes
+changements par ses propres Server Actions (`changePasswordAction`,
+`changeEmailAction`). Les deux côtés reposent sur les mêmes primitives
+(`src/lib/auth/password.ts`, scrypt) et les mêmes fonctions de
+`src/lib/data/users.ts` (`verifyUserPasswordById`, `updateUserPassword`,
+`updateUserEmail`). Les deux routes exigent `currentPassword` : un jeton de
+session seul ne suffit pas à prouver que c'est bien l'utilisateur qui tape, pas
+un appareil qui aurait volé le jeton. `POST /me/password` révoque en plus
+**toutes les autres** sessions mobiles de l'utilisateur (celle qui fait la
+requête reste active) — un appareil qui n'avait que l'ancien mot de passe, ou
+un jeton volé, cesse de fonctionner. Un changement de mot de passe fait depuis
+le site révoque, lui, **toutes** les sessions mobiles du compte. Dans les deux
+cas, les sessions du site ouvertes dans d'autres navigateurs prennent fin
+aussi. `POST
+/me/email` refuse `409 EMAIL_TAKEN` si l'adresse appartient déjà à un autre
+compte (même vérification, en deux temps comme à l'inscription, qu'à `POST
+/auth/register`).
 
 `GET /me/summary` alimente l'écran d'accueil de l'app : `upcoming.count`
 (même définition que `scope=upcoming`), `recent` (`reservations`, `hours`,
@@ -125,6 +137,41 @@ champ reste optionnel : un check-in sans scan continue de fonctionner
 exactement comme avant. `scannedSpaceId` est aussi stocké sur la ligne
 `check_ins`, qu'il corresponde ou non, pour que la trace montre si une
 tentative a été corroborée par un scan.
+
+**QR codes de test.** La page `/qrcode` du site (réservée aux administrateurs)
+affiche un QR code par espace, avec son identifiant. C'est elle qui sert à
+tester le scan : afficher le code à l'écran ou l'imprimer, puis le scanner
+depuis l'application. Scanner le code d'un autre espace que celui réservé doit
+donner `WRONG_SPACE`.
+
+## Ce que le site partage avec l'API
+
+L'espace membre du site appelle directement, sans passer par HTTP, les mêmes
+fonctions de `src/lib/mobile/` que les routes ci-dessus :
+
+| Fonction            | Route de l'API                     | Page ou action du site                                |
+| ------------------- | ---------------------------------- | ----------------------------------------------------- |
+| `listReservations`  | `GET /reservations`                | `/reservations`, `/tableau-de-bord`                   |
+| `getReservation`    | `GET /reservations/{id}`           | `/reservations/[id]`                                  |
+| `getMemberSummary`  | `GET /me/summary`                  | `/tableau-de-bord`                                    |
+| `listNearbySpaces`  | `GET /spaces/nearby`               | `/reserver`, « Réserver près de moi »                 |
+| `listCheckIns`      | `GET /check-ins`                   | `/arrivees`                                           |
+| `createReservation` | `POST /reservations`               | `createReservationAction` (confirmer une réservation) |
+| `cancelReservation` | `POST /reservations/{id}/cancel`   | `cancelReservationAction` (annuler)                   |
+| `performCheckIn`    | `POST /reservations/{id}/check-in` | `checkInAction` (valider l'arrivée)                   |
+
+Le site et l'application affichent donc les mêmes chiffres et appliquent les
+mêmes règles. Les trois écritures sont des transactions, que la demande vienne
+du site ou du téléphone.
+
+Le site ajoute une règle que l'API n'a pas : sa Server Action refuse un
+créneau hors des heures d'ouverture (9 h – 18 h, heure de Paris). L'API
+s'en tient aux règles de durée et de date ci-dessous ; c'est le calendrier de
+l'application qui ne propose que ces heures.
+
+Le frein de connexion (`src/lib/mobile/rate-limit.ts`) est lui aussi commun :
+les échecs sur le site et sur l'application comptent ensemble pour une même
+adresse.
 
 ## Format d'erreur
 
@@ -164,7 +211,7 @@ tentative a été corroborée par un scan.
   versé qu'une fois.
 - **Check-in.** Fenêtre : de 15 minutes avant le début jusqu'à la fin. Position
   précise à 100 m ou mieux, prise il y a moins de 60 s, à **150 m ou moins** du lieu.
-  `scannedSpaceId` optionnel (voir « Check-in par QR » ci-dessous) : s'il est
+  `scannedSpaceId` optionnel (voir « Check-in par QR » plus haut) : s'il est
   fourni et ne correspond pas à l'espace réservé, c'est la toute première règle
   vérifiée. La première règle qui échoue donne le motif (`NOT_CONFIRMED`,
   `WRONG_SPACE`, `TOO_EARLY`, `TOO_LATE`, `LOW_ACCURACY`, `STALE_POSITION`,
@@ -185,15 +232,19 @@ tentative a été corroborée par un scan.
   mesure où le téléphone dit vrai.
 - Le frein de connexion vit en mémoire : il se réinitialise au redémarrage et ne
   serait pas partagé entre plusieurs instances.
-- Les Server Actions du site lisent puis réécrivent le solde de crédits sans
-  transaction ; l'API mobile, elle, est atomique. Le site n'a pas été modifié.
+- L'API ne revérifie pas les heures d'ouverture d'un créneau : cette règle est
+  appliquée par le calendrier de l'application, et par la Server Action du
+  site.
 - Un client Prisma déjà chargé par `next dev` ne connaît pas les modèles ajoutés
   après coup : redémarrer le serveur de dev après une migration.
 
 ## Tester à la main
 
+Avec l'application lancée (par `docker compose up --build`, ou par
+`npm run dev`) :
+
 ```bash
-BASE=http://127.0.0.1:3100/api/mobile/v1   # `npm run build && npm run start -- -p 3100`
+BASE=http://localhost:3000/api/mobile/v1
 curl -s $BASE/health
 
 TOKEN=$(curl -s -X POST $BASE/auth/login -H "Content-Type: application/json" \

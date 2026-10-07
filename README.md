@@ -1,41 +1,354 @@
 # Repère
 
-Plateforme de réservation d'espaces de coworking : site public (lieux, tarifs),
-espace membre (réservation par créneau, crédits, arrivées), back-office
-d'administration, et une API pour l'application mobile.
+Plateforme de réservation d'espaces de coworking : un site public pour découvrir
+les lieux, un espace membre pour réserver à l'heure et payer en crédits, un
+back-office pour gérer les lieux et les utilisateurs, et une API pour
+l'application mobile.
 
-Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · PostgreSQL 16
-· Prisma 7.
+Next.js 16.3 (App Router) · React 19 · TypeScript · Tailwind CSS 4 ·
+PostgreSQL 16 · Prisma 7 · Docker.
 
-## Lancer en local (développement)
+Projet fil rouge individuel — Ilias Benharrat, M2 EEMI, 2026.
+Application mobile associée (dépôt séparé) :
+<https://github.com/Benbecker69/react_native_eemi>.
 
-Pré-requis : Node.js 24, Docker (pour PostgreSQL).
+## Sommaire
+
+- [Guide de correction](#guide-de-correction)
+- [Le produit](#le-produit)
+- [Fonctionnalités](#fonctionnalités)
+- [Architecture](#architecture)
+- [Installation et lancement](#installation-et-lancement)
+- [Comptes de démonstration](#comptes-de-démonstration)
+- [Tester en cinq minutes](#tester-en-cinq-minutes)
+- [Schéma de données](#schéma-de-données)
+- [Application mobile, QR code et géolocalisation](#application-mobile-qr-code-et-géolocalisation)
+- [Docker](#docker)
+- [Docker — sécurité & IA](#docker--sécurité--ia)
+- [Limites connues](#limites-connues)
+- [Documentation](#documentation)
+
+## Guide de correction
+
+Pour chaque ligne du barème : où lire, quels fichiers ouvrir, et comment le
+constater dans l'application.
+
+### Note Next.js
+
+| Critère du barème                                        | Document                                                                     | Fichiers à ouvrir                                                                                   | À constater dans l'application                                                                                            |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Architecture App Router & organisation                   | [docs/architecture.md](docs/architecture.md)                                 | `src/app/(marketing)`, `(auth)`, `(onboarding)`, `(app)`, `(app)/admin/layout.tsx`                  | Quatre groupes de routes, trois niveaux de layouts imbriqués                                                              |
+| Fonctionnalités & parcours métier                        | [docs/fonctionnalites.md](docs/fonctionnalites.md)                           | `src/app/(app)/reserver/[spaceId]/_actions.ts`                                                      | Réserver, voir le solde baisser, annuler, voir le solde remonter                                                          |
+| Data, Server Components, Server Actions & Route Handlers | [docs/choix-de-rendu.md](docs/choix-de-rendu.md)                             | `src/lib/data/`, les fichiers `_actions.ts`, `src/app/(auth)/deconnexion/route.ts`, `src/app/api/`  | 20 Server Actions, 40 composants client justifiés, 2 familles de Route Handlers                                           |
+| Authentification, autorisation & sécurité                | [docs/authentification-et-securite.md](docs/authentification-et-securite.md) | `src/lib/auth/session.ts`, `src/lib/data/sessions.ts`, `src/lib/auth/password.ts`                   | `/admin` avec le compte membre → « accès refusé » ; un identifiant d'utilisateur mis à la place du cookie ne connecte pas |
+| UX/UI, responsive & états d'interface                    | [docs/interface-et-etats.md](docs/interface-et-etats.md)                     | `src/components/skeletons.tsx`, `src/components/error-screen.tsx`, les `loading.tsx` et `error.tsx` | Soumettre un formulaire vide ; ouvrir `/lieux/inconnu` ; réduire la fenêtre                                               |
+| Performance, cache, SEO & optimisation                   | [docs/performance-cache-seo.md](docs/performance-cache-seo.md)               | `src/lib/data/locations.ts`, `src/app/sitemap.ts`, `src/app/robots.ts`, `next.config.ts`            | `/sitemap.xml`, `/robots.txt` ; Lighthouse : performance 97 à 100, accessibilité, bonnes pratiques et SEO à 100           |
+| Qualité du code, tests, README & déploiement             | [docs/git-et-github.md](docs/git-et-github.md)                               | `tsconfig.json`, `eslint.config.mjs`, les fichiers `*.test.ts`, `git log --oneline --graph`         | `npm run lint`, `npm run typecheck`, `npm run test` (80 tests) et `npm run build` passent                                 |
+
+Ce qui manque, dit clairement : l'application **n'est pas déployée en ligne**.
+Elle se lance en local, en développement ou par l'image Docker de production.
+Les tests sont des tests unitaires des règles métier ; il n'y a pas de tests de
+bout en bout. Voir [Limites connues](#limites-connues).
+
+### Ce que le sujet demande de retrouver dans le dépôt
+
+| Exigence                           | Où                                                                                                                                                             |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| App Router, route groups           | `src/app/(marketing)`, `(auth)`, `(onboarding)`, `(app)`                                                                                                       |
+| Layouts imbriqués                  | `src/app/layout.tsx` → `(app)/layout.tsx` → `(app)/admin/layout.tsx` et `(app)/parametres/layout.tsx`                                                          |
+| Server Components                  | Toutes les pages et tous les layouts                                                                                                                           |
+| Client Components limités          | 40 fichiers `"use client"`, classés par raison dans [docs/choix-de-rendu.md](docs/choix-de-rendu.md)                                                           |
+| Route dynamique                    | `/lieux/[slug]`, `/reserver/[spaceId]`, `/reservations/[id]`, `/arrivees/[id]`, `/admin/*/[id]`                                                                |
+| Server Action                      | 20 actions dans 13 fichiers `_actions.ts`, par exemple `src/app/(app)/reserver/[spaceId]/_actions.ts`                                                          |
+| Route Handler avec justification   | `src/app/(auth)/deconnexion/route.ts` et `src/app/api/mobile/v1/` — justifiés dans [docs/choix-de-rendu.md](docs/choix-de-rendu.md#route-handlers-et-pourquoi) |
+| `loading.tsx`                      | 24 fichiers, un par page                                                                                                                                       |
+| `error.tsx`                        | `src/app/error.tsx`, `global-error.tsx`, `(app)/error.tsx`, `(app)/tableau-de-bord/error.tsx`, `(marketing)/error.tsx`                                         |
+| `notFound()`                       | Les sept pages à paramètre dynamique ; `not-found.tsx` à la racine, dans `(marketing)` et dans `(app)`                                                         |
+| Metadata API                       | `generateMetadata` ou `metadata` sur les pages ; modèle de titre dans `src/app/layout.tsx`                                                                     |
+| `next/image`                       | `src/components/location-photo.tsx`, `src/components/space-photo.tsx`, pages d'accueil, tarifs, fonctionnalités                                                |
+| Authentification serveur           | `src/lib/auth/session.ts` : `getSession`, `requireUser`, `requireOnboarded`, `requireAdmin`                                                                    |
+| Stratégie de cache et invalidation | `unstable_cache` + `revalidateTag` : `src/lib/data/locations.ts`, `src/lib/data/spaces.ts`, `src/app/(app)/admin/lieux/`                                       |
+| Trois choix de rendu justifiés     | Six sont détaillés dans [docs/choix-de-rendu.md](docs/choix-de-rendu.md#choix-de-rendu-justifiés)                                                              |
+| Sitemap et robots                  | `src/app/sitemap.ts`, `src/app/robots.ts`                                                                                                                      |
+| Lighthouse interprété              | [docs/performance-cache-seo.md](docs/performance-cache-seo.md#audit-lighthouse)                                                                                |
+| `proxy.ts` (« si utile »)          | Non utilisé : les gardes sont dans les layouts, les pages et les actions                                                                                       |
+
+### Note Docker
+
+| Critère du barème                                     | Où                                                                                               |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Dockerfile Next.js fonctionnel et adapté production   | `Dockerfile` ; expliqué ligne par ligne dans [docs/docker.md](docs/docker.md)                    |
+| `.dockerignore`, contexte de build, cache des couches | `.dockerignore` ; [docs/docker.md](docs/docker.md#dockerignore-et-contexte-de-build)             |
+| Lancement documenté                                   | [Docker](#docker) ci-dessous : `docker compose up --build` ou `docker run`                       |
+| Variables d'environnement et secrets                  | `.env.example` ; [Variables](#variables)                                                         |
+| Image lançable et testable localement                 | [Vérifier](#vérifier)                                                                            |
+| Docker Scout et lecture du résultat                   | [Docker — sécurité & IA](#docker--sécurité--ia)                                                  |
+| Usage de l'IA documenté                               | [Recommandations de l'assistant IA et décisions](#recommandations-de-lassistant-ia-et-décisions) |
+
+## Le produit
+
+**Le besoin.** Trouver un endroit pour travailler quelques heures, savoir avant
+de se déplacer qu'il sera libre, et ne payer que le temps utilisé.
+
+**La réponse.** Repère référence des lieux de coworking et leurs espaces : poste
+flex, cabine téléphonique, bureau privé, salle de réunion. Un membre réserve un
+espace à l'heure. Chaque heure coûte des **crédits**, selon le type d'espace ;
+ils sont débités à la réservation et rendus en entier si la réservation est
+annulée avant son début.
+
+**Trois publics.**
+
+| Public         | Ce qu'il fait                                                                               |
+| -------------- | ------------------------------------------------------------------------------------------- |
+| Visiteur       | Découvre les lieux, les types d'espace et les tarifs, puis crée un compte                   |
+| Membre         | Réserve, consulte et annule ses réservations, valide son arrivée sur place, gère son compte |
+| Administrateur | Gère les lieux, les espaces, les utilisateurs et les réservations                           |
+
+**La suite mobile.** L'application mobile sert au moment d'arriver : réserver
+l'espace libre le plus proche (géolocalisation) et valider sa présence (position
+et QR code de l'espace). Elle utilise le même compte, les mêmes crédits et la
+même base que le site, par l'API `/api/mobile/v1`. Le sujet initial prévoyait le
+NFC ; le sujet de soutenance retient le scan de QR code et la géolocalisation, le
+NFC devenant facultatif. Il n'est pas implémenté.
+
+Les lieux présentés sont fictifs : Repère est un projet de démonstration.
+
+## Fonctionnalités
+
+Liste détaillée, règles métier et scénario de démonstration :
+[docs/fonctionnalites.md](docs/fonctionnalites.md).
+
+| Expérience       | Ce qui existe                                                                                                                                |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Marketing        | Accueil avec recherche, lieux filtrables, page d'un lieu, tarifs lus en base, fonctionnalités, FAQ, français / anglais, thème clair / sombre |
+| Authentification | Inscription, connexion, déconnexion, session lue sur le serveur, mots de passe hachés                                                        |
+| Onboarding       | Profil obligatoire après l'inscription : situation et lieu habituel                                                                          |
+| Espace membre    | Accueil avec prochaine réservation et activité, liste des réservations, historique des arrivées                                              |
+| Module métier    | Recherche d'espace, tri par distance, carte, calendrier mensuel, réservation avec débit de crédits, annulation, validation de l'arrivée      |
+| Paramètres       | Profil, e-mail et mot de passe, préférences                                                                                                  |
+| Back-office      | Statistiques, lieux et espaces, utilisateurs (rôle, crédits, suppression), réservations filtrables et annulables                             |
+| API mobile       | 17 points d'entrée JSON : [docs/api-mobile.md](docs/api-mobile.md)                                                                           |
+
+## Architecture
+
+Explication complète : [docs/architecture.md](docs/architecture.md).
+
+Une seule application Next.js. Les pages lisent la base sur le serveur, les
+écritures passent par des Server Actions, l'application mobile passe par des
+Route Handlers. Il n'y a pas de serveur backend séparé.
+
+```
+src/
+  app/
+    (marketing)/     site public : /, /lieux, /lieux/[slug], /tarifs, /faq…
+    (auth)/          /connexion, /inscription, /deconnexion
+    (onboarding)/    /bienvenue, /profil
+    (app)/           espace membre : /tableau-de-bord, /reserver, /reservations,
+                     /arrivees, /parametres — et le back-office /admin
+    api/mobile/v1/   API JSON de l'application mobile
+    qrcode/          QR codes de test (administrateurs)
+  components/        composants partagés
+  lib/
+    auth/            session et gardes serveur
+    data/            accès à la base, un fichier par entité
+    validation/      schémas zod
+    feedback/        résultats d'actions, toasts
+    i18n/            dictionnaires français et anglais
+    mobile/          règles de l'API mobile
+prisma/              schéma, migrations, données de démonstration
+docs/                documentation
+```
+
+| Technologie            | Rôle                                                       |
+| ---------------------- | ---------------------------------------------------------- |
+| Next.js 16.3, React 19 | Application, rendu serveur, Server Actions, Route Handlers |
+| TypeScript (strict)    | Typage                                                     |
+| Tailwind CSS 4         | Styles, à partir de variables CSS                          |
+| PostgreSQL 16          | Base de données                                            |
+| Prisma 7               | Schéma, migrations, requêtes                               |
+| zod                    | Validation des entrées                                     |
+| Leaflet                | Carte des lieux                                            |
+| Docker                 | PostgreSQL local, image de production                      |
+
+## Installation et lancement
+
+Deux façons de lancer le projet. La plus courte ne demande que Docker.
+
+### Le plus rapide : tout dans Docker
+
+Pré-requis : Docker Desktop, ou Docker Engine avec le plugin Compose.
 
 ```bash
+git clone https://github.com/Benbecker69/next_js_m_deux.git
+cd next_js_m_deux
+docker compose up --build
+```
+
+Ouvrir <http://localhost:3000>. La commande démarre PostgreSQL, applique les
+migrations, charge les données de démonstration et lance l'application en mode
+production. Détail dans la section [Docker](#docker).
+
+### En développement
+
+Pré-requis : Node.js 24 et Docker (pour PostgreSQL).
+
+```bash
+git clone https://github.com/Benbecker69/next_js_m_deux.git
+cd next_js_m_deux
 cp .env.example .env   # DATABASE_URL du PostgreSQL local
 npm install            # installe et génère le client Prisma (postinstall)
 npm run db:up          # démarre PostgreSQL dans Docker (port hôte 5433)
 npm run db:migrate     # applique les migrations
-npm run db:seed        # données de démonstration
+npm run db:seed        # charge les données de démonstration
 npm run dev            # http://localhost:3000
 ```
 
-Détail des choix et des commandes de base de données :
-[docs/base-de-donnees.md](docs/base-de-donnees.md).
+### Variables d'environnement
+
+Une seule variable, décrite dans `.env.example`.
+
+| Variable       | Rôle                          | Valeur en développement                                          |
+| -------------- | ----------------------------- | ---------------------------------------------------------------- |
+| `DATABASE_URL` | Adresse de la base PostgreSQL | `postgresql://repere:repere@localhost:5433/repere?schema=public` |
+
+Elle est lue sur le serveur uniquement et n'est jamais envoyée au navigateur. Le
+projet n'a aucune variable `NEXT_PUBLIC_`. Les identifiants `repere` / `repere`
+sont ceux du PostgreSQL local de démonstration.
+
+### Commandes
+
+| Commande               | Effet                                                      |
+| ---------------------- | ---------------------------------------------------------- |
+| `npm run dev`          | Serveur de développement                                   |
+| `npm run build`        | Build de production                                        |
+| `npm run start`        | Serveur de production (après `build`)                      |
+| `npm run lint`         | ESLint                                                     |
+| `npm run typecheck`    | Vérification TypeScript                                    |
+| `npm run test`         | Tests unitaires (Vitest)                                   |
+| `npm run format`       | Met en forme avec Prettier                                 |
+| `npm run format:check` | Vérifie la mise en forme                                   |
+| `npm run db:up`        | Démarre PostgreSQL (Docker)                                |
+| `npm run db:down`      | Arrête les conteneurs ; les données restent dans le volume |
+| `npm run db:migrate`   | Applique les migrations (`prisma migrate dev`)             |
+| `npm run db:seed`      | Charge les données de démonstration                        |
+| `npm run db:studio`    | Ouvre Prisma Studio pour consulter la base                 |
+
+Base de données en détail : [docs/base-de-donnees.md](docs/base-de-donnees.md).
 
 ## Comptes de démonstration
 
-Créés par le seed, mot de passe `demo1234` pour les deux :
+Créés par le seed. Mot de passe `demo1234` pour les deux. La page `/connexion`
+propose deux boutons qui remplissent le formulaire.
 
-| Rôle           | E-mail                |
-| -------------- | --------------------- |
-| Membre         | `camille@example.com` |
-| Administrateur | `admin@example.com`   |
+| Rôle           | E-mail                | Crédits au départ |
+| -------------- | --------------------- | ----------------- |
+| Membre         | `camille@example.com` | 250               |
+| Administrateur | `admin@example.com`   | 500               |
+
+Un compte créé par `/inscription` reçoit 20 crédits et passe par l'onboarding.
+
+## Tester en cinq minutes
+
+1. **Site public.** `/` → choisir une ville dans la recherche → ouvrir un lieu.
+   Ouvrir `/lieux/inconnu` : page « introuvable ».
+2. **Route protégée.** Ouvrir `/tableau-de-bord` sans être connecté : retour à
+   `/connexion` avec le message « Connexion requise ».
+3. **Parcours principal.** Se connecter avec `camille@example.com` → « Réserver
+   un espace » → choisir un espace → un jour, une heure de début, une heure de
+   fin → « Confirmer la réservation ». Le solde de crédits baisse.
+4. **Historique et annulation.** « Mes réservations » → ouvrir la réservation →
+   « Annuler la réservation ». Le solde remonte.
+5. **Paramètres.** « Mon compte » → modifier le prénom → toast de succès. Vider
+   le champ et enregistrer : l'erreur s'affiche sous le champ.
+6. **Autorisation.** Toujours avec le compte membre, ouvrir `/admin` : page
+   « accès refusé ».
+7. **Back-office.** Se connecter avec `admin@example.com` → « Administration » →
+   Lieux → ouvrir un lieu → passer un espace en maintenance : il disparaît de
+   `/reserver`.
+8. **Onboarding.** Créer un compte par `/inscription` : passage obligé par
+   `/bienvenue` puis `/profil`.
+
+## Schéma de données
+
+Schéma complet, relations, migrations et seed :
+[docs/base-de-donnees.md](docs/base-de-donnees.md). Source :
+`prisma/schema.prisma`.
+
+```mermaid
+erDiagram
+  users ||--o{ reservations : "réserve"
+  users ||--o| preferences : "a"
+  users ||--o{ sessions : "ouvre"
+  users ||--o{ mobile_sessions : "ouvre"
+  users ||--o{ check_ins : "tente"
+  locations ||--o{ spaces : "contient"
+  spaces ||--o{ reservations : "est réservé par"
+  reservations ||--o{ check_ins : "reçoit"
+```
+
+| Table             | Contenu                                                     |
+| ----------------- | ----------------------------------------------------------- |
+| `users`           | Comptes, mot de passe haché, rôle, solde de crédits         |
+| `locations`       | Lieux, avec coordonnées GPS                                 |
+| `spaces`          | Espaces d'un lieu : type, capacité, prix par heure, statut  |
+| `reservations`    | Réservation d'un espace par un membre sur un créneau        |
+| `preferences`     | Préférences d'un membre                                     |
+| `sessions`        | Sessions du site (empreinte du jeton du cookie, expiration) |
+| `mobile_sessions` | Sessions de l'application mobile                            |
+| `check_ins`       | Tentatives de validation d'arrivée, acceptées ou refusées   |
+
+## Application mobile, QR code et géolocalisation
+
+L'application mobile est dans un dépôt séparé :
+<https://github.com/Benbecker69/react_native_eemi>. Son README explique comment
+la lancer sur un téléphone et comment tester le scan et la géolocalisation côté
+téléphone. Ce dépôt-ci fournit le backend qu'elle appelle.
+
+| Ce que le site fournit    | Où                                                                    |
+| ------------------------- | --------------------------------------------------------------------- |
+| L'API                     | `/api/mobile/v1` — contrat : [docs/api-mobile.md](docs/api-mobile.md) |
+| Vérifier que l'API répond | <http://localhost:3000/api/mobile/v1/health> → `{"status":"ok",…}`    |
+| Les QR codes de test      | `/qrcode`, connecté en administrateur : un QR code par espace         |
+
+### Tester le QR code
+
+1. Se connecter en administrateur et ouvrir `/qrcode`.
+2. Chaque espace a son QR code, qui encode `repere:space:<identifiant>`.
+3. Depuis l'application mobile, sur une réservation, scanner le code de
+   l'espace réservé. Scanner celui d'un autre espace doit être refusé (« mauvais
+   espace »).
+
+Le scan n'ouvre pas une adresse web : l'identifiant lu est envoyé au serveur avec
+la position, et c'est le serveur qui valide ou refuse l'arrivée. Le site n'a pas
+de scan (il demanderait la caméra).
+
+### Tester la géolocalisation sur le site
+
+| Fonction                | Où                                               | Comportement                                                                                              |
+| ----------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| Tri par distance        | `/reserver`, « Trier par distance »              | Demande la position au navigateur et classe les espaces                                                   |
+| Réserver près de moi    | `/reserver`, « Trouver l'espace le plus proche » | Ouvre l'espace libre le plus proche, première heure libre présélectionnée                                 |
+| Carte des lieux         | `/reserver`                                      | Affichée si la localisation est autorisée ; sinon carte grisée avec un bouton « Activer la localisation » |
+| Validation de l'arrivée | `/reservations/[id]`, « Valider mon arrivée »    | Envoie la position au serveur, qui accepte ou refuse en expliquant pourquoi                               |
+
+Si la permission est refusée, chaque fonction affiche un message et le reste de
+la page continue de fonctionner.
+
+Une arrivée n'est acceptée qu'à moins de 150 m du lieu, entre 15 minutes avant le
+début du créneau et sa fin, avec une position précise à 100 m ou mieux. Loin du
+lieu, le refus est le résultat normal : il s'affiche avec la distance mesurée et
+apparaît dans « Arrivées ». Pour obtenir une arrivée acceptée sans se déplacer, on
+peut simuler une position dans les outils de développement du navigateur
+(coordonnées du lieu, précision de 100 m au plus). Les coordonnées des lieux de
+démonstration sont dans `prisma/seed.ts`.
 
 ## Docker
 
 L'application est livrée en image de production : build multi-étapes, sortie
 `standalone` de Next.js, utilisateur non-root, aucun secret dans l'image.
+
+Explication du `Dockerfile` ligne par ligne, du `.dockerignore`, du cache des
+couches et des questions de soutenance : [docs/docker.md](docs/docker.md).
 
 | Fichier              | Rôle                                                              |
 | -------------------- | ----------------------------------------------------------------- |
@@ -130,6 +443,15 @@ Sous Linux, ajouter `--add-host=host.docker.internal:host-gateway`.
 - <http://localhost:3000/api/mobile/v1/health> : `{"status":"ok"}` (c'est aussi
   l'URL du `HEALTHCHECK` de l'image).
 
+### Scan
+
+```bash
+docker scout quickview repere-web
+docker scout cves repere-web
+```
+
+Résultat et analyse : [Docker — sécurité & IA](#docker--sécurité--ia).
+
 ### Particularités du projet
 
 - **Le build ne lit jamais la base.** Les pages publiques sont rendues à la
@@ -188,8 +510,8 @@ n'aurait rien changé.
 
 ### Recommandations de l'assistant IA et décisions
 
-Le rapport de scan a été soumis à un assistant IA. Chaque proposition a été
-vérifiée par une mesure ou un test avant d'être retenue.
+J'ai soumis le rapport de scan à un assistant IA. J'ai vérifié chaque
+proposition par une mesure ou un test avant de la retenir.
 
 | Proposition                                                            | Décision                   | Vérification et justification                                                                                                                                                                                                                                  |
 | ---------------------------------------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -210,13 +532,17 @@ vérifiée par une mesure ou un test avant d'être retenue.
 | 2. `node:24-alpine`, sans npm                     | 1         | 2      | 0        | 0       | 112     | 245 Mo |
 | 3. + `next` 16.3.8, `sharp` 0.35.5, `apk upgrade` | **0**     | **0**  | **0**    | **0**   | 113     | 251 Mo |
 
-Après chaque étape l'image a été reconstruite, rescannée, et le parcours
-principal rejoué dans le conteneur sur une base vierge : connexion, réservation,
-annulation, refus d'accès à `/admin` pour un membre.
+Après chaque étape j'ai reconstruit l'image, relancé le scan, et rejoué le
+parcours principal dans le conteneur sur une base vierge : connexion,
+réservation, annulation, refus d'accès à `/admin` pour un membre.
 
-Vérifié aussi sur l'image finale : utilisateur `node` (non-root), aucun fichier
-`.env`, aucune occurrence de `DATABASE_URL` dans `docker history`, contexte de
-build de 3,85 Mo.
+J'ai aussi vérifié sur l'image finale : utilisateur `node` (non-root), aucun
+fichier `.env`, aucune occurrence de `DATABASE_URL` dans `docker history`,
+contexte de build de 3,85 Mo.
+
+J'ai relancé le scan le même jour, après les dernières modifications du code
+(session par jeton, écritures en transaction, images AVIF) : toujours
+**0 / 0 / 0 / 0**, 113 paquets, image de 256 Mo.
 
 ### Limites
 
@@ -232,10 +558,57 @@ build de 3,85 Mo.
 - Pas de scan automatique en intégration continue, ni d'attestation SBOM ou de
   provenance.
 
+## Limites connues
+
+Ce que le projet ne fait pas, ou fait de façon imparfaite. Chaque point est
+détaillé dans le document cité.
+
+**Livrables**
+
+- **Pas de déploiement en ligne.** L'application se lance en local, en
+  développement ou par l'image Docker de production. L'adresse du site dans
+  `src/lib/site-config.ts` (`https://repere.example.com`) est une adresse
+  d'exemple, utilisée par `sitemap.xml` et `robots.txt`.
+- **Des tests unitaires, pas de tests de bout en bout.** 80 tests couvrent les
+  règles métier écrites en fonctions pures (créneaux, heures d'ouverture,
+  règles d'arrivée, validation des formulaires, catalogue). Les parcours
+  complets dans le navigateur sont rejoués à la main.
+  ([docs/git-et-github.md](docs/git-et-github.md#tests))
+- Pas d'intégration continue : les vérifications sont lancées à la main avant
+  chaque commit.
+
+**Sécurité** ([docs/authentification-et-securite.md](docs/authentification-et-securite.md#limites-connues))
+
+- Le frein sur les tentatives de connexion vit en mémoire du processus : il est
+  remis à zéro au redémarrage et ne serait pas partagé entre plusieurs
+  instances.
+- Pas de réinitialisation de mot de passe ni de vérification d'adresse e-mail :
+  l'application n'envoie aucun e-mail.
+- La position envoyée pour valider une arrivée peut être falsifiée.
+
+**Fonctionnel**
+
+- Le back-office ne permet pas de supprimer un lieu, ni de modifier un espace
+  existant autrement qu'en changeant son statut.
+- Trois colonnes de la base sont enregistrées mais pas encore exploitées.
+  ([docs/base-de-donnees.md](docs/base-de-donnees.md#limites-connues))
+
+**Mobile**
+
+- Le NFC n'est pas implémenté. L'application mobile utilise le QR code et la
+  géolocalisation.
+
 ## Documentation
 
-- [docs/base-de-donnees.md](docs/base-de-donnees.md) — PostgreSQL, Prisma,
-  commandes
-- [docs/choix-de-rendu.md](docs/choix-de-rendu.md) — choix serveur / client /
-  cache
-- [docs/api-mobile.md](docs/api-mobile.md) — API de l'application mobile
+| Document                                                                     | Contenu                                                                    |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [docs/architecture.md](docs/architecture.md)                                 | Groupes de routes, layouts, toutes les routes, dossiers, où intervenir     |
+| [docs/fonctionnalites.md](docs/fonctionnalites.md)                           | Fonctionnalités, parcours de bout en bout, règles métier, scénario de démo |
+| [docs/choix-de-rendu.md](docs/choix-de-rendu.md)                             | Serveur ou client, lecture des données, Server Actions, Route Handlers     |
+| [docs/base-de-donnees.md](docs/base-de-donnees.md)                           | Schéma de données, relations, migrations, seed, commandes                  |
+| [docs/authentification-et-securite.md](docs/authentification-et-securite.md) | Session, gardes serveur, autorisations, secrets, limites                   |
+| [docs/interface-et-etats.md](docs/interface-et-etats.md)                     | Direction visuelle, responsive, états d'interface, accessibilité, langues  |
+| [docs/performance-cache-seo.md](docs/performance-cache-seo.md)               | Cache et invalidation, images, SEO, audit Lighthouse                       |
+| [docs/api-mobile.md](docs/api-mobile.md)                                     | Contrat de l'API de l'application mobile                                   |
+| [docs/docker.md](docs/docker.md)                                             | Dockerfile expliqué, `.dockerignore`, Compose, questions de soutenance     |
+| [docs/git-et-github.md](docs/git-et-github.md)                               | Branches, forme des commits, vérifications, qualité du code                |

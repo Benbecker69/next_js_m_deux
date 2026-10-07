@@ -3,7 +3,7 @@
 /*
  * Repère — design tokens.
  * Palette named after the metaphor (encre/papier/pin/ochre) grounding the
- * "architect's plan / lieu guide" direction — see .claude/PLAN.md §4.
+ * "architect's plan / lieu guide" direction — see docs/interface-et-etats.md.
  * Two layers: raw palette below, then Tailwind color utilities generated
  * from it via @theme inline (bg-pine, text-ink, border-line, …).
  */

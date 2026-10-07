@@ -12,8 +12,7 @@ import { SPACE_TYPE_LABELS } from "@/types/domain";
 // QR"). Not a real feature of the booking product: no dictionary entry, not
 // in the sitemap, excluded from indexing below, and admin-gated like the
 // rest of /admin even though it lives outside that route group (a tab here
-// would misrepresent it as a real admin sub-section — see CLAUDE.md
-// "Navigation unifiée").
+// would misrepresent it as a real admin sub-section).
 export const metadata: Metadata = {
   title: "QR codes de test — Repère",
   robots: { index: false, follow: false },

@@ -1,12 +1,16 @@
-.claude/
-.agents/
-skills-lock.json
-CLAUDE.md
-AGENTS.md
-.next/
+# Dot-folders (build output, editor and tooling configuration).
+.*/
 node_modules/
 public/
-package-lock.json
-*.pdf
+
+# Generated code and SQL.
 src/generated/
 prisma/migrations/
+
+# Lock files and binary documents.
+*-lock.json
+*.pdf
+
+# Root Markdown other than the README (AGENTS.md is rewritten by `next dev`).
+/*.md
+!/README.md
