@@ -5,6 +5,7 @@ import { useActionState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordField } from "@/components/ui/password-field";
 import { Alert } from "@/components/ui/alert";
 import { FieldError, fieldProps } from "@/components/ui/field-error";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
@@ -23,7 +24,13 @@ const DEMO_PASSWORD = "demo1234";
 // Client Component: getT() is server-only, so the Server Component parent
 // (page.tsx) resolves the dictionary once and passes just the slice this
 // form needs — no client-side locale plumbing required.
-export function LoginForm({ t }: { t: Dictionary["auth"] }) {
+export function LoginForm({
+  t,
+  passwordLabels,
+}: {
+  t: Dictionary["auth"];
+  passwordLabels: { show: string; hide: string };
+}) {
   const [state, formAction, pending] = useActionState(loginAction, initialState);
   useActionToast(state);
   const errors = state.fieldErrors;
@@ -78,12 +85,13 @@ export function LoginForm({ t }: { t: Dictionary["auth"] }) {
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="password">{t.password}</Label>
-        <Input
+        <PasswordField
           ref={passwordRef}
           id="password"
           name="password"
-          type="password"
           autoComplete="current-password"
+          showLabel={passwordLabels.show}
+          hideLabel={passwordLabels.hide}
           required
           {...fieldProps("password", errors?.password)}
         />

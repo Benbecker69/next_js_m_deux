@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordField } from "@/components/ui/password-field";
 import { Alert } from "@/components/ui/alert";
 import { FieldError, fieldProps } from "@/components/ui/field-error";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
@@ -13,7 +14,13 @@ import { registerAction, type RegisterFormState } from "../_actions";
 
 const initialState: RegisterFormState = { error: null };
 
-export function RegisterForm({ t }: { t: Dictionary["auth"] }) {
+export function RegisterForm({
+  t,
+  passwordLabels,
+}: {
+  t: Dictionary["auth"];
+  passwordLabels: { show: string; hide: string };
+}) {
   const [state, formAction, pending] = useActionState(registerAction, initialState);
   useActionToast(state);
   const errors = state.fieldErrors;
@@ -49,11 +56,12 @@ export function RegisterForm({ t }: { t: Dictionary["auth"] }) {
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="password">{t.password}</Label>
-        <Input
+        <PasswordField
           id="password"
           name="password"
-          type="password"
           autoComplete="new-password"
+          showLabel={passwordLabels.show}
+          hideLabel={passwordLabels.hide}
           required
           aria-describedby={errors?.password ? "password-error" : "password-hint"}
           aria-invalid={errors?.password ? true : undefined}

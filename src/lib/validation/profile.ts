@@ -20,5 +20,21 @@ export const profileSchema = z.object({
   memberType: memberTypeSchema,
 });
 
+// What the account form submits: the name in two fields, joined into the
+// single `name` the database stores (see `lib/member/name.ts`).
+export const profileFormSchema = z.object({
+  firstName: z
+    .string({ error: "Indiquez votre prénom." })
+    .trim()
+    .min(1, "Indiquez votre prénom.")
+    .max(40, "Ce prénom est trop long (40 caractères au maximum)."),
+  lastName: z
+    .string({ error: "Indiquez votre nom." })
+    .trim()
+    .min(1, "Indiquez votre nom.")
+    .max(40, "Ce nom est trop long (40 caractères au maximum)."),
+  memberType: memberTypeSchema,
+});
+
 export type OnboardingInput = z.infer<typeof onboardingSchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;

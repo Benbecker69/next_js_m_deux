@@ -15,7 +15,13 @@ export default async function LoginPage() {
       <h1 className="font-display text-2xl font-medium text-ink">{t.auth.loginTitle}</h1>
       <p className="mt-2 text-sm text-ink-muted">{t.auth.loginSubtitle}</p>
       <div className="mt-8">
-        <LoginForm t={t.auth} />
+        <LoginForm
+          t={t.auth}
+          passwordLabels={{
+            show: t.member.account.showPassword,
+            hide: t.member.account.hidePassword,
+          }}
+        />
       </div>
     </div>
   );

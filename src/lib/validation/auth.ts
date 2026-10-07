@@ -36,5 +36,39 @@ export const registerSchema = z.object({
     .max(200, "Ce mot de passe est trop long (200 caractères au maximum)."),
 });
 
+const newPassword = z
+  .string({ error: "Choisissez un nouveau mot de passe." })
+  .min(8, {
+    error: (issue) =>
+      `Le mot de passe doit contenir au moins 8 caractères (vous en avez saisi ${String(issue.input ?? "").length}).`,
+  })
+  .max(200, "Ce mot de passe est trop long (200 caractères au maximum).");
+
+const currentPassword = z
+  .string({ error: "Saisissez votre mot de passe actuel." })
+  .min(1, "Saisissez votre mot de passe actuel.");
+
+export const changeEmailSchema = z.object({
+  email,
+  currentPassword,
+});
+
+// `refine` runs on the whole object: each rule names the field it is about
+// (`path`), so its message lands under that field.
+export const changePasswordSchema = z
+  .object({
+    currentPassword,
+    newPassword,
+    confirmPassword: z.string({ error: "Saisissez à nouveau le nouveau mot de passe." }),
+  })
+  .refine((value) => value.newPassword === value.confirmPassword, {
+    message: "Les deux saisies du nouveau mot de passe ne sont pas identiques.",
+    path: ["confirmPassword"],
+  })
+  .refine((value) => value.newPassword !== value.currentPassword, {
+    message: "Le nouveau mot de passe doit être différent de l'actuel.",
+    path: ["newPassword"],
+  });
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;

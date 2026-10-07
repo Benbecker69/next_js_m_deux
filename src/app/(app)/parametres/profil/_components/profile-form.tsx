@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { FieldError, fieldProps } from "@/components/ui/field-error";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
+import { splitName } from "@/lib/member/name";
 import type { MemberType } from "@/types/domain";
 import { useActionToast } from "@/lib/feedback/use-action-toast";
 import { updateProfileAction, type ProfileFormState } from "../_actions";
@@ -17,14 +18,18 @@ export function ProfileForm({
   name,
   memberType,
   t,
+  labels,
 }: {
   name: string;
   memberType: MemberType | null;
   t: Dictionary["settings"];
+  labels: Pick<Dictionary["member"]["account"], "firstName" | "lastName">;
 }) {
   const [state, formAction, pending] = useActionState(updateProfileAction, initialState);
   useActionToast(state, t.profileSaved);
   const errors = state.fieldErrors;
+  // The single stored name, shown as the two fields people expect.
+  const saved = splitName(name);
 
   const MEMBER_TYPES: { value: MemberType; label: string }[] = [
     { value: "freelance", label: t.freelance },
@@ -34,16 +39,31 @@ export function ProfileForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-6" noValidate>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="name">{t.name}</Label>
-        <Input
-          id="name"
-          name="name"
-          defaultValue={state.name ?? name}
-          required
-          {...fieldProps("name", errors?.name)}
-        />
-        <FieldError field="name" message={errors?.name} />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="firstName">{labels.firstName}</Label>
+          <Input
+            id="firstName"
+            name="firstName"
+            autoComplete="given-name"
+            defaultValue={state.values?.firstName ?? saved.firstName}
+            required
+            {...fieldProps("firstName", errors?.firstName)}
+          />
+          <FieldError field="firstName" message={errors?.firstName} />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="lastName">{labels.lastName}</Label>
+          <Input
+            id="lastName"
+            name="lastName"
+            autoComplete="family-name"
+            defaultValue={state.values?.lastName ?? saved.lastName}
+            required
+            {...fieldProps("lastName", errors?.lastName)}
+          />
+          <FieldError field="lastName" message={errors?.lastName} />
+        </div>
       </div>
 
       <fieldset {...fieldProps("memberType", errors?.memberType)}>
@@ -58,7 +78,7 @@ export function ProfileForm({
                 defaultChecked={memberType === type.value}
                 className="peer sr-only"
               />
-              <span className="inline-block rounded-sm border border-line px-3 py-1.5 text-sm text-ink-muted peer-checked:border-pine peer-checked:bg-pine/10 peer-checked:text-pine">
+              <span className="inline-block rounded-sm border border-line bg-surface px-4 py-2 text-sm text-ink-muted transition-colors peer-checked:border-pine peer-checked:bg-pine/10 peer-checked:text-pine peer-focus-visible:ring-2 peer-focus-visible:ring-focus">
                 {type.label}
               </span>
             </label>
@@ -70,7 +90,6 @@ export function ProfileForm({
       </fieldset>
 
       {state.error && !errors && <Alert variant="error">{state.error}</Alert>}
-      {state.success && <Alert variant="success">{t.profileSaved}</Alert>}
 
       <div>
         <Button type="submit" disabled={pending}>

@@ -1,23 +1,13 @@
 "use client";
 
-import { useEffect, useSyncExternalStore, useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import Link from "next/link";
 import { WifiOff, TriangleAlert } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { buttonVariants } from "@/components/ui/button";
+import { useOnline } from "@/lib/feedback/use-online";
 import { applyStoredTheme } from "@/lib/theme/theme-provider";
 import { cn } from "@/lib/utils/cn";
-
-// `navigator.onLine` as React state: the screen changes by itself when the
-// connection drops or comes back, without an effect that sets state.
-function subscribeToConnection(onChange: () => void) {
-  window.addEventListener("online", onChange);
-  window.addEventListener("offline", onChange);
-  return () => {
-    window.removeEventListener("online", onChange);
-    window.removeEventListener("offline", onChange);
-  };
-}
 
 /**
  * What every `error.tsx` renders: what happened, what the user can do about
@@ -49,11 +39,8 @@ export function ErrorScreen({
   fullPage?: boolean;
 }) {
   const [retrying, startTransition] = useTransition();
-  const online = useSyncExternalStore(
-    subscribeToConnection,
-    () => navigator.onLine,
-    () => true,
-  );
+  // The screen changes by itself when the connection drops or comes back.
+  const online = useOnline();
 
   useEffect(() => {
     console.error(error);

@@ -17,7 +17,13 @@ export default async function RegisterPage() {
       </h1>
       <p className="mt-2 text-sm text-ink-muted">{t.auth.registerSubtitle}</p>
       <div className="mt-8">
-        <RegisterForm t={t.auth} />
+        <RegisterForm
+          t={t.auth}
+          passwordLabels={{
+            show: t.member.account.showPassword,
+            hide: t.member.account.hidePassword,
+          }}
+        />
       </div>
     </div>
   );

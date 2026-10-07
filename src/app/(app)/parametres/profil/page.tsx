@@ -9,5 +9,12 @@ export const metadata: Metadata = {
 
 export default async function SettingsProfilePage() {
   const [user, t] = await Promise.all([requireOnboarded(), getT()]);
-  return <ProfileForm name={user.name} memberType={user.memberType} t={t.settings} />;
+  return (
+    <ProfileForm
+      name={user.name}
+      memberType={user.memberType}
+      t={t.settings}
+      labels={t.member.account}
+    />
+  );
 }

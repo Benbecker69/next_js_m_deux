@@ -1,37 +1,63 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { requireOnboarded } from "@/lib/auth/session";
-import { getLocationById } from "@/lib/data/locations";
-import { getReservationById } from "@/lib/data/reservations";
-import { getSpaceById } from "@/lib/data/spaces";
-import { RESERVATION_STATUS_LABELS } from "@/types/domain";
-import { getLocale, getDictionary, INTL_LOCALE } from "@/lib/i18n/locale";
+import { getLocale, getDictionary } from "@/lib/i18n/locale";
+import { formatDateTime, formatDayLong, formatHourRange } from "@/lib/member/format";
+import {
+  cancelBlocker,
+  reservationPhase,
+  type MemberReservation,
+} from "@/lib/member/reservations";
+import { ApiError } from "@/lib/mobile/http";
+import { getReservation } from "@/lib/mobile/reservations";
+import { cn } from "@/lib/utils/cn";
+import { SPACE_TYPE_LABELS, type SpaceType } from "@/types/domain";
+import { ArrivalCard } from "./_components/arrival-card";
 import { CancelReservationButton } from "./_components/cancel-reservation-button";
 
 export const metadata: Metadata = {
   title: "Détail de la réservation",
 };
 
+/** The reservation of this member, or the 404 page — never someone else's. */
+async function loadReservation(userId: string, id: string): Promise<MemberReservation> {
+  try {
+    return await getReservation(userId, id);
+  } catch (error) {
+    // "Not found" and "not yours" are one answer, on purpose.
+    if (error instanceof ApiError && error.status === 404) notFound();
+    throw error;
+  }
+}
+
 export default async function ReservationDetailPage({
   params,
 }: PageProps<"/reservations/[id]">) {
   const { id } = await params;
-  const [user, reservation, locale] = await Promise.all([
-    requireOnboarded(),
-    getReservationById(id),
-    getLocale(),
-  ]);
-  if (!reservation || reservation.userId !== user.id) notFound();
+  const [user, locale] = await Promise.all([requireOnboarded(), getLocale()]);
+  const reservation = await loadReservation(user.id, id);
+
   const t = getDictionary(locale);
+  const r = t.member.reservations;
+  const nav = t.member.nav;
+  const now = new Date();
+  const phase = reservationPhase(reservation, now);
+  const blocker = cancelBlocker(reservation, now);
+  // Only a reservation still ahead gets the filled card: once it is over or
+  // cancelled, the page stops insisting.
+  const featured = phase === "upcoming";
 
-  const space = await getSpaceById(reservation.spaceId);
-  const location = space ? await getLocationById(space.locationId) : null;
-
-  const canCancel =
-    reservation.status === "confirmed" && new Date(reservation.startAt) > new Date();
-  const badge = RESERVATION_STATUS_LABELS[reservation.status];
+  const status = {
+    upcoming: { label: r.statusConfirmed, variant: "success" as const },
+    past: { label: r.statusDone, variant: "neutral" as const },
+    cancelled: { label: r.statusCancelled, variant: "danger" as const },
+  }[phase];
+  const creditsWord = reservation.creditsSpent === 1 ? nav.credit : nav.credits;
+  const typeLabel =
+    SPACE_TYPE_LABELS[reservation.space.type as SpaceType] ?? reservation.space.type;
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-10 sm:px-8 sm:py-12">
@@ -41,37 +67,88 @@ export default async function ReservationDetailPage({
       >
         {t.myReservations.backToList}
       </Link>
-      <div className="mt-4 flex items-center justify-between">
-        <h1 className="font-display text-2xl font-medium text-ink">
-          {space?.name ?? "Espace"}
+
+      <header
+        className={cn(
+          "mt-4 rounded-sm p-6",
+          featured
+            ? "bg-pine text-pine-contrast shadow-sm shadow-pine/25"
+            : "border border-line bg-surface text-ink",
+        )}
+      >
+        <div className="flex items-center justify-between gap-4 text-sm">
+          <p className={featured ? "opacity-85" : "text-ink-muted"}>{typeLabel}</p>
+          {featured ? (
+            // On the filled card a tinted badge would not show: an outlined
+            // label in the card's own text color instead.
+            <span className="rounded-sm border border-pine-contrast/40 px-2 py-0.5 text-xs font-medium">
+              {status.label}
+            </span>
+          ) : (
+            <Badge variant={status.variant}>{status.label}</Badge>
+          )}
+        </div>
+        <p className="mt-4 font-display text-lg font-medium">
+          {formatDayLong(new Date(reservation.startAt), locale)}
+        </p>
+        <h1 className="font-display text-4xl font-medium leading-tight">
+          {formatHourRange(reservation.startAt, reservation.endAt, locale)}
         </h1>
-        <Badge variant={badge.variant}>{badge.label}</Badge>
-      </div>
-      <p className="mt-1 text-sm text-ink-muted">
-        {location?.name} — {location?.city}
-      </p>
-
-      <dl className="mt-8 divide-y divide-line border-t border-line text-sm">
-        <div className="flex justify-between py-3">
-          <dt className="text-ink-muted">{t.myReservations.slot}</dt>
-          <dd className="text-ink">
-            {new Date(reservation.startAt).toLocaleString(INTL_LOCALE[locale], {
-              dateStyle: "medium",
-              timeStyle: "short",
-            })}
-          </dd>
+        <p className={cn("mt-3 font-medium", featured ? "opacity-95" : undefined)}>
+          {reservation.space.name}
+        </p>
+        <div
+          className={cn(
+            "mt-1 flex flex-col gap-1 text-sm",
+            featured ? "opacity-85" : "text-ink-muted",
+          )}
+        >
+          <p className="flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+            {reservation.location.name}, {reservation.location.address}
+          </p>
+          <p className="flex items-center gap-1.5">
+            <Users className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+            {reservation.space.capacity} {r.capacity}
+          </p>
         </div>
-        <div className="flex justify-between py-3">
-          <dt className="text-ink-muted">{t.myReservations.creditsSpent}</dt>
-          <dd className="text-ink">{reservation.creditsSpent}</dd>
-        </div>
-      </dl>
+        <p
+          className={cn(
+            "mt-5 font-display text-xl font-medium tabular-nums",
+            // Spent: red. Refunded: crossed out. Over: quiet.
+            !featured && phase === "cancelled" && "text-ink-muted line-through",
+            !featured && phase === "past" && "text-ink-muted",
+          )}
+        >
+          -{reservation.creditsSpent} {creditsWord}
+        </p>
+      </header>
 
-      {canCancel && (
-        <div className="mt-8">
+      <div className="mt-6 flex flex-col gap-6">
+        <ArrivalCard
+          reservationId={reservation.id}
+          state={reservation.checkIn.state}
+          windowLabel={`${formatDateTime(reservation.checkIn.opensAt, locale)} → ${formatDateTime(reservation.checkIn.closesAt, locale)}`}
+          doneLabel={
+            reservation.checkIn.doneAt
+              ? formatDateTime(reservation.checkIn.doneAt, locale)
+              : null
+          }
+          t={r}
+          geo={t.booking}
+        />
+
+        {blocker === null ? (
           <CancelReservationButton reservationId={reservation.id} t={t.myReservations} />
-        </div>
-      )}
+        ) : (
+          // Says why there is no button, rather than leaving it looking forgotten.
+          blocker !== "inactive" && (
+            <p className="text-sm text-ink-muted">
+              {blocker === "arrived" ? r.cannotCancelArrived : r.cannotCancelStarted}
+            </p>
+          )
+        )}
+      </div>
     </div>
   );
 }

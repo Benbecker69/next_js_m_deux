@@ -58,6 +58,18 @@ export function validationFailure(error: ZodError): {
   return { error: validationSummary(fieldErrors), fieldErrors };
 }
 
+/**
+ * A refusal that is about one field, found after validation (wrong current
+ * password, address already taken): the same sentence goes to the toast and
+ * under that field.
+ */
+export function fieldFailure(
+  field: string,
+  message: string,
+): { error: string; fieldErrors: FieldErrors } {
+  return { error: message, fieldErrors: { [field]: message } };
+}
+
 const slotFormatter = new Intl.DateTimeFormat("fr-FR", {
   weekday: "long",
   day: "numeric",

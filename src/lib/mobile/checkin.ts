@@ -114,6 +114,18 @@ export async function performCheckIn(
   });
 }
 
+/** One attempt of this user. Someone else's looks exactly like a missing one. */
+export async function getCheckIn(userId: string, checkInId: string) {
+  const row = await prisma.checkIn.findUnique({
+    where: { id: checkInId },
+    include: { reservation: { include: { space: { include: { location: true } } } } },
+  });
+  if (!row || row.userId !== userId) {
+    throw new ApiError(404, "CHECK_IN_NOT_FOUND", "Tentative d'arrivée introuvable.");
+  }
+  return toCheckInHistoryDto(row);
+}
+
 export async function listCheckIns(
   userId: string,
   options: { limit?: number; cursor?: string },

@@ -61,8 +61,6 @@ export function PreferencesForm({
         {t.emailReminder}
       </label>
 
-      <p className="text-xs text-ink-muted">{t.themeHint}</p>
-
       {state.error && !errors && <Alert variant="error">{state.error}</Alert>}
       {state.success && <Alert variant="success">{t.preferencesSaved}</Alert>}
 
