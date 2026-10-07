@@ -1,0 +1,32 @@
+# Files listed here are never sent to the Docker daemon (the "build context"),
+# so `COPY . .` cannot put them in an image. Smaller context = faster build,
+# and no local secret or host-specific artefact can leak into a layer.
+
+# Installed and generated on the host (Windows binaries, dev caches): the
+# image installs and builds its own, for Linux.
+node_modules
+.next
+out
+build
+dist
+coverage
+src/generated
+next-env.d.ts
+*.tsbuildinfo
+npm-debug.log*
+
+# Secrets and local configuration: injected when the container starts
+# (`--env-file`, Compose `environment`), never baked into the image.
+.env
+.env.*
+
+# Not needed to build or run the app.
+.git
+Dockerfile
+docker-compose.yml
+docs
+*.md
+*.pdf
+
+# Any other dot-file or dot-folder at the root (editor and tooling config).
+.*

@@ -12,10 +12,11 @@ import { getCachedLocations } from "@/lib/data/locations";
 import { getCachedSpaces } from "@/lib/data/spaces";
 import { getT } from "@/lib/i18n/locale";
 
-export async function generateStaticParams() {
-  const locations = await getCachedLocations();
-  return locations.map((location) => ({ slug: location.slug }));
-}
+// No `generateStaticParams` here, on purpose: this page reads cookies (language,
+// session), so it is rendered on every request and cannot be pre-built. Listing
+// slugs would only make `next build` depend on the database — and with no slug
+// listed, Next treats the route as static and fails at runtime
+// (DYNAMIC_SERVER_USAGE). The data itself still comes from the data cache.
 
 export async function generateMetadata({
   params,

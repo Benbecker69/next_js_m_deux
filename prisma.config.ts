@@ -1,4 +1,4 @@
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 // Prisma 7 config: `prisma migrate dev`, `prisma db seed`, etc. read the
 // connection string from here (not from schema.prisma anymore). Runtime
@@ -16,7 +16,12 @@ try {
 export default defineConfig({
   schema: "prisma/schema.prisma",
   datasource: {
-    url: env("DATABASE_URL"),
+    // Plain `process.env`, not the strict `env()` helper (which throws when
+    // the variable is missing): `prisma generate` runs on every `npm ci`
+    // (postinstall), including while the Docker image is built, where no
+    // database URL exists — and it never connects to the database anyway.
+    // Commands that do connect (migrate, seed) still need the variable.
+    url: process.env.DATABASE_URL ?? "",
   },
   migrations: {
     seed: "node prisma/seed.ts",

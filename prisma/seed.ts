@@ -213,6 +213,15 @@ const USERS = [
 ];
 
 async function main() {
+  // Docker Compose runs this script on every `docker compose up` (see the
+  // `migrate` service). With SEED_ONLY_IF_EMPTY=1 it only fills a brand-new
+  // database and never resets existing data (credits, edited locations).
+  // Without the flag (`npm run db:seed`) the behaviour is unchanged.
+  if (process.env.SEED_ONLY_IF_EMPTY === "1" && (await prisma.user.count()) > 0) {
+    console.log("Database already has users: seed skipped.");
+    return;
+  }
+
   for (const location of LOCATIONS) {
     await prisma.location.upsert({
       where: { id: location.id },

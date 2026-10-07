@@ -1,7 +1,14 @@
-# Local PostgreSQL for Repère. Host port 5433 (not the default 5432) to
-# avoid clashing with any other Postgres already running on the machine.
-# Start it with `npm run db:up`, then run migrations/seed — see
-# docs/base-de-donnees.md.
+# Two ways to use this file:
+#
+#   npm run db:up               only PostgreSQL — the day-to-day setup, with
+#                               the app running on the host (`npm run dev`).
+#                               See docs/base-de-donnees.md.
+#   docker compose up --build   the whole stack in containers: PostgreSQL,
+#                               the migrations/seed job, then the production
+#                               image of the app. See README.md, "Docker".
+#
+# PostgreSQL is published on host port 5433 (not the default 5432) to avoid
+# clashing with any other Postgres already running on the machine.
 services:
   postgres:
     image: postgres:16-alpine
@@ -20,6 +27,37 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  # One-shot job: applies the pending migrations, fills the demo data if the
+  # database is empty, then exits (it is normal to see it "Exited (0)").
+  migrate:
+    build:
+      context: .
+      target: migrate
+    environment:
+      # Inside the Compose network the database is reached by its service
+      # name and its own port: "postgres:5432", not "localhost:5433".
+      DATABASE_URL: postgresql://repere:repere@postgres:5432/repere?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # The app, production build (Dockerfile, last stage).
+  web:
+    build:
+      context: .
+      target: runner
+    image: repere-web
+    environment:
+      DATABASE_URL: postgresql://repere:repere@postgres:5432/repere?schema=public
+    ports:
+      # Host port 3000 by default; `WEB_PORT=3100 docker compose up` if taken.
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
   repere-postgres-data:
