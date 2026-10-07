@@ -6,17 +6,17 @@ import {
   updateUserPassword,
   verifyUserPasswordById,
 } from "@/lib/data/users";
+import { deleteSessionsOfUser } from "@/lib/data/sessions";
 import { toMeDto } from "./dto";
 import { ApiError } from "./http";
 import { revokeOtherMobileSessions } from "./auth";
 
-// Account security: change password, change email. Neither exists on the
-// web yet (its own "Sécurité" tab is read-only and literally says the
-// ability to change the password "arrivera dans une prochaine mise à jour")
-// — this is new capability, not a reuse of an existing web action, built on
-// the same `src/lib/auth/password.ts` primitives and the same
-// `INVALID_CREDENTIALS`/`EMAIL_TAKEN` error codes the rest of the API
-// already uses, so the contract stays consistent even though the flow is new.
+// Account security: change password, change email. Written for the mobile
+// API first; the site's "Sécurité" tab now offers the same two changes
+// through its own Server Actions (`(app)/parametres/securite/_actions.ts`).
+// Both sides rely on the same `src/lib/auth/password.ts` primitives and the
+// same repository functions; this file keeps the API's error codes
+// (`INVALID_CREDENTIALS`, `EMAIL_TAKEN`) consistent with the rest of it.
 
 const WRONG_PASSWORD = "Mot de passe actuel incorrect.";
 
@@ -24,7 +24,8 @@ const WRONG_PASSWORD = "Mot de passe actuel incorrect.";
  * Requires the current password (a mobile session token alone isn't enough
  * to prove the human typing right now still knows it). Every other active
  * session is revoked afterward — a device that only had the old password
- * stops working, while this one stays signed in.
+ * stops working, while this one stays signed in. The website's sessions of
+ * the account end too: a browser left signed in must not outlive the change.
  */
 export async function changePassword(
   userId: string,
@@ -40,6 +41,7 @@ export async function changePassword(
     throw new ApiError(404, "USER_NOT_FOUND", "Utilisateur introuvable.");
   }
   await revokeOtherMobileSessions(userId, sessionId);
+  await deleteSessionsOfUser(userId);
 }
 
 const EMAIL_TAKEN = "Un compte existe déjà avec cette adresse e-mail.";

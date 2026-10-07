@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireOnboarded } from "@/lib/auth/session";
+import { destroyOtherSessions, requireOnboarded } from "@/lib/auth/session";
 import {
   getUserByEmail,
   updateUserEmail,
@@ -128,9 +128,11 @@ export async function changePasswordAction(
       if (!updated) {
         return { error: MESSAGES.notSaved, success: false };
       }
-      // A phone that only knew the old password, or a stolen token, stops
-      // working: every mobile session of this account is revoked (the site
-      // has no mobile session of its own to keep, hence the empty id).
+      // Whoever only knew the old password stops being signed in: every
+      // other browser session of this account ends (this one stays), and
+      // every mobile session is revoked (the site has no mobile session of
+      // its own to keep, hence the empty id).
+      await destroyOtherSessions(user.id);
       await revokeOtherMobileSessions(user.id, "");
 
       return { error: null, success: true, resetKey: Date.now() };

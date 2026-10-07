@@ -54,10 +54,27 @@ model User {
 
   reservations   Reservation[]
   preference     Preference?
+  sessions       Session[]
   mobileSessions MobileSession[]
   checkIns       CheckIn[]
 
   @@map("users")
+}
+
+// Sessions of the website. The `repere_session` cookie holds an opaque random
+// token; only its SHA-256 hash is stored here, so neither a guessed user id
+// nor a leaked database is enough to sign in as someone. Deleting the row is
+// a real logout (see src/lib/auth/session.ts).
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+  @@map("sessions")
 }
 
 model Location {
