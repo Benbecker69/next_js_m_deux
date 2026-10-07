@@ -44,6 +44,7 @@ export function BookingPicker({
   submitLabel,
   submittingLabel,
   locale,
+  preselect = false,
 }: {
   space: Pick<Space, "id" | "pricePerHour">;
   /** Confirmed reservations of this space: start and end only. */
@@ -53,12 +54,22 @@ export function BookingPicker({
   submitLabel: string;
   submittingLabel: string;
   locale: Locale;
+  /** Start with the first free hour of the first bookable day already picked. */
+  preselect?: boolean;
 }) {
   // Read once: the grid must not change under the member's cursor.
   const [now] = useState(() => new Date());
   const [day, setDay] = useState(() => defaultBookingDay(now));
-  const [startHour, setStartHour] = useState<number | null>(null);
-  const [endHour, setEndHour] = useState<number | null>(null);
+  // With `preselect`, the first hour still free on that day is picked from
+  // the start, for one hour — the member only has to confirm or extend it.
+  const [startHour, setStartHour] = useState<number | null>(() =>
+    preselect
+      ? (BOOKABLE_HOURS.find((hour) => isSlotBookable(day, hour, busySlots, now)) ?? null)
+      : null,
+  );
+  const [endHour, setEndHour] = useState<number | null>(() =>
+    startHour === null ? null : startHour + 1,
+  );
   const [state, formAction, pending] = useActionState(
     createReservationAction,
     initialState,

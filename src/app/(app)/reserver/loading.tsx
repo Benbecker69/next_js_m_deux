@@ -5,6 +5,8 @@ export default function ReserveLoading() {
   return (
     <SkeletonPage width="5xl">
       <TitleSkeleton subtitle />
+      {/* The "book near me" card. */}
+      <Skeleton className="mt-8 h-24" />
       {/* The filter bar: search, type, location, "sort by distance". */}
       <div className="mt-8 grid gap-4 rounded-sm border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-4">
         <FieldSkeleton />
@@ -12,6 +14,8 @@ export default function ReserveLoading() {
         <FieldSkeleton />
         <FieldSkeleton />
       </div>
+      {/* The map of the locations. */}
+      <Skeleton className="mt-6 h-72" />
       <Skeleton className="mt-6 h-4 w-24" />
       {/* Space cards: photo on top, three lines, price. */}
       <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

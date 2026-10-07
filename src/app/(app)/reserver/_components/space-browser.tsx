@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { LocateFixed, MapPin, Users } from "lucide-react";
+import { PlacesMap } from "@/components/places-map";
 import { SpacePhoto } from "@/components/space-photo";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -12,17 +14,23 @@ import { Select } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import { SPACE_TYPES } from "@/lib/catalog";
 import { distanceKm } from "@/lib/geo/distance";
+import type { MapPin as Pin } from "@/lib/geo/map";
 import { useToast } from "@/lib/feedback/toast-provider";
 import type { Dictionary } from "@/lib/i18n/dictionaries/fr";
+import { fill } from "@/lib/member/format";
 import { SPACE_TYPE_LABELS, type Location, type Space } from "@/types/domain";
 
-type SpaceWithLocation = Space & { location: Location };
+type SpaceWithLocation = Space & {
+  location: Location;
+  /** Taken for the coming hour — worked out by the server. */
+  busy: boolean;
+};
 
-// Client Component because it needs two browser-only things a server can't
-// provide: filtering as you type, and the Geolocation API for "sort by
-// distance" — both are pure front-end, no server round-trip. The first
-// filters can come from the URL (`/reserver?lieu=…&type=…`, read by the
-// page), which is how a location page sends a member straight to its spaces.
+// Client Component because it needs browser-only things a server can't
+// provide: filtering as you type, the Geolocation API for "sort by
+// distance", and the map. The first filters can come from the URL
+// (`/reserver?lieu=…&type=…`, read by the page), which is how a location
+// page sends a member straight to its spaces.
 export function SpaceBrowser({
   spaces,
   locations,
@@ -30,6 +38,7 @@ export function SpaceBrowser({
   initialType = "",
   t,
   f,
+  m,
 }: {
   spaces: SpaceWithLocation[];
   locations: Location[];
@@ -39,6 +48,8 @@ export function SpaceBrowser({
   t: Dictionary["booking"];
   /** Filters and cards (`bookingFlow`). */
   f: Dictionary["bookingFlow"];
+  /** Availability and map (`member.booking`). */
+  m: Dictionary["member"]["booking"];
 }) {
   const [query, setQuery] = useState("");
   const [type, setType] = useState(initialType);
@@ -96,6 +107,28 @@ export function SpaceBrowser({
     }
     return result;
   }, [spaces, query, type, locationId, origin]);
+
+  // One pin per location that has spaces, with how many are free right now.
+  const pins = useMemo<Pin[]>(
+    () =>
+      locations.flatMap((location) => {
+        const own = spaces.filter((space) => space.locationId === location.id);
+        if (own.length === 0) return [];
+        return [
+          {
+            id: location.id,
+            name: location.name,
+            lat: location.lat,
+            lng: location.lng,
+            caption: fill(m.freeOf, {
+              a: own.filter((space) => !space.busy).length,
+              b: own.length,
+            }),
+          },
+        ];
+      }),
+    [locations, spaces, m.freeOf],
+  );
 
   const filtering = Boolean(query || type || locationId);
   const reset = () => {
@@ -163,6 +196,23 @@ export function SpaceBrowser({
         </Alert>
       )}
 
+      {/* The map and the "Lieu" select are two views of one filter: a click
+          on a pin chooses that location, a second click lets go of it. */}
+      <div className="mt-6">
+        <PlacesMap
+          pins={pins}
+          selectedId={locationId || null}
+          onSelect={(id) => setLocationId((current) => (current === id ? "" : id))}
+          heightClass="h-72"
+          labels={{
+            label: m.mapLabel,
+            locked: m.mapLocked,
+            denied: m.mapDenied,
+            enable: m.mapEnable,
+          }}
+        />
+      </div>
+
       <div className="mt-6 flex items-center justify-between gap-4">
         <p className="text-sm text-ink-muted" aria-live="polite">
           {filtered.length} {filtered.length === 1 ? f.countOne : f.countMany}
@@ -204,9 +254,19 @@ export function SpaceBrowser({
                   sizes="(min-width: 1024px) 20rem, (min-width: 640px) 50vw, 100vw"
                 />
                 <div className="flex flex-1 flex-col p-4">
-                  <h2 className="font-display text-lg font-medium text-ink">
-                    {space.name}
-                  </h2>
+                  <div className="flex items-start justify-between gap-3">
+                    <h2 className="font-display text-lg font-medium text-ink">
+                      {space.name}
+                    </h2>
+                    {/* Free right now, or taken for the coming hour — it can
+                        still be booked for later either way. */}
+                    <Badge
+                      variant={space.busy ? "warning" : "success"}
+                      className="shrink-0"
+                    >
+                      {space.busy ? m.busyNow : m.freeNow}
+                    </Badge>
+                  </div>
                   {space.name !== SPACE_TYPE_LABELS[space.type] && (
                     <p className="text-sm text-ink-muted">
                       {SPACE_TYPE_LABELS[space.type]}

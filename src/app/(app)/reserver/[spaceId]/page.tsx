@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin, Users } from "lucide-react";
+import { MapPin, Navigation, Users } from "lucide-react";
+import { PlacesMap } from "@/components/places-map";
 import { SpacePhoto } from "@/components/space-photo";
+import { buttonVariants } from "@/components/ui/button";
 import { requireOnboarded } from "@/lib/auth/session";
 import { getLocationById } from "@/lib/data/locations";
 import { listReservationsBySpace } from "@/lib/data/reservations";
 import { getSpaceById } from "@/lib/data/spaces";
+import { directionsUrl } from "@/lib/geo/map";
 import { SPACE_TYPE_LABELS } from "@/types/domain";
 import { getLocale, getDictionary } from "@/lib/i18n/locale";
 import { BookingPicker } from "./_components/booking-picker";
@@ -23,8 +26,9 @@ export async function generateMetadata({
 
 export default async function ReserveSpacePage({
   params,
+  searchParams,
 }: PageProps<"/reserver/[spaceId]">) {
-  const { spaceId } = await params;
+  const [{ spaceId }, query] = await Promise.all([params, searchParams]);
   const [user, space, locale] = await Promise.all([
     requireOnboarded(),
     getSpaceById(spaceId),
@@ -92,8 +96,59 @@ export default async function ReserveSpacePage({
           submitLabel={t.booking.confirmBooking}
           submittingLabel={t.booking.confirming}
           locale={locale}
+          // Coming from "Réserver près de moi": the space is free right now,
+          // so the first free hour is already picked.
+          preselect={query.proche === "1"}
         />
       </div>
+
+      {location && (
+        <section className="mt-12 border-t border-line pt-8">
+          <h2 className="font-display text-xl font-medium text-ink">
+            {t.member.booking.whereTitle}
+          </h2>
+          <div className="mt-4 overflow-hidden rounded-sm border border-line bg-surface">
+            <div className="p-3 pb-0">
+              <PlacesMap
+                pins={[
+                  {
+                    id: location.id,
+                    name: location.name,
+                    lat: location.lat,
+                    lng: location.lng,
+                    caption: location.address,
+                  },
+                ]}
+                selectedId={location.id}
+                heightClass="h-64"
+                labels={{
+                  label: t.member.booking.mapLabel,
+                  locked: t.member.booking.mapLocked,
+                  denied: t.member.booking.mapDenied,
+                  enable: t.member.booking.mapEnable,
+                }}
+              />
+            </div>
+            {/* The address and the route are plain information: they stay
+                even while the map waits for the location to be on. */}
+            <div className="flex flex-wrap items-center justify-between gap-4 p-5">
+              <div className="min-w-0">
+                <p className="font-medium text-ink">{location.name}</p>
+                <p className="text-sm text-ink-muted">{location.address}</p>
+              </div>
+              <a
+                href={directionsUrl(location)}
+                target="_blank"
+                rel="noreferrer"
+                className={buttonVariants({ variant: "secondary", size: "sm" })}
+              >
+                <Navigation className="h-4 w-4" strokeWidth={1.75} />
+                {t.member.booking.itinerary}
+              </a>
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
