@@ -6,10 +6,10 @@ import { reservationInclude, toReservationDto } from "./dto";
 import { ApiError } from "./http";
 import { withSerializableTransaction } from "./transaction";
 
-// Booking and cancelling for the mobile app. The repositories in src/lib/data
-// don't accept a transaction client, and these two operations must be atomic:
-// the web actions read the balance, then write it back, so two requests in a
-// row can double-book a slot or lose credits. Here each operation is a single
+// Booking and cancelling, for the mobile API and for the website's Server
+// Actions alike. These two operations must be atomic: reading a balance, then
+// writing it back in a second query, would let two requests at the same
+// instant double-book a slot or lose credits. Here each operation is a single
 // interactive transaction, and the credit changes are conditional updates.
 
 const HOUR_MS = 3_600_000;

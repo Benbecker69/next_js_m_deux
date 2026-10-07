@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/session";
-import { getReservationById, updateReservation } from "@/lib/data/reservations";
-import { getUserById, updateUser } from "@/lib/data/users";
-import { MESSAGES, credits, type ActionResult } from "@/lib/feedback/action-result";
+import { cancelReservationWithRefund, getReservationById } from "@/lib/data/reservations";
+import { getUserById } from "@/lib/data/users";
+import { credits, type ActionResult } from "@/lib/feedback/action-result";
 import { guardAction } from "@/lib/feedback/guard-action";
 
 // Admin cancellation differs from a member's: no "must be in the future"
@@ -35,14 +35,14 @@ export async function adminCancelReservationAction(
       }
 
       const member = await getUserById(reservation.userId);
-      const cancelled = await updateReservation(reservation.id, { status: "cancelled" });
+      // Status and refund in one transaction (see the function's comment).
+      const cancelled = await cancelReservationWithRefund(reservation.id);
       if (!cancelled) {
-        return { ok: false, error: MESSAGES.notSaved };
-      }
-      if (member) {
-        await updateUser(member.id, {
-          credits: member.credits + reservation.creditsSpent,
-        });
+        return {
+          ok: false,
+          error:
+            "Cette réservation vient d'être modifiée par quelqu'un d'autre. Rechargez la page.",
+        };
       }
 
       revalidatePath(`/admin/reservations/${reservation.id}`);

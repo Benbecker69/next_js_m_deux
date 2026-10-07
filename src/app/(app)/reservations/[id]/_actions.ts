@@ -2,19 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { requireOnboarded } from "@/lib/auth/session";
-import { getReservationById, updateReservation } from "@/lib/data/reservations";
-import { updateUser } from "@/lib/data/users";
-import {
-  MESSAGES,
-  credits,
-  formatSlot,
-  type ActionResult,
-} from "@/lib/feedback/action-result";
+import { getReservationById } from "@/lib/data/reservations";
+import { credits, formatSlot, type ActionResult } from "@/lib/feedback/action-result";
 import { guardAction } from "@/lib/feedback/guard-action";
 import { performCheckIn } from "@/lib/mobile/checkin";
 import { MOBILE_CONFIG } from "@/lib/mobile/config";
 import { ApiError } from "@/lib/mobile/http";
-import { getReservation } from "@/lib/mobile/reservations";
+import { cancelReservation, getReservation } from "@/lib/mobile/reservations";
 import { checkInBodySchema } from "@/lib/mobile/schemas";
 
 const NOT_FOUND =
@@ -55,11 +49,15 @@ export async function cancelReservationAction(
         };
       }
 
-      const cancelled = await updateReservation(reservation.id, { status: "cancelled" });
-      if (!cancelled) {
-        return { ok: false, error: MESSAGES.notSaved };
+      // One transaction (the same function as the mobile app's): the status
+      // changes and the credits come back together, and of two cancellations
+      // at the same instant only one is refunded.
+      try {
+        await cancelReservation(user.id, reservation.id);
+      } catch (error) {
+        if (error instanceof ApiError) return { ok: false, error: error.message };
+        throw error;
       }
-      await updateUser(user.id, { credits: user.credits + reservation.creditsSpent });
 
       revalidatePath("/tableau-de-bord", "layout");
       revalidatePath(`/reservations/${reservation.id}`);

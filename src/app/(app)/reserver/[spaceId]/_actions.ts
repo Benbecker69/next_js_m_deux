@@ -3,10 +3,12 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireOnboarded } from "@/lib/auth/session";
-import { createReservation, listReservationsBySpace } from "@/lib/data/reservations";
+import { listReservationsBySpace } from "@/lib/data/reservations";
 import { getSpaceById } from "@/lib/data/spaces";
-import { updateUser } from "@/lib/data/users";
+import { isWithinOpeningHours } from "@/lib/booking/opening-hours";
 import { maxBookingDate } from "@/lib/booking/slots";
+import { ApiError } from "@/lib/mobile/http";
+import { createReservation } from "@/lib/mobile/reservations";
 import { createReservationSchema } from "@/lib/validation/reservation";
 import { withFlash } from "@/lib/feedback/flash-messages";
 import {
@@ -57,6 +59,15 @@ export async function createReservationAction(
         };
       }
 
+      // The picker only offers these hours; a direct call must not get
+      // around them.
+      if (!isWithinOpeningHours(new Date(startAt), new Date(endAt))) {
+        return {
+          error:
+            "Les espaces se réservent par heures entières, entre 9 h et 18 h. Choisissez un créneau dans ces horaires.",
+        };
+      }
+
       // One day of margin: the server may not be in the member's time zone.
       const latestStart = maxBookingDate(new Date()).getTime() + 24 * 3_600_000;
       if (new Date(startAt).getTime() > latestStart) {
@@ -88,17 +99,23 @@ export async function createReservationAction(
         };
       }
 
-      await createReservation({
-        id: crypto.randomUUID(),
-        userId: user.id,
-        spaceId: space.id,
-        startAt,
-        endAt,
-        status: "confirmed",
-        creditsSpent: cost,
-        createdAt: new Date().toISOString(),
-      });
-      await updateUser(user.id, { credits: user.credits - cost });
+      // The checks above read the state a moment ago and only serve to
+      // answer with a precise sentence. The booking itself is one database
+      // transaction (the same function as the mobile app's): it checks the
+      // slot and debits the credits together, so two requests at the same
+      // instant cannot both get the slot, and the balance cannot go wrong.
+      try {
+        await createReservation(user.id, {
+          spaceId: space.id,
+          startAt: new Date(startAt),
+          endAt: new Date(endAt),
+        });
+      } catch (error) {
+        // Lost a race (slot just taken, credits just spent): the function
+        // answers with a sentence of its own.
+        if (error instanceof ApiError) return { error: error.message };
+        throw error;
+      }
 
       // The (app) layout (sidebar credits) is shared across routes and would
       // otherwise keep showing the pre-booking balance from the router cache.

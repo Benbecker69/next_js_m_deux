@@ -69,7 +69,9 @@ export function checkInEligibility(
   const opensAt = new Date(
     record.startAt.getTime() - MOBILE_CONFIG.checkIn.opensBeforeStartMs,
   );
-  const doneAt = record.checkIns[0]?.createdAt ?? null;
+  // `.at(0)`, not `[0]`: indexing is typed as "always there", which would
+  // make `doneAt` look like it can never be null.
+  const doneAt = record.checkIns.at(0)?.createdAt ?? null;
   let state: CheckInState;
   if (record.status !== "confirmed") state = "unavailable";
   else if (doneAt) state = "done";

@@ -51,6 +51,32 @@ export async function createReservation(reservation: Reservation): Promise<Reser
   return toReservation(row);
 }
 
+/**
+ * Cancels a confirmed reservation and gives its credits back to the member,
+ * as one transaction: either both happen or neither does. The status only
+ * changes `WHERE status = 'confirmed'`, so of two cancellations at the same
+ * instant a single one matches — the refund is paid once. Returns null when
+ * the reservation was not (or no longer) confirmed.
+ */
+export async function cancelReservationWithRefund(
+  id: string,
+): Promise<Reservation | null> {
+  return prisma.$transaction(async (tx) => {
+    const cancelled = await tx.reservation.updateMany({
+      where: { id, status: "confirmed" },
+      data: { status: "cancelled" },
+    });
+    if (cancelled.count !== 1) return null;
+
+    const row = await tx.reservation.findUniqueOrThrow({ where: { id } });
+    await tx.user.update({
+      where: { id: row.userId },
+      data: { credits: { increment: row.creditsSpent } },
+    });
+    return toReservation(row);
+  });
+}
+
 export async function updateReservation(
   id: string,
   patch: Partial<Reservation>,
