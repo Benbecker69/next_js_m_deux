@@ -7,6 +7,11 @@ import { loginSchema } from "@/lib/validation/auth";
 import { withFlash } from "@/lib/feedback/flash-messages";
 import { validationFailure, type FieldErrors } from "@/lib/feedback/action-result";
 import { guardAction } from "@/lib/feedback/guard-action";
+import {
+  clearLoginFailures,
+  isLoginBlocked,
+  recordLoginFailure,
+} from "@/lib/mobile/rate-limit";
 
 export type LoginFormState = {
   error: string | null;
@@ -30,10 +35,23 @@ export async function loginAction(
     return { ...validationFailure(parsed.error), email };
   }
 
+  // Brute-force brake, the same one as the mobile app's login: after too many
+  // wrong passwords for one address, further attempts are refused for a while
+  // — before the password is even checked.
+  const brakeKey = parsed.data.email.toLowerCase();
+  if (isLoginBlocked(brakeKey)) {
+    return {
+      error:
+        "Trop de tentatives de connexion pour cette adresse. Patientez une dizaine de minutes, puis réessayez.",
+      email,
+    };
+  }
+
   return guardAction<LoginFormState>(
     async () => {
       const user = await verifyUserCredentials(parsed.data.email, parsed.data.password);
       if (!user) {
+        recordLoginFailure(brakeKey);
         // Deliberately the same sentence for an unknown address and a wrong
         // password: it must not reveal whether the email has an account.
         return {
@@ -42,6 +60,7 @@ export async function loginAction(
           email,
         };
       }
+      clearLoginFailures(brakeKey);
 
       await createSession(user.id);
       // /bienvenue is itself a welcome screen for a not-yet-onboarded user, so a

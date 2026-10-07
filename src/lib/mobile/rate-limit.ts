@@ -2,7 +2,8 @@ import "server-only";
 import { MOBILE_CONFIG } from "./config";
 import { ApiError } from "./http";
 
-// Brute-force brake for the login endpoint, keyed by e-mail address. It lives
+// Brute-force brake for signing in, keyed by e-mail address and shared by the
+// mobile login endpoint and the website's login action. It lives
 // in this process's memory: enough for a single local server, and honest about
 // its limit — it resets on restart and would not be shared across instances.
 
@@ -17,10 +18,15 @@ function recentFailures(key: string, now: number): number[] {
   return recent;
 }
 
-export function assertLoginAllowed(key: string): void {
-  if (
+/** True once an address has failed too many times within the window. */
+export function isLoginBlocked(key: string): boolean {
+  return (
     recentFailures(key, Date.now()).length >= MOBILE_CONFIG.loginRateLimit.maxFailures
-  ) {
+  );
+}
+
+export function assertLoginAllowed(key: string): void {
+  if (isLoginBlocked(key)) {
     throw new ApiError(
       429,
       "TOO_MANY_ATTEMPTS",
