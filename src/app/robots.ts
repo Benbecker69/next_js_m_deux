@@ -6,11 +6,13 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      // Not built yet, but reserved: authenticated areas should never be indexed.
+      // Authenticated areas should never be indexed (they are guarded on the
+      // server anyway: a crawler would only be redirected to /connexion).
       disallow: [
         "/tableau-de-bord",
         "/reserver",
         "/reservations",
+        "/arrivees",
         "/parametres",
         "/admin",
         "/qrcode",

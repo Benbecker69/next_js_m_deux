@@ -24,10 +24,10 @@ export function PhoneMock({ t }: { t: Dictionary["site"]["app"] }) {
         </div>
 
         <div className="mx-3 mt-5 rounded-xl bg-pine p-4 text-pine-contrast">
-          <p className="text-[11px] opacity-85">{t.mockNext}</p>
+          <p className="text-[11px]">{t.mockNext}</p>
           <p className="mt-1 font-display text-2xl font-medium">{t.mockSlot}</p>
-          <p className="mt-1 truncate text-[11px] opacity-90">{t.mockPlace}</p>
-          <p className="mt-3 inline-block rounded-full bg-pine-contrast/20 px-2 py-0.5 text-[10px] font-medium">
+          <p className="mt-1 truncate text-[11px]">{t.mockPlace}</p>
+          <p className="mt-3 inline-block rounded-full bg-pine-contrast px-2 py-0.5 text-[10px] font-medium text-pine">
             {t.mockArrival}
           </p>
         </div>

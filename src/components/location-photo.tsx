@@ -34,7 +34,8 @@ export function LocationPhoto({
   variant?: "standalone" | "top";
   /** Subtle scale-up on the parent `group`'s hover, for a clickable card. */
   zoom?: boolean;
-  /** Set on the one photo that is the page's main image (detail page). */
+  /** Set on the one photo that is the page's main image: loaded at once,
+   *  ahead of the other images, instead of lazily. */
   priority?: boolean;
   sizes?: string;
   className?: string;
@@ -54,7 +55,9 @@ export function LocationPhoto({
         alt={alt}
         fill
         sizes={sizes}
-        priority={priority}
+        // `priority` is deprecated in Next.js 16: say the two things it meant.
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
         className={cn(
           "object-cover",
           zoom && "transition-transform duration-300 group-hover:scale-105",

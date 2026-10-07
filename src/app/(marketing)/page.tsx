@@ -74,7 +74,9 @@ export default async function MarketingHomePage() {
               fill
               sizes="(min-width: 768px) 45vw, 100vw"
               className="object-cover"
-              priority
+              // The page's largest image: fetched first, never lazily.
+              loading="eager"
+              fetchPriority="high"
             />
           </div>
         </div>

@@ -29,7 +29,7 @@ export function ReservationHero({
   return (
     <article className="rounded-sm bg-pine p-6 text-pine-contrast shadow-sm shadow-pine/25">
       <div className="flex items-center justify-between gap-4 text-sm">
-        <p className="opacity-85">{t.nextEyebrow}</p>
+        <p className="opacity-90">{t.nextEyebrow}</p>
         <p className="font-medium">{startsInLabel(reservation, now, t)}</p>
       </div>
 
@@ -42,7 +42,7 @@ export function ReservationHero({
       <p className="mt-2 opacity-90">
         {reservation.space.name}, {reservation.location.name}
       </p>
-      <p className="text-sm opacity-80">{reservation.location.address}</p>
+      <p className="text-sm opacity-90">{reservation.location.address}</p>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm font-medium opacity-90">

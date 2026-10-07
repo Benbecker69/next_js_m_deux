@@ -82,7 +82,10 @@ export function RegisterForm({
       </Button>
       <p className="text-sm text-ink-muted">
         {t.hasAccount}{" "}
-        <Link href="/connexion" className="text-pine hover:underline">
+        <Link
+          href="/connexion"
+          className="text-pine underline underline-offset-2 hover:no-underline"
+        >
           {t.loginLink}
         </Link>
       </p>

@@ -72,7 +72,7 @@ export default async function ArrivalDetailPage({ params }: PageProps<"/arrivees
             : "border border-line bg-surface text-ink",
         )}
       >
-        <p className={cn("text-sm", accepted ? "opacity-85" : "text-ink-muted")}>
+        <p className={cn("text-sm", accepted ? "opacity-90" : "text-ink-muted")}>
           {accepted ? a.accepted : a.refused}
         </p>
         <p className="mt-4 font-display text-lg font-medium">

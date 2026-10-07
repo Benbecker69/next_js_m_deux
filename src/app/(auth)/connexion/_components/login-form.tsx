@@ -105,7 +105,10 @@ export function LoginForm({
       </Button>
       <p className="text-sm text-ink-muted">
         {t.noAccount}{" "}
-        <Link href="/inscription" className="text-pine hover:underline">
+        <Link
+          href="/inscription"
+          className="text-pine underline underline-offset-2 hover:no-underline"
+        >
           {t.signupLink}
         </Link>
       </p>

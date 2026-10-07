@@ -38,7 +38,8 @@ export default async function PricingPage() {
               fill
               sizes="(min-width: 768px) 20rem, 100vw"
               className="object-cover"
-              priority
+              loading="eager"
+              fetchPriority="high"
             />
           </div>
         }

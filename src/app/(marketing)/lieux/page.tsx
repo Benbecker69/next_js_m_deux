@@ -110,11 +110,13 @@ export default async function LocationsPage({ searchParams }: PageProps<"/lieux"
           />
         ) : (
           <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {results.map((summary) => (
+            {results.map((summary, index) => (
               <LocationCard
                 key={summary.location.id}
                 summary={summary}
                 t={t.site.places}
+                headingLevel="h2"
+                priority={index === 0}
               />
             ))}
           </div>

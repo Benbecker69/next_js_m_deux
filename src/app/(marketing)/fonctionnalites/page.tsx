@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.features.title, description: t.features.subtitle };
 }
 
-// Real photos (Unsplash, free license, see CLAUDE.md): these four blocks
+// Real photos (Unsplash, free license): these four blocks
 // describe things that exist today, on real coworking floors, so a generic
 // "people working in a bright space" photo doesn't claim anything false.
 // Local files under /public so next/image can optimize them (resize per
@@ -53,7 +53,9 @@ export default async function FeaturesPage() {
                   fill
                   sizes="(min-width: 768px) 50vw, 100vw"
                   className="object-cover"
-                  priority={index === 0}
+                  // Only the first photo is above the fold.
+                  loading={index === 0 ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
                 />
               </div>
               <div className="md:w-1/2">

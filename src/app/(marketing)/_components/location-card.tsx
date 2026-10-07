@@ -12,11 +12,20 @@ import { SPACE_TYPE_LABELS } from "@/types/domain";
 export function LocationCard({
   summary,
   t,
+  headingLevel = "h3",
+  priority = false,
 }: {
   summary: LocationSummary;
   t: Dictionary["site"]["places"];
+  /** "h2" where the cards come right under the page title (/lieux), "h3"
+   *  where a section title sits in between (home page): no level is skipped. */
+  headingLevel?: "h2" | "h3";
+  /** The first card of a page that opens on the list: its photo is the
+   *  largest image on screen and must not be lazy-loaded. */
+  priority?: boolean;
 }) {
   const { location, spaces, types, fromPrice } = summary;
+  const Heading = headingLevel;
 
   return (
     <Link
@@ -27,12 +36,15 @@ export function LocationCard({
         slug={location.slug}
         variant="top"
         zoom
+        priority={priority}
         sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
         className="transition-colors duration-150 group-hover:border-pine"
       />
       <div className="flex flex-1 flex-col rounded-b-sm border border-t-0 border-line bg-surface p-5 transition-colors duration-150 group-hover:border-pine">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-display text-xl font-medium text-ink">{location.name}</h3>
+          <Heading className="font-display text-xl font-medium text-ink">
+            {location.name}
+          </Heading>
           {fromPrice !== null && (
             <p className="shrink-0 text-right text-sm text-ink-muted">
               {t.from}{" "}

@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
   // bindings, fs) that the bundler shouldn't try to trace/bundle for the
   // server runtime — run them as plain external requires instead.
   serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg", "pg"],
+  images: {
+    // AVIF first for the browsers that accept it (smaller files for the same
+    // photo), WebP for the others. Each size is encoded once, then cached.
+    formats: ["image/avif", "image/webp"],
+  },
 };
 
 export default nextConfig;

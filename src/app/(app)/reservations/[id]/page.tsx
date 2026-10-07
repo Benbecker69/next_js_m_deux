@@ -77,7 +77,7 @@ export default async function ReservationDetailPage({
         )}
       >
         <div className="flex items-center justify-between gap-4 text-sm">
-          <p className={featured ? "opacity-85" : "text-ink-muted"}>{typeLabel}</p>
+          <p className={featured ? "opacity-90" : "text-ink-muted"}>{typeLabel}</p>
           {featured ? (
             // On the filled card a tinted badge would not show: an outlined
             // label in the card's own text color instead.
@@ -100,7 +100,7 @@ export default async function ReservationDetailPage({
         <div
           className={cn(
             "mt-1 flex flex-col gap-1 text-sm",
-            featured ? "opacity-85" : "text-ink-muted",
+            featured ? "opacity-90" : "text-ink-muted",
           )}
         >
           <p className="flex items-center gap-1.5">
