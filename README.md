@@ -235,6 +235,25 @@ sont ceux du PostgreSQL local de démonstration.
 
 Base de données en détail : [docs/base-de-donnees.md](docs/base-de-donnees.md).
 
+### Contexte de développement
+
+Je développe sur un **ordinateur de mon entreprise** : un serveur Windows
+Server 2022 auquel j'accède en **bureau à distance (RDS)**, **sans droits
+d'administrateur**. Ce poste est dans le domaine de l'entreprise, qui gère son
+pare-feu, et il héberge d'autres projets. Plusieurs choix du projet viennent de
+là :
+
+| Contrainte                                      | Ce que j'ai fait                                                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Pas de droits d'administrateur                  | PostgreSQL tourne dans un conteneur Docker : aucune installation sur le poste                                 |
+| Poste partagé, ports déjà utilisés              | PostgreSQL est publié sur le port `5433` ; le port du site se change avec `WEB_PORT` (voir [Docker](#docker)) |
+| Ports du poste injoignables depuis un téléphone | L'application mobile atteint l'API par un tunnel et une passerelle qui ne transmet que `/api/mobile/v1/*`     |
+| Je ne peux pas ouvrir de port dans le pare-feu  | Tout passe par des connexions sortantes : rien n'est modifié sur le poste                                     |
+
+Le détail des problèmes de ports et de réseau rencontrés avec le téléphone, et
+leur solution, est dans le dépôt de l'application mobile :
+[docs/environnement-et-reseau.md](https://github.com/Benbecker69/react_native_eemi/blob/main/docs/environnement-et-reseau.md).
+
 ## Comptes de démonstration
 
 Créés par le seed. Mot de passe `demo1234` pour les deux. La page `/connexion`
