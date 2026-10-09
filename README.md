@@ -564,11 +564,15 @@ J'ai relancé le scan le même jour, après les dernières modifications du code
 (session par jeton, écritures en transaction, images AVIF) : toujours
 **0 / 0 / 0 / 0**, 113 paquets, image de 256 Mo.
 
+Le 9 octobre 2026, j'ai relancé le scan sur cette même image, sans la
+reconstruire : toujours **0 / 0 / 0 / 0**, 113 paquets.
+
 ### Limites
 
-- Zéro vulnérabilité est une photo au 7 octobre 2026. Le tag `node:24-alpine`
-  n'est pas figé par digest et `apk upgrade` dépend de la date : le scan est à
-  relancer à chaque reconstruction.
+- Zéro vulnérabilité est une photo, prise le 7 octobre 2026 et confirmée le 9
+  sur la même image. Le tag `node:24-alpine` n'est pas figé par digest et
+  `apk upgrade` dépend de la date : le scan est à relancer à chaque
+  reconstruction.
 - L'image `migrate` n'est pas durcie : elle contient toutes les dépendances de
   développement (1,4 Go ; 12 hautes au scan, dont celles de npm). C'est un
   travail ponctuel, sans port publié, qui s'arrête après les migrations.
