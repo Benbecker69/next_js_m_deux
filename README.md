@@ -25,6 +25,7 @@ Application mobile associée (dépôt séparé) :
 - [Application mobile, QR code et géolocalisation](#application-mobile-qr-code-et-géolocalisation)
 - [Docker](#docker)
 - [Docker — sécurité & IA](#docker--sécurité--ia)
+- [Usage de l'IA](#usage-de-lia)
 - [Limites connues](#limites-connues)
 - [Documentation](#documentation)
 
@@ -576,6 +577,82 @@ J'ai relancé le scan le même jour, après les dernières modifications du code
   l'hébergeur, jamais commité.
 - Pas de scan automatique en intégration continue, ni d'attestation SBOM ou de
   provenance.
+
+## Usage de l'IA
+
+Ce projet a été développé avec un agent IA. Il a écrit le code sous ma
+direction : je cadrais le travail, je prenais les décisions techniques et je
+validais chaque modification avant qu'elle soit commitée. J'ai d'abord réalisé
+ce site, puis l'application mobile, avec la même méthode. Ce qui concerne
+Docker est détaillé dans [Docker — sécurité & IA](#docker--sécurité--ia).
+
+### Outils utilisés
+
+| Outil                                           | Usage                                                                                                                                          |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| ChatGPT                                         | Rédiger le prompt de départ : je lui ai donné une trentaine de lignes décrivant ce que je voulais, il en a fait un prompt adapté à Claude Code |
+| Claude Code                                     | Agent de développement dans le terminal : plan, code, tests, documentation                                                                     |
+| Claude Design                                   | Maquettes, que je validais avant le développement                                                                                              |
+| Jira, relié à Claude Code par un connecteur MCP | Tableau agile, sprints et tickets du projet, créés par l'agent                                                                                 |
+
+### Le prompt de départ
+
+Ce prompt fixait la façon de travailler avant toute ligne de code.
+
+- **Un rôle et un cadre.** Agir en lead développeur senior, commencer en mode
+  plan et me poser une trentaine de questions avant de développer. Toute
+  décision technique m'était soumise.
+- **Des règles écrites.** Un fichier de règles : commits en anglais, à
+  l'impératif, avec un tag ; une fonctionnalité par commit ; ne rien inventer ;
+  aucun commit ni push sans ma validation.
+- **Des fiches de connaissances (« skills »).** Pour que l'agent travaille sur
+  la version actuelle de Next.js sans refaire les mêmes recherches à chaque
+  session : des fiches que je lui ai fait construire à partir de la
+  documentation officielle et de sources recoupées (conventions Next.js,
+  backend avec Prisma et hachage des mots de passe, design), et des fiches
+  publiées par Vercel (performance React, règles d'interface).
+- **Un fichier de contexte.** Il décrit le projet et ses règles, et dit quelle
+  fiche consulter pour quel besoin ; à défaut, la documentation officielle. Il
+  est tenu à jour au fil du projet : c'est lui qui permet de reprendre le
+  travail dans une conversation neuve.
+- **Des agents spécialisés.** Un agent lit les PDF des sujets avec un modèle
+  plus léger, pour économiser le modèle principal ; un autre tenait le rôle de
+  product owner.
+- **Une limite de contexte.** Au-delà de 60 % de la fenêtre de contexte, la
+  conversation est compactée, puis le contexte est rechargé depuis le fichier
+  de contexte.
+
+Les règles, les fiches, le fichier de contexte et les agents sont sur mon
+poste : je ne les ai pas versionnés dans ce dépôt.
+
+### Tâches confiées, et ce que j'ai gardé
+
+| Confié à l'agent                                                                | Gardé pour moi                                                    |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Proposer le plan et l'architecture                                              | Répondre aux questions du plan et trancher chaque choix technique |
+| Écrire le code : pages, Server Actions, API mobile, schéma et migrations Prisma | Relire et valider chaque modification avant qu'elle soit commitée |
+| Écrire les tests unitaires, le `Dockerfile`, la documentation                   | Vérifier que le résultat correspond à ce que j'avais demandé      |
+| Analyser le scan Docker Scout et l'audit Lighthouse, proposer des corrections   | Accepter, modifier ou refuser chaque proposition                  |
+
+### Une décision de l'IA que j'ai refusée
+
+Pour que l'image Docker se construise sans base de données, l'agent a proposé
+de garder `generateStaticParams` sur `/lieux/[slug]` en renvoyant une liste vide
+quand la base est absente. Le build passait, mais la page répondait 500 dans le
+conteneur (`DYNAMIC_SERVER_USAGE` : elle lit des cookies). Le problème est
+apparu en testant l'image, pas à la lecture du code. La fonction a été retirée.
+
+Les sept autres propositions, acceptées, modifiées ou refusées, sont dans le
+tableau
+[Recommandations de l'assistant IA et décisions](#recommandations-de-lassistant-ia-et-décisions).
+
+### Une partie que je peux expliquer intégralement
+
+L'authentification et l'autorisation : la session par jeton dont seule
+l'empreinte est en base, les gardes `requireUser`, `requireOnboarded` et
+`requireAdmin` de `src/lib/auth/session.ts`, et leur rappel en première ligne de
+chaque Server Action. Détail :
+[docs/authentification-et-securite.md](docs/authentification-et-securite.md).
 
 ## Limites connues
 
