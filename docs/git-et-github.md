@@ -128,15 +128,17 @@ Depuis cette dernière fusion, tout le travail se fait sur `main` :
 
 L'historique se lit comme le plan de construction du produit.
 
-| Période           | Ce qui a été construit                                                                                                                                                      |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 15 septembre      | Base du projet, composants d'interface, site public, authentification et gardes serveur, onboarding, espace membre, réservation, historique, paramètres, back-office, cache |
-| 15 – 16 septembre | Accessibilité, responsive, retours utilisateur, français / anglais, comptes de démonstration                                                                                |
-| 16 septembre      | Remplacement du stockage JSON de départ par PostgreSQL et Prisma                                                                                                            |
-| 17 septembre      | Indicateurs des tableaux de bord, navigation unifiée membre / admin, toasts, navigation mobile                                                                              |
-| 22 – 29 septembre | API mobile sur la branche `mobile-api` (pull request #1)                                                                                                                    |
-| 6 octobre         | Suite de l'API mobile (pull request #2), messages d'erreur et squelettes de chargement, refonte du site public et du calendrier de réservation                              |
-| 7 octobre         | Espace membre aligné sur l'application mobile, carte et réservation « près de moi », image Docker de production                                                             |
+| Période           | Ce qui a été construit                                                                                                                                                                                                                                      |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 15 septembre      | Base du projet, composants d'interface, site public, authentification et gardes serveur, onboarding, espace membre, réservation, historique, paramètres, back-office, cache                                                                                 |
+| 15 – 16 septembre | Accessibilité, responsive, retours utilisateur, français / anglais, comptes de démonstration                                                                                                                                                                |
+| 16 septembre      | Remplacement du stockage JSON de départ par PostgreSQL et Prisma                                                                                                                                                                                            |
+| 17 septembre      | Indicateurs des tableaux de bord, navigation unifiée membre / admin, toasts, navigation mobile                                                                                                                                                              |
+| 22 – 29 septembre | API mobile sur la branche `mobile-api` (pull request #1)                                                                                                                                                                                                    |
+| 6 octobre         | Suite de l'API mobile (pull request #2), messages d'erreur et squelettes de chargement, refonte du site public et du calendrier de réservation                                                                                                              |
+| 7 octobre         | Espace membre aligné sur l'application mobile, carte et réservation « près de moi », image Docker de production                                                                                                                                             |
+| 7 octobre (suite) | Réservation et annulation en transaction, heures d'ouverture vérifiées par le serveur, frein sur les tentatives de connexion, corrections issues de l'audit Lighthouse, tests unitaires, README en guide de correction et un document par critère du barème |
+| 9 octobre         | README : contexte de développement, usage de l'IA                                                                                                                                                                                                           |
 
 Pour le relire :
 
