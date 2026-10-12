@@ -36,6 +36,7 @@ export function SpaceBrowser({
   locations,
   initialLocationId = "",
   initialType = "",
+  initialSort = "",
   t,
   f,
   m,
@@ -44,6 +45,7 @@ export function SpaceBrowser({
   locations: Location[];
   initialLocationId?: string;
   initialType?: string;
+  initialSort?: string;
   /** Geolocation and sorting labels (`booking`). */
   t: Dictionary["booking"];
   /** Filters and cards (`bookingFlow`). */
@@ -54,6 +56,7 @@ export function SpaceBrowser({
   const [query, setQuery] = useState("");
   const [type, setType] = useState(initialType);
   const [locationId, setLocationId] = useState(initialLocationId);
+  const [sort, setSort] = useState(initialSort);
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
@@ -100,13 +103,17 @@ export function SpaceBrowser({
           space.location.city.toLowerCase().includes(q) ||
           space.location.name.toLowerCase().includes(q)),
     );
-    if (origin) {
+    if (sort === "prix-asc") {
+      result = [...result].sort((a, b) => a.pricePerHour - b.pricePerHour);
+    } else if (sort === "prix-desc") {
+      result = [...result].sort((a, b) => b.pricePerHour - a.pricePerHour);
+    } else if (origin) {
       result = [...result].sort(
         (a, b) => distanceKm(origin, a.location) - distanceKm(origin, b.location),
       );
     }
     return result;
-  }, [spaces, query, type, locationId, origin]);
+  }, [spaces, query, type, locationId, origin, sort]);
 
   // One pin per location that has spaces, with how many are free right now.
   const pins = useMemo<Pin[]>(
@@ -139,7 +146,7 @@ export function SpaceBrowser({
 
   return (
     <div>
-      <div className="grid gap-4 rounded-sm border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_auto] lg:items-end">
+      <div className="grid gap-4 rounded-sm border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_auto] lg:items-end">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="space-search">{f.searchLabel}</Label>
           <Input
@@ -180,6 +187,18 @@ export function SpaceBrowser({
             ))}
           </Select>
         </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="space-sort">{f.sortLabel}</Label>
+          <Select
+            id="space-sort"
+            value={sort}
+            onChange={(event) => setSort(event.target.value)}
+          >
+            <option value="">{f.sortDefault}</option>
+            <option value="prix-asc">{f.sortPriceAsc}</option>
+            <option value="prix-desc">{f.sortPriceDesc}</option>
+          </Select>
+        </div>
         <Button
           type="button"
           variant="secondary"
@@ -216,7 +235,7 @@ export function SpaceBrowser({
       <div className="mt-6 flex items-center justify-between gap-4">
         <p className="text-sm text-ink-muted" aria-live="polite">
           {filtered.length} {filtered.length === 1 ? f.countOne : f.countMany}
-          {origin ? ` · ${f.nearest}` : ""}
+          {origin && !sort ? ` · ${f.nearest}` : ""}
         </p>
         {filtering && (
           <button

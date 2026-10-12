@@ -43,6 +43,8 @@ export default async function ReservePage({ searchParams }: PageProps<"/reserver
   const initialLocationId =
     typeof params.lieu === "string" && locationById.has(params.lieu) ? params.lieu : "";
   const initialType = isSpaceType(params.type) ? params.type : "";
+  const initialSort =
+    params.tri === "prix-asc" || params.tri === "prix-desc" ? params.tri : "";
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-12">
@@ -59,6 +61,7 @@ export default async function ReservePage({ searchParams }: PageProps<"/reserver
           locations={locations}
           initialLocationId={initialLocationId}
           initialType={initialType}
+          initialSort={initialSort}
           t={t.booking}
           f={t.bookingFlow}
           m={t.member.booking}
