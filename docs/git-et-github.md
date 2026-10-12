@@ -139,6 +139,7 @@ L'historique se lit comme le plan de construction du produit.
 | 7 octobre         | Espace membre aligné sur l'application mobile, carte et réservation « près de moi », image Docker de production                                                                                                                                             |
 | 7 octobre (suite) | Réservation et annulation en transaction, heures d'ouverture vérifiées par le serveur, frein sur les tentatives de connexion, corrections issues de l'audit Lighthouse, tests unitaires, README en guide de correction et un document par critère du barème |
 | 9 octobre         | README : contexte de développement, usage de l'IA                                                                                                                                                                                                           |
+| 12 octobre        | Tri des espaces par prix sur /reserver (live coding de la soutenance), diaporama de soutenance                                                                                                                                                              |
 
 Pour le relire :
 

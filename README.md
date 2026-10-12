@@ -26,6 +26,7 @@ Application mobile associée (dépôt séparé) :
 - [Docker](#docker)
 - [Docker — sécurité & IA](#docker--sécurité--ia)
 - [Usage de l'IA](#usage-de-lia)
+- [Soutenance et live coding](#soutenance-et-live-coding)
 - [Limites connues](#limites-connues)
 - [Documentation](#documentation)
 
@@ -659,6 +660,20 @@ l'empreinte est en base, les gardes `requireUser`, `requireOnboarded` et
 `requireAdmin` de `src/lib/auth/session.ts`, et leur rappel en première ligne de
 chaque Server Action. Détail :
 [docs/authentification-et-securite.md](docs/authentification-et-securite.md).
+
+## Soutenance et live coding
+
+- **Diaporama de soutenance** : [docs/soutenance.pdf](docs/soutenance.pdf)
+  (23 diapositives : produit, démonstration, architecture, base de données,
+  application mobile, Docker, usage de l'IA, limites).
+- **Live coding** : le tri des espaces par prix sur `/reserver`, avec un
+  sélecteur « Trier par » et le paramètre d'URL `tri` (`?tri=prix-asc` ou
+  `?tri=prix-desc`). Fichiers modifiés : `src/app/(app)/reserver/page.tsx`
+  (lecture de `searchParams`), `src/app/(app)/reserver/_components/space-browser.tsx`
+  (le tri) et les libellés dans `src/lib/i18n/dictionaries/fr.ts` et
+  `src/lib/i18n/dictionaries/en.ts`.
+- **Se repérer dans le code** : la table « Où intervenir pour… » de
+  [docs/architecture.md](docs/architecture.md).
 
 ## Limites connues
 
